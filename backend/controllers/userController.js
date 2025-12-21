@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import { errorResponse } from "../utils/errorResponse.js";
 
 // ADMIN: get all users
 export const getAllUsers = async (req, res) => {

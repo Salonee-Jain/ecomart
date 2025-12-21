@@ -1,5 +1,6 @@
 import stripe from "../config/stripe.js";
 import Order from "../models/Order.js";
+import { errorResponse } from "../utils/errorResponse.js";
 
 // @desc   Create Stripe payment intent
 // @route  POST /api/payment/create-intent

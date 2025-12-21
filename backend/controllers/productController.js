@@ -1,4 +1,5 @@
 import Product from "../models/Product.js";
+import { errorResponse } from "../utils/errorResponse.js";
 
 // @desc   Get all products
 // @route  GET /api/products

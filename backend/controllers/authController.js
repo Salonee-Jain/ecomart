@@ -1,6 +1,5 @@
 import User from "../models/User.js";
-import generateToken from "../utils/generateToken.js";
-
+import generateToken from "../utils/generateToken.js";import { errorResponse } from "../utils/errorResponse.js";
 // @route   POST /api/auth/register
 export const registerUser = async (req, res) => {
   const { name, email, password } = req.body;

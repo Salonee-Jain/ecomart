@@ -1,5 +1,6 @@
 import Cart from "../models/Cart.js";
 import Product from "../models/Product.js";
+import { errorResponse } from "../utils/errorResponse.js";
 
 // @desc   Get my cart
 // @route  GET /api/cart
@@ -23,11 +24,11 @@ export const addToCart = async (req, res) => {
   const product = await Product.findById(productId);
 
   if (!product) {
-    return res.status(404).json({ status: 404, message: "Product not found" });
+    return errorResponse(res, 404, "Product not found");
   }
 
   if (quantity > product.stock) {
-    return res.status(400).json({ status: 400, message: `Only ${product.stock} items left in stock` });
+    return errorResponse(res, 400, `Only ${product.stock} items left in stock`);
   }
 
   let cart = await Cart.findOne({ user: req.user._id });
@@ -45,7 +46,7 @@ export const addToCart = async (req, res) => {
 
   if (existingItem) {
     if (quantity > product.stock) {
-      return res.status(400).json({ status: 400, message: `Cannot add ${quantity}. Only ${product.stock} left.` });
+      return errorResponse(res, 400, `Cannot add ${quantity}. Only ${product.stock} left.`);
     }
 
     existingItem.quantity = quantity;
@@ -90,7 +91,7 @@ export const clearCart = async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id });
 
   if (!cart) {
-    return res.status(404).json({ status: 404, message: "Cart not found" });
+    return errorResponse(res, 404, "Cart not found");
   }
 
   cart.items = [];

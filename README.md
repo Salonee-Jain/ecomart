@@ -13,7 +13,7 @@ Full-stack e-commerce application for eco-friendly products built with NestJS, N
 ```
 ecomart/
 ├── backend/          # NestJS API (see backend/README.md)
-├── frontend/         # Next.js app
+├── frontend/         # Next.js app (see frontend/README.md)
 └── docker-compose.yml # RabbitMQ service
 ```
 
@@ -57,8 +57,11 @@ npm run dev
 
 ## 📚 Documentation
 
-**For complete API documentation, setup instructions, and troubleshooting:**
-👉 **See [backend/README.md](backend/README.md)**
+**Backend API (complete setup, endpoints, troubleshooting):**
+👉 See [backend/README.md](backend/README.md)
+
+**Frontend (components, pages, state management):**
+👉 See [frontend/README.md](frontend/README.md)
 
 ---
 

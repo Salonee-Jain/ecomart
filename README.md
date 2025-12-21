@@ -11,14 +11,18 @@ A full-stack e-commerce application focused on eco-friendly and sustainable prod
 - Order management
 - Admin dashboard with analytics
 - Responsive design
+- Email notifications with RabbitMQ
 
 ## Tech Stack
 
 ### Backend
-- Node.js & Express.js
+- **NestJS** with TypeScript (migrated from Express.js)
 - MongoDB with Mongoose
-- JWT Authentication
+- JWT Authentication with Passport
 - Stripe Payment Integration
+- RabbitMQ for email queue
+- Class-validator for request validation
+- Dependency Injection
 
 ### Frontend
 - React with Vite
@@ -41,16 +45,30 @@ npm run install-all
 ```
 
 3. Configure environment variables
-   - Copy `.env.example` to `.env`
-   - Update with your MongoDB URI, JWT secret, and Stripe keys
+   - Create `.env` file in the root directory
+   - Add required variables (see backend/NESTJS_MIGRATION.md)
 
 4. Start development servers
 ```bash
+# Backend (from backend directory)
+cd backend
+npm run start:dev
+
+# Frontend (from frontend directory)
+cd frontend
 npm run dev
+
+# Email Worker (optional, from backend directory)
+cd backend
+npx ts-node src/worker.ts
 ```
 
 Backend runs on http://localhost:5000
 Frontend runs on http://localhost:5173
+
+## NestJS Migration
+
+The backend has been converted to NestJS! See [backend/NESTJS_MIGRATION.md](backend/NESTJS_MIGRATION.md) for details.
 
 ## Project Structure
 

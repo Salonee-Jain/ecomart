@@ -11,7 +11,11 @@ import cartRoutes from "./routes/cartRoutes.js";
 const app = express();
 
 app.use(cors());
-runWebhookServer();
+app.post(
+  "/api/payment/webhook",
+  express.raw({ type: "application/json" }),
+  stripeWebhook
+);
 app.use(express.json());
 
 app.get("/", (req, res) => {

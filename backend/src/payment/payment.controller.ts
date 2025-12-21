@@ -21,17 +21,16 @@ export class PaymentController {
       req.user.isAdmin,
     );
   }
+  @Get('all')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  async getAllPayments() {
+    return this.paymentService.getAllPayments();
+  }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   async getPaymentById(@Request() req, @Param('id') id: string) {
     return this.paymentService.getPaymentById(req.user._id, id, req.user.isAdmin);
-  }
-
-  @Get('all')
-  @UseGuards(JwtAuthGuard, AdminGuard)
-  async getAllPayments() {
-    return this.paymentService.getAllPayments();
   }
 
   @Post('confirm/:paymentIntentId')

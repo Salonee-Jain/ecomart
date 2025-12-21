@@ -31,7 +31,6 @@ export class PaymentService {
     if (!isAdmin && order.user.toString() !== userId) {
       throw new ForbiddenException('Not authorized');
     }
-
     const paymentIntent = await this.stripe.paymentIntents.create({
       amount: Math.round(order.totalPrice * 100),
       currency: 'aud',
@@ -40,8 +39,8 @@ export class PaymentService {
         allow_redirects: 'never',
       },
       metadata: {
-        orderId,
-        userId: userId,
+        orderId: orderId.toString(),
+        userId: userId.toString(),
       },
     });
 

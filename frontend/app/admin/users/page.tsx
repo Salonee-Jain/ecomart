@@ -72,13 +72,13 @@ export default function AdminUsersPage() {
     const fetchUsers = async () => {
         try {
             const data = await getAllUsers();
-            setUsers(data);
-            setFilteredUsers(data);
+            setUsers(data.users);
+            setFilteredUsers(data.users);
 
-            const admins = data.filter((u: User) => u.isAdmin).length;
+            const admins = data.users.filter((u: User) => u.isAdmin).length;
 
             setStats({
-                totalUsers: data.length,
+                totalUsers: data.users.length,
                 adminUsers: admins,
                 regularUsers: data.length - admins,
             });

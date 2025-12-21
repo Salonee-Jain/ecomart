@@ -46,6 +46,7 @@ import {
 import { getProducts, getCategories } from "@/services/product.service";
 import { deleteProduct } from "@/services/admin.service";
 
+
 interface Product {
   _id: string;
   name: string;
@@ -104,11 +105,11 @@ export default function AdminProductsPage() {
   const fetchProducts = async () => {
     try {
       const data = await getProducts();
-      setProducts(data);
-      setFilteredProducts(data);
+      setProducts(data.products);
+      setFilteredProducts(data.products);
 
       // Calculate stats
-      const totalValue = data.reduce((sum: number, p: Product) => sum + p.price * p.stock, 0);
+      const totalValue = data.products.reduce((sum: number, p: Product) => sum + p.price * p.stock, 0);
       const lowStock = data.filter((p: Product) => p.stock < 10).length;
       const uniqueCategories = new Set(data.map((p: Product) => p.category)).size;
 

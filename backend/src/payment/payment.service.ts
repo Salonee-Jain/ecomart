@@ -95,7 +95,7 @@ export class PaymentService {
       const paymentsWithDetails = payments.map(payment => {
         const order = payment.order as any;
         const user = payment.user as any;
-        const paymentObj = payment.toObject();
+        const paymentDoc = payment as any; // Cast to any to access timestamp fields
 
         return {
           _id: payment._id,
@@ -127,8 +127,8 @@ export class PaymentService {
           },
 
           // Timestamps
-          createdAt: paymentObj.createdAt,
-          updatedAt: paymentObj.updatedAt,
+          createdAt: paymentDoc.createdAt,
+          updatedAt: paymentDoc.updatedAt,
           paidAt: order?.paidAt || null,
 
           // Metadata

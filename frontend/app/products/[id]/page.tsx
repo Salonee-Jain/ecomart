@@ -16,14 +16,34 @@ import {
   Alert,
   IconButton,
   Rating,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CardContent,
+  Avatar,
 } from "@mui/material";
 import {
   ArrowBack,
   Add,
   Remove,
   ShoppingCart,
+  Star,
+  Edit,
+  Delete,
 } from "@mui/icons-material";
 import { getToken, isAuthenticated } from "@/lib/auth";
+import { createReview, updateReview, deleteReview } from "@/services/review.service";
+import { getProfile } from "@/services/auth.service";
+
+interface Review {
+  user: string;
+  name: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
 
 interface Product {
   _id: string;
@@ -37,6 +57,7 @@ interface Product {
   sku: string;
   rating?: number;
   numReviews?: number;
+  reviews?: Review[];
 }
 
 export default function ProductDetailPage() {
@@ -48,17 +69,33 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [editingReview, setEditingReview] = useState<number | null>(null);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (params.id) {
       fetchProduct();
     }
+    if (isAuthenticated()) {
+      fetchUserId();
+    }
   }, [params.id]);
+
+  const fetchUserId = async () => {
+    try {
+      const response = await getProfile();
+      setUserId(response.data._id);
+    } catch (err) {
+      console.error("Failed to fetch user ID");
+    }
+  };
 
   const fetchProduct = async () => {
     try {
       const response = await fetch(`http://localhost:5000/api/products/${params.id}`);
-      
+
       if (!response.ok) throw new Error("Product not found");
 
       const data = await response.json();
@@ -110,6 +147,64 @@ export default function ProductDetailPage() {
     const newQty = quantity + delta;
     if (newQty >= 1 && newQty <= (product?.stock || 0)) {
       setQuantity(newQty);
+    }
+  };
+
+  const handleOpenReviewDialog = (reviewIndex?: number) => {
+    if (!isAuthenticated()) {
+      router.push("/login");
+      return;
+    }
+
+    if (reviewIndex !== undefined && product?.reviews) {
+      const review = product.reviews[reviewIndex];
+      setEditingReview(reviewIndex);
+      setReviewForm({ rating: review.rating, comment: review.comment });
+    } else {
+      setEditingReview(null);
+      setReviewForm({ rating: 5, comment: "" });
+    }
+    setReviewDialogOpen(true);
+  };
+
+  const handleCloseReviewDialog = () => {
+    setReviewDialogOpen(false);
+    setEditingReview(null);
+    setReviewForm({ rating: 5, comment: "" });
+  };
+
+  const handleSubmitReview = async () => {
+    if (!product) return;
+
+    setError("");
+    try {
+      if (editingReview !== null) {
+        await updateReview(product._id, editingReview, reviewForm);
+        setSuccessMessage("Review updated successfully!");
+      } else {
+        await createReview(product._id, reviewForm);
+        setSuccessMessage("Review added successfully!");
+      }
+
+      handleCloseReviewDialog();
+      fetchProduct(); // Refresh product to show new review
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to submit review");
+    }
+  };
+
+  const handleDeleteReview = async (reviewIndex: number) => {
+    if (!product || !confirm("Are you sure you want to delete this review?")) return;
+
+    setError("");
+    try {
+      await deleteReview(product._id, reviewIndex);
+      setSuccessMessage("Review deleted successfully!");
+      fetchProduct(); // Refresh product
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to delete review");
     }
   };
 
@@ -295,6 +390,126 @@ export default function ProductDetailPage() {
           </Box>
         </Grid>
       </Grid>
+
+      {/* Reviews Section */}
+      <Box sx={{ mt: 6 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+          <Typography variant="h4" fontWeight={700}>
+            Customer Reviews
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<Star />}
+            onClick={() => handleOpenReviewDialog()}
+          >
+            Write a Review
+          </Button>
+        </Box>
+
+        {product.reviews && product.reviews.length > 0 ? (
+          <Grid container spacing={2}>
+            {product.reviews.map((review, index) => (
+              <Grid item xs={12} key={index}>
+                <Card>
+                  <CardContent>
+                    <Box display="flex" justifyContent="space-between" alignItems="start">
+                      <Box display="flex" gap={2}>
+                        <Avatar sx={{ bgcolor: "primary.main" }}>
+                          {review.name.charAt(0).toUpperCase()}
+                        </Avatar>
+                        <Box>
+                          <Typography variant="body1" fontWeight={600}>
+                            {review.name}
+                          </Typography>
+                          <Box display="flex" alignItems="center" gap={1} my={0.5}>
+                            <Rating value={review.rating} readOnly size="small" />
+                            <Typography variant="caption" color="text.secondary">
+                              {new Date(review.createdAt).toLocaleDateString()}
+                            </Typography>
+                          </Box>
+                          <Typography variant="body2" sx={{ mt: 1 }}>
+                            {review.comment}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      {userId === review.user && (
+                        <Box display="flex" gap={1}>
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => handleOpenReviewDialog(index)}
+                          >
+                            <Edit fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={() => handleDeleteReview(index)}
+                          >
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      )}
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        ) : (
+          <Card>
+            <CardContent sx={{ py: 4, textAlign: "center" }}>
+              <Star sx={{ fontSize: 60, color: "text.secondary", mb: 2 }} />
+              <Typography color="text.secondary">
+                No reviews yet. Be the first to review this product!
+              </Typography>
+            </CardContent>
+          </Card>
+        )}
+      </Box>
+
+      {/* Review Dialog */}
+      <Dialog open={reviewDialogOpen} onClose={handleCloseReviewDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          {editingReview !== null ? "Edit Review" : "Write a Review"}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            <Typography variant="body2" gutterBottom>
+              Rating
+            </Typography>
+            <Rating
+              value={reviewForm.rating}
+              onChange={(_, newValue) =>
+                setReviewForm({ ...reviewForm, rating: newValue || 5 })
+              }
+              size="large"
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              label="Your Review"
+              value={reviewForm.comment}
+              onChange={(e) =>
+                setReviewForm({ ...reviewForm, comment: e.target.value })
+              }
+              placeholder="Share your thoughts about this product..."
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseReviewDialog}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleSubmitReview}
+            disabled={!reviewForm.comment.trim()}
+          >
+            {editingReview !== null ? "Update" : "Submit"} Review
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

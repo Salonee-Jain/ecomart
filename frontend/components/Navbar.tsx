@@ -22,6 +22,7 @@ import {
   Logout,
   ShoppingBag,
   AccountCircle,
+  Favorite,
 } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -39,6 +40,7 @@ export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [cartCount, setCartCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -47,6 +49,7 @@ export default function Navbar() {
       if (isAuth) {
         fetchUserProfile();
         fetchCartCount();
+        fetchWishlistCount();
       }
     };
 
@@ -90,6 +93,23 @@ export default function Navbar() {
     }
   };
 
+  const fetchWishlistCount = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/wishlist", {
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setWishlistCount(data.products?.length || 0);
+      }
+    } catch (err) {
+      console.error("Failed to fetch wishlist:", err);
+    }
+  };
+
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -104,6 +124,7 @@ export default function Navbar() {
     setAuthenticated(false);
     setUser(null);
     setCartCount(0);
+    setWishlistCount(0);
     router.push("/login");
   };
 
@@ -151,6 +172,17 @@ export default function Navbar() {
               >
                 <Badge badgeContent={cartCount} color="error">
                   <ShoppingCart />
+                </Badge>
+              </IconButton>
+
+              <IconButton
+                color="inherit"
+                component={Link}
+                href="/wishlist"
+                onClick={fetchWishlistCount}
+              >
+                <Badge badgeContent={wishlistCount} color="error">
+                  <Favorite />
                 </Badge>
               </IconButton>
 
@@ -204,6 +236,13 @@ export default function Navbar() {
                     <ShoppingBag fontSize="small" />
                   </ListItemIcon>
                   My Orders
+                </MenuItem>
+
+                <MenuItem onClick={() => handleNavigate("/wishlist")}>
+                  <ListItemIcon>
+                    <Favorite fontSize="small" />
+                  </ListItemIcon>
+                  My Wishlist
                 </MenuItem>
 
                 <Divider />

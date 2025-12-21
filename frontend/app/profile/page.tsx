@@ -168,15 +168,14 @@ export default function ProfilePage() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/change-password", {
+      const response = await fetch("http://localhost:5000/api/auth/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({
-          currentPassword: formData.currentPassword,
-          newPassword: formData.newPassword,
+          password: formData.newPassword,
         }),
       });
 
@@ -408,16 +407,6 @@ export default function ProfilePage() {
                     Change Password
                   </Typography>
                   <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Current Password"
-                        name="currentPassword"
-                        type="password"
-                        value={formData.currentPassword}
-                        onChange={handleInputChange}
-                      />
-                    </Grid>
                     <Grid item xs={12}>
                       <TextField
                         fullWidth

@@ -6,11 +6,14 @@ import { UpdateUserRoleDto } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
 
   async getAllUsers() {
-    const users = await this.userModel.find({}).select('-password');
-    return { count: users.length, users };
+    const users = await this.userModel.find().select('-password').exec();
+    return {
+      total: users.length,
+      users: users,
+    };
   }
 
   async getUserById(id: string) {

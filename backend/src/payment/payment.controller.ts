@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request, RawBodyRequest, Req, Headers } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, UseGuards, Request, RawBodyRequest, Req, Headers } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiExcludeEndpoint } from '@nestjs/swagger';
 import { PaymentService } from './payment.service';
 import { StripeWebhookService } from './stripe-webhook.service';
@@ -12,7 +12,7 @@ export class PaymentController {
   constructor(
     private readonly paymentService: PaymentService,
     private readonly stripeWebhookService: StripeWebhookService,
-  ) {}
+  ) { }
 
   @Post('create-intent')
   @UseGuards(JwtAuthGuard)
@@ -62,6 +62,18 @@ export class PaymentController {
     @Body() confirmPaymentIntentDto: ConfirmPaymentIntentDto,
   ) {
     return this.paymentService.confirmPaymentIntent(paymentIntentId, confirmPaymentIntentDto);
+  }
+
+  @Put(':id/mark-succeeded')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Mark payment as succeeded (Admin only - for testing)' })
+  @ApiResponse({ status: 200, description: 'Payment marked as succeeded' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  @ApiResponse({ status: 404, description: 'Payment not found' })
+  async markPaymentSucceeded(@Param('id') id: string) {
+    return this.paymentService.markPaymentSucceeded(id);
   }
 
   @Post('webhook')

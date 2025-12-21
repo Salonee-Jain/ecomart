@@ -91,9 +91,54 @@ export class PaymentService {
         .populate('order')
         .sort({ createdAt: -1 });
 
+      // Map payments to include all necessary fields for admin
+      const paymentsWithDetails = payments.map(payment => {
+        const order = payment.order as any;
+        const user = payment.user as any;
+        const paymentObj = payment.toObject();
+
+        return {
+          _id: payment._id,
+          orderId: order?._id?.toString() || null,
+
+          // Payment Details
+          paymentIntentId: payment.paymentIntentId,
+          amount: payment.amount,
+          currency: payment.currency,
+          status: payment.status,
+          paymentMethod: payment.paymentMethod || 'stripe',
+
+          // Customer Information
+          user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+          },
+
+          // Order Information
+          order: {
+            _id: order?._id,
+            totalPrice: order?.totalPrice || payment.amount,
+            isPaid: order?.isPaid || false,
+            isDelivered: order?.isDelivered || false,
+            isCancelled: order?.isCancelled || false,
+            paymentMethod: order?.paymentMethod || 'stripe',
+            itemsCount: order?.orderItems?.length || 0,
+          },
+
+          // Timestamps
+          createdAt: paymentObj.createdAt,
+          updatedAt: paymentObj.updatedAt,
+          paidAt: order?.paidAt || null,
+
+          // Metadata
+          metadata: payment.metadata,
+        };
+      });
+
       return {
-        count: payments.length,
-        payments,
+        count: paymentsWithDetails.length,
+        payments: paymentsWithDetails,
       };
     } catch (error) {
       throw new Error(`Failed to fetch payments: ${error.message}`);
@@ -130,6 +175,40 @@ export class PaymentService {
       };
     } catch (error) {
       throw new BadRequestException(`Failed to confirm payment: ${error.message}`);
+    }
+  }
+
+  async markPaymentSucceeded(paymentId: string) {
+    try {
+      const payment = await this.paymentModel.findById(paymentId).populate('order');
+
+      if (!payment) {
+        throw new NotFoundException('Payment not found');
+      }
+
+      // Update payment status
+      payment.status = 'succeeded';
+      await payment.save();
+
+      // Mark associated order as paid
+      const order = await this.orderModel.findById(payment.order);
+      if (order && !order.isPaid) {
+        order.isPaid = true;
+        order.paidAt = new Date();
+        await order.save();
+      }
+
+      return {
+        success: true,
+        message: 'Payment marked as succeeded',
+        payment: {
+          id: payment._id,
+          status: payment.status,
+          orderId: payment.order,
+        },
+      };
+    } catch (error) {
+      throw new BadRequestException(`Failed to update payment: ${error.message}`);
     }
   }
 }

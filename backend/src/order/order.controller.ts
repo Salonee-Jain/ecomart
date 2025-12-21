@@ -10,7 +10,7 @@ import { AdminGuard } from '../guards/admin.guard';
 @Controller('orders')
 @UseGuards(JwtAuthGuard)
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(private readonly orderService: OrderService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create a new order' })

@@ -10,7 +10,7 @@ export class OrderService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
-  ) {}
+  ) { }
 
   async createOrder(userId: string, createOrderDto: CreateOrderDto) {
     const { orderItems, shippingAddress, paymentMethod } = createOrderDto;
@@ -50,7 +50,10 @@ export class OrderService {
       totalPrice,
     });
 
-    return await order.save();
+    const savedOrder = await order.save();
+
+    // Return the order (payment intent will be created separately by frontend)
+    return savedOrder;
   }
 
   async getMyOrders(userId: string) {

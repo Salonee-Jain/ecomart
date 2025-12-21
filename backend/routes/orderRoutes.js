@@ -3,7 +3,8 @@ import {
   createOrder,
   getMyOrders,
   getOrderById,
-  getAllOrders
+  getAllOrders,
+  markOrderPaid,
 } from "../controllers/orderController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { admin } from "../middleware/adminMiddleware.js";
@@ -14,5 +15,9 @@ router.post("/", protect, createOrder);
 router.get("/my", protect, getMyOrders);
 router.get("/:id", protect, getOrderById);
 router.get("/", protect, admin, getAllOrders);
+
+
+router.put("/:id/pay", protect, markOrderPaid);
+
 
 export default router;

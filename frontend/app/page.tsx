@@ -7,7 +7,14 @@ export default function Home() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    getProducts().then(res => setProducts(res.data));
+    getProducts().then(res => {
+      // Handle both res.data (axios response) and res.data.data (API response format)
+      const productsData = Array.isArray(res.data) ? res.data : res.data?.data || [];
+      setProducts(productsData);
+    }).catch(err => {
+      console.error('Failed to fetch products:', err);
+      setProducts([]);
+    });
   }, []);
 
   return (

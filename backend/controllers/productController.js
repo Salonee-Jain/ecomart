@@ -55,8 +55,7 @@ export const getProductById = async (req, res) => {
   if (product) {
     res.json(product);
   } else {
-    res.status(404);
-    throw new Error("Product not found");
+    return res.status(404).json({ status: 404, message: "Product not found" });
   }
 };
 
@@ -69,10 +68,9 @@ export const createProduct = async (req, res) => {
     res.status(201).json(createdProduct);
   } catch (error) {
     if (error.code === 11000) {
-      res.status(400);
-      throw new Error("Product with this SKU already exists");
+      return res.status(400).json({ status: 400, message: "Product with this SKU already exists" });
     }
-    throw error;
+    return res.status(500).json({ status: 500, message: error.message });
   }
 };
 
@@ -103,7 +101,7 @@ export const bulkDeleteProducts = async (req, res) => {
   const ids = req.body.filter(item => item._id).map(item => item._id);
 
   if (!Array.isArray(ids) || ids.length === 0) {
-    return res.status(400).json({ message: "No product IDs provided" });
+    return res.status(400).json({ status: 400, message: "No product IDs provided" });
   }
 
   const result = await Product.deleteMany({ _id: { $in: ids } });
@@ -125,8 +123,7 @@ export const updateProduct = async (req, res) => {
     const updatedProduct = await product.save();
     res.json(updatedProduct);
   } else {
-    res.status(404);
-    throw new Error("Product not found");
+    return res.status(404).json({ status: 404, message: "Product not found" });
   }
 };
 
@@ -139,8 +136,7 @@ export const deleteProduct = async (req, res) => {
     await product.deleteOne();
     res.json({ message: "Product removed" });
   } else {
-    res.status(404);
-    throw new Error("Product not found");
+    return res.status(404).json({ status: 404, message: "Product not found" });
   }
 };
 

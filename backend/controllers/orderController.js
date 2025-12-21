@@ -8,16 +8,11 @@ export const createOrder = async (req, res) => {
   const {
     orderItems,
     shippingAddress,
-    paymentMethod,
-    itemsPrice,
-    taxPrice,
-    shippingPrice,
-    totalPrice
+    paymentMethod
   } = req.body;
 
   if (!orderItems || orderItems.length === 0) {
-    res.status(400);
-    throw new Error("No order items");
+    return res.status(400).json({ status: 400, message: "No order items" });
   }
 
   // 🔥 Validate stock for each item
@@ -25,19 +20,30 @@ export const createOrder = async (req, res) => {
     const product = await Product.findById(item.product);
 
     if (!product) {
-      res.status(404);
-      throw new Error(`Product not found: ${item.name}`);
+      return res.status(404).json({ status: 404, message: `Product not found: ${item.name}` });
     }
 
     if (product.stock < item.quantity) {
-      res.status(400);
-      throw new Error(
-        `Not enough stock for ${item.name}. Only ${product.stock} available.`
-      );
+      return res.status(400).json({ 
+        status: 400,
+        message: `Not enough stock for ${item.name}. Only ${product.stock} available.`
+      });
     }
   }
+  let itemsPrice = orderItems.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0
+  );
+
+  let taxPrice = Number((0.1 * itemsPrice).toFixed(2)); // 10% GST
+
+  let shippingPrice = itemsPrice > 100 ? 0 : 10;
+
+  let totalPrice = itemsPrice + taxPrice + shippingPrice;
+
 
   // All stock valid: Create the order
+
   const order = new Order({
     user: req.user._id,
     orderItems,
@@ -73,8 +79,7 @@ export const getOrderById = async (req, res) => {
   );
 
   if (!order) {
-    res.status(404);
-    throw new Error("Order not found");
+    return res.status(404).json({ status: 404, message: "Order not found" });
   }
   if (req.user.isAdmin) {
     return res.json(order);
@@ -83,8 +88,7 @@ export const getOrderById = async (req, res) => {
     return res.json(order);
   }
 
-  res.status(403);
-  throw new Error("Not authorized to view this order");
+  return res.status(403).json({ status: 403, message: "Not authorized to view this order" });
 };
 
 
@@ -100,8 +104,7 @@ export const markOrderPaid = async (req, res) => {
   const order = await Order.findById(req.params.id);
 
   if (!order) {
-    res.status(404);
-    throw new Error("Order not found");
+    return res.status(404).json({ status: 404, message: "Order not found" });
   }
 
   // Only owner or admin
@@ -109,13 +112,12 @@ export const markOrderPaid = async (req, res) => {
     !req.user.isAdmin &&
     order.user.toString() !== req.user._id.toString()
   ) {
-    res.status(403);
-    throw new Error("Not authorized");
+    return res.status(403).json({ status: 403, message: "Not authorized" });
   }
 
   // If already paid — prevent double stock reduction
   if (order.isPaid) {
-    return res.status(400).json({ message: "Order already paid" });
+    return res.status(400).json({ status: 400, message: "Order already paid" });
   }
 
   // Mark order as paid
@@ -129,8 +131,7 @@ export const markOrderPaid = async (req, res) => {
     if (!product) continue;
 
     if (product.stock < item.quantity) {
-      res.status(400);
-      throw new Error(`Not enough stock for ${item.name}`);
+      return res.status(400).json({ status: 400, message: `Not enough stock for ${item.name}` });
     }
 
     product.stock = product.stock - item.quantity;
@@ -141,3 +142,63 @@ export const markOrderPaid = async (req, res) => {
   res.json(updatedOrder);
 };
 
+
+
+// @desc   Cancel order + restock items
+// @route  PUT /api/orders/:id/cancel
+// @access Private (user or admin)
+export const cancelOrder = async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    return res.status(404).json({ status: 404, message: "Order not found" });
+  }
+
+  // Only owner or admin
+  if (
+    !req.user.isAdmin &&
+    order.user.toString() !== req.user._id.toString()
+  ) {
+    return res.status(403).json({ status: 403, message: "Not authorized to cancel this order" });
+  }
+
+  // Can't cancel delivered orders
+  if (order.isDelivered) {
+    return res.status(400).json({ status: 400, message: "Delivered orders cannot be cancelled" });
+  }
+
+  // Restock products only if order was paid
+  if (order.isPaid) {
+    for (const item of order.orderItems) {
+      const product = await Product.findById(item.product);
+      if (product) {
+        product.stock += item.quantity;
+        await product.save();
+      }
+    }
+  }
+
+  order.isCancelled = true;
+  order.cancelledAt = Date.now();
+
+  const updatedOrder = await order.save();
+  res.json(updatedOrder);
+};
+
+
+// @desc   Mark order as delivered
+// @route  PUT /api/orders/:id/deliver
+// @access Admin
+export const markOrderDelivered = async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (!order) {
+    return res.status(404).json({ status: 404, message: "Order not found" });
+  }
+
+  order.isDelivered = true;
+  order.deliveredAt = Date.now();
+
+  const updatedOrder = await order.save();
+  res.json(updatedOrder);
+};

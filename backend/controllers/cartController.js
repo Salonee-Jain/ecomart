@@ -23,14 +23,11 @@ export const addToCart = async (req, res) => {
   const product = await Product.findById(productId);
 
   if (!product) {
-    res.status(404);
-    throw new Error("Product not found");
+    return res.status(404).json({ status: 404, message: "Product not found" });
   }
 
-  // ❗ Stock validation
   if (quantity > product.stock) {
-    res.status(400);
-    throw new Error(`Only ${product.stock} items left in stock`);
+    return res.status(400).json({ status: 400, message: `Only ${product.stock} items left in stock` });
   }
 
   let cart = await Cart.findOne({ user: req.user._id });
@@ -47,10 +44,8 @@ export const addToCart = async (req, res) => {
   );
 
   if (existingItem) {
-    // ❗ Validate updated quantity
     if (quantity > product.stock) {
-      res.status(400);
-      throw new Error(`Cannot add ${quantity}. Only ${product.stock} left.`);
+      return res.status(400).json({ status: 400, message: `Cannot add ${quantity}. Only ${product.stock} left.` });
     }
 
     existingItem.quantity = quantity;
@@ -77,8 +72,7 @@ export const removeFromCart = async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id });
 
   if (!cart) {
-    res.status(404);
-    throw new Error("Cart not found");
+    return res.status(404).json({ status: 404, message: "Cart not found" });
   }
 
   cart.items = cart.items.filter(
@@ -96,12 +90,52 @@ export const clearCart = async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id });
 
   if (!cart) {
-    res.status(404);
-    throw new Error("Cart not found");
+    return res.status(404).json({ status: 404, message: "Cart not found" });
   }
 
   cart.items = [];
   await cart.save();
 
   res.json({ message: "Cart cleared" });
+};
+
+
+// @desc   Merge guest cart into user cart after login
+// @route  POST /api/cart/merge
+// @access Private
+export const mergeCart = async (req, res) => {
+  const guestItems = req.body.items; // array of {productId, quantity}
+
+  let cart = await Cart.findOne({ user: req.user._id });
+
+  if (!cart) {
+    cart = await Cart.create({ user: req.user._id, items: [] });
+  }
+
+  for (const g of guestItems) {
+    const product = await Product.findById(g.productId);
+    if (!product) continue;
+
+    const existing = cart.items.find(
+      (item) => item.product.toString() === g.productId
+    );
+
+    let qty = Math.min(g.quantity, product.stock); // enforce stock
+
+    if (existing) {
+      existing.quantity = qty;
+    } else {
+      cart.items.push({
+        product: product._id,
+        name: product.name,
+        sku: product.sku,
+        image: product.image,
+        price: product.price,
+        quantity: qty
+      });
+    }
+  }
+
+  await cart.save();
+  res.json(cart);
 };

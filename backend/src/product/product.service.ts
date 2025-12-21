@@ -6,7 +6,7 @@ import { CreateProductDto, UpdateProductDto, QueryProductDto } from './dto/produ
 
 @Injectable()
 export class ProductService {
-  constructor(@InjectModel(Product.name) private productModel: Model<ProductDocument>) {}
+  constructor(@InjectModel(Product.name) private productModel: Model<ProductDocument>) { }
 
   async getProducts(queryDto: QueryProductDto) {
     const pageSize = Number(queryDto.limit) || 10;
@@ -161,7 +161,82 @@ export class ProductService {
   }
 
   async getAllCategories() {
-  return this.productModel.distinct("category");
-}
+    return this.productModel.distinct("category");
+  }
+
+  async createReview(productId: string, userId: string, userName: string, reviewData: { rating: number; comment: string }) {
+    const product = await this.productModel.findById(productId);
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    // Check if user already reviewed
+    const alreadyReviewed = product.reviews.find(
+      (review: any) => review.user.toString() === userId
+    );
+
+    if (alreadyReviewed) {
+      throw new BadRequestException('Product already reviewed');
+    }
+
+    const review = {
+      user: userId as any,
+      name: userName,
+      rating: reviewData.rating,
+      comment: reviewData.comment,
+      createdAt: new Date(),
+    };
+
+    product.reviews.push(review as any);
+    product.numReviews = product.reviews.length;
+    product.rating = product.reviews.reduce((acc: number, item: any) => item.rating + acc, 0) / product.reviews.length;
+
+    await product.save();
+    return { message: 'Review added', product };
+  }
+
+  async updateReview(productId: string, reviewIndex: number, userId: string, reviewData: { rating: number; comment: string }) {
+    const product = await this.productModel.findById(productId);
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    if (!product.reviews[reviewIndex] || (product.reviews[reviewIndex] as any).user.toString() !== userId) {
+      throw new BadRequestException('Review not found or unauthorized');
+    }
+
+    (product.reviews[reviewIndex] as any).rating = reviewData.rating;
+    (product.reviews[reviewIndex] as any).comment = reviewData.comment;
+
+    product.rating = product.reviews.reduce((acc: number, item: any) => item.rating + acc, 0) / product.reviews.length;
+
+    await product.save();
+    return { message: 'Review updated', product };
+  }
+
+  async deleteReview(productId: string, reviewIndex: number, userId: string, isAdmin: boolean) {
+    const product = await this.productModel.findById(productId);
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    if (!product.reviews[reviewIndex]) {
+      throw new NotFoundException('Review not found');
+    }
+
+    const review = product.reviews[reviewIndex] as any;
+    if (review.user.toString() !== userId && !isAdmin) {
+      throw new BadRequestException('Unauthorized to delete this review');
+    }
+
+    product.reviews.splice(reviewIndex, 1);
+    product.numReviews = product.reviews.length;
+    product.rating = product.reviews.length > 0
+      ? product.reviews.reduce((acc: number, item: any) => item.rating + acc, 0) / product.reviews.length
+      : 0;
+
+    await product.save();
+    return { message: 'Review removed' };
+  }
 
 }

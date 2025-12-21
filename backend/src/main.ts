@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as express from 'express';
+import { HttpExceptionFilter } from './filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -11,6 +12,9 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors();
+
+  // Global exception filter
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // Global validation pipe
   app.useGlobalPipes(
@@ -47,6 +51,8 @@ async function bootstrap() {
     .addTag('Payments', 'Payment processing with Stripe')
     .addTag('Email', 'Email notification endpoints')
     .addTag('Users', 'User management (Admin only)')
+    .addTag('Health', 'Health check and monitoring endpoints')
+    .addTag('Wishlist', 'User wishlist management')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -54,7 +60,7 @@ async function bootstrap() {
 
   const PORT = process.env.PORT || 5000;
   await app.listen(PORT);
-  
+
   console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on http://localhost:${PORT}`);
   console.log(`Swagger documentation available at http://localhost:${PORT}/api/docs`);
 }

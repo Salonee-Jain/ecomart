@@ -1,14 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ProductService } from './product.service';
 import { CreateProductDto, UpdateProductDto, QueryProductDto } from './dto/product.dto';
+import { CreateReviewDto } from './dto/review.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../guards/admin.guard';
 
 @ApiTags('Products')
 @Controller('products')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(private readonly productService: ProductService) { }
 
   @Get()
   @ApiOperation({ summary: 'Get all products with filtering and pagination' })
@@ -27,13 +28,13 @@ export class ProductController {
   async getProductAnalytics() {
     return this.productService.getProductAnalytics();
   }
-  
+
   @Get('categories')
   @ApiOperation({ summary: 'Get all product categories' })
   @ApiResponse({ status: 200, description: 'List of categories' })
   async getCategories() {
     return this.productService.getAllCategories();
-}
+  }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get product by ID' })
@@ -97,6 +98,50 @@ export class ProductController {
     return this.productService.deleteProduct(id);
   }
 
+  @Post(':id/reviews')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Create product review' })
+  @ApiResponse({ status: 201, description: 'Review added successfully' })
+  @ApiResponse({ status: 400, description: 'Product already reviewed' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  async createReview(@Request() req, @Param('id') id: string, @Body() createReviewDto: CreateReviewDto) {
+    return this.productService.createReview(id, req.user._id, req.user.name, createReviewDto);
+  }
+
+  @Put(':id/reviews/:reviewIndex')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Update own review' })
+  @ApiResponse({ status: 200, description: 'Review updated successfully' })
+  @ApiResponse({ status: 400, description: 'Review not found or unauthorized' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  async updateReview(
+    @Request() req,
+    @Param('id') id: string,
+    @Param('reviewIndex') reviewIndex: string,
+    @Body() createReviewDto: CreateReviewDto,
+  ) {
+    return this.productService.updateReview(id, parseInt(reviewIndex), req.user._id, createReviewDto);
+  }
+
+  @Delete(':id/reviews/:reviewIndex')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Delete review (own review or Admin)' })
+  @ApiResponse({ status: 200, description: 'Review deleted successfully' })
+  @ApiResponse({ status: 400, description: 'Unauthorized to delete this review' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Review not found' })
+  async deleteReview(
+    @Request() req,
+    @Param('id') id: string,
+    @Param('reviewIndex') reviewIndex: string,
+  ) {
+    return this.productService.deleteReview(id, parseInt(reviewIndex), req.user._id, req.user.isAdmin);
+  }
 
 
 }

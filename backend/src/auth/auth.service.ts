@@ -88,6 +88,40 @@ export class AuthService {
       isAdmin: user.isAdmin,
     };
   }
+
+  async updateProfile(userId: string, updateData: { name?: string; email?: string; password?: string }) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // Check if email is being changed and if it's already taken
+    if (updateData.email && updateData.email !== user.email) {
+      const emailExists = await this.userModel.findOne({ email: updateData.email });
+      if (emailExists) {
+        throw new BadRequestException('Email already in use');
+      }
+      user.email = updateData.email;
+    }
+
+    if (updateData.name) {
+      user.name = updateData.name;
+    }
+
+    if (updateData.password) {
+      user.password = updateData.password; // Will be hashed by pre-save hook
+    }
+
+    await user.save();
+
+    return {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+    };
+  }
+
   private generateToken(id: string): string {
     return this.jwtService.sign(
       { id },

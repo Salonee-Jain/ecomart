@@ -8,6 +8,8 @@ import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
 import { EmailModule } from './email/email.module';
+import { HealthModule } from './health/health.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -29,8 +31,10 @@ import { EmailModule } from './email/email.module';
     OrderModule,
     PaymentModule,
     EmailModule,
+    HealthModule,
+    WishlistModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }

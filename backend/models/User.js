@@ -19,7 +19,11 @@ const userSchema = mongoose.Schema(
     isAdmin: {
       type: Boolean,
       default: false
+    },
+    stripeCustomerId: {
+      type: String,
     }
+
   },
   { timestamps: true }
 );

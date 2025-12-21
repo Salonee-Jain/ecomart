@@ -11,6 +11,7 @@ import cartRoutes from "./routes/cartRoutes.js";
 const app = express();
 
 app.use(cors());
+runWebhookServer();
 app.use(express.json());
 
 app.get("/", (req, res) => {

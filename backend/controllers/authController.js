@@ -1,6 +1,8 @@
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
 import { errorResponse } from "../utils/errorResponse.js";
+import stripe from "../config/stripe.js";
+
 // @route   POST /api/auth/register
 export const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -11,6 +13,13 @@ export const registerUser = async (req, res) => {
   }
 
   const user = await User.create({ name, email, password, isAdmin: req.body.isAdmin ?? false });
+  const customer = await stripe.customers.create({
+    email,
+    name
+  });
+
+  user.stripeCustomerId = customer.id;
+  await user.save();
   if (user) {
     res.status(201).json({
       _id: user._id,

@@ -29,12 +29,19 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Grid,
+  Tooltip,
+  Avatar,
 } from "@mui/material";
 import {
   Delete,
   Search,
   Edit,
   Add,
+  Inventory,
+  Category,
+  AttachMoney,
+  ShoppingBag,
 } from "@mui/icons-material";
 import { getProducts } from "@/services/product.service";
 import { deleteProduct } from "@/services/admin.service";
@@ -63,6 +70,13 @@ export default function AdminProductsPage() {
     product: null,
   });
 
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    totalValue: 0,
+    lowStock: 0,
+    categories: 0,
+  });
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -88,8 +102,20 @@ export default function AdminProductsPage() {
   const fetchProducts = async () => {
     try {
       const data = await getProducts();
-      setProducts(data.products || data);
-      setFilteredProducts(data.products || data);
+      setProducts(data);
+      setFilteredProducts(data);
+
+      // Calculate stats
+      const totalValue = data.reduce((sum: number, p: Product) => sum + p.price * p.stock, 0);
+      const lowStock = data.filter((p: Product) => p.stock < 10).length;
+      const uniqueCategories = new Set(data.map((p: Product) => p.category)).size;
+
+      setStats({
+        totalProducts: data.length,
+        totalValue,
+        lowStock,
+        categories: uniqueCategories,
+      });
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to load products");
     } finally {
@@ -97,11 +123,7 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleDeleteClick = (product: Product) => {
-    setDeleteDialog({ open: true, product });
-  };
-
-  const handleDeleteConfirm = async () => {
+  const handleDeleteProduct = async () => {
     if (!deleteDialog.product) return;
 
     setError("");
@@ -109,7 +131,7 @@ export default function AdminProductsPage() {
 
     try {
       await deleteProduct(deleteDialog.product._id);
-      setSuccess(`${deleteDialog.product.name} deleted successfully`);
+      setSuccess(`✅ "${deleteDialog.product.name}" deleted successfully!`);
       setDeleteDialog({ open: false, product: null });
       fetchProducts();
       setTimeout(() => setSuccess(""), 3000);
@@ -119,63 +141,130 @@ export default function AdminProductsPage() {
     }
   };
 
-  const categories = Array.from(new Set(products.map((p) => p.category)));
+  const categories = [...new Set(products.map((p) => p.category))];
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-        <CircularProgress />
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+        <CircularProgress size={60} />
       </Box>
     );
   }
 
+  const statsCards = [
+    {
+      title: "Total Products",
+      value: stats.totalProducts,
+      icon: <ShoppingBag sx={{ fontSize: 40, color: "#1976d2" }} />,
+      color: "#e3f2fd",
+    },
+    {
+      title: "Inventory Value",
+      value: `$${stats.totalValue.toFixed(2)}`,
+      icon: <AttachMoney sx={{ fontSize: 40, color: "#4caf50" }} />,
+      color: "#e8f5e9",
+    },
+    {
+      title: "Low Stock Items",
+      value: stats.lowStock,
+      icon: <Inventory sx={{ fontSize: 40, color: "#f44336" }} />,
+      color: "#ffebee",
+    },
+    {
+      title: "Categories",
+      value: stats.categories,
+      icon: <Category sx={{ fontSize: 40, color: "#9c27b0" }} />,
+      color: "#f3e5f5",
+    },
+  ];
+
   return (
-    <Box>
+    <Box sx={{ p: 3 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Box>
-          <Typography variant="h4" fontWeight={700} gutterBottom>
-            Product Management
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Manage your product inventory
-          </Typography>
-        </Box>
+        <Typography variant="h4" fontWeight="bold">
+          🛍️ Product Management
+        </Typography>
         <Button
           variant="contained"
           startIcon={<Add />}
           onClick={() => router.push("/admin/products/create")}
+          sx={{
+            bgcolor: "#1976d2",
+            borderRadius: 2,
+            px: 3,
+            textTransform: "none",
+            fontWeight: 600,
+            "&:hover": { bgcolor: "#1565c0" },
+          }}
         >
-          Create Product
+          Add New Product
         </Button>
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError("")}>
           {error}
         </Alert>
       )}
 
       {success && (
-        <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess("")}>
+        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess("")}>
           {success}
         </Alert>
       )}
 
-      <Card>
+      {/* Stats Cards */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {statsCards.map((stat, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
+            <Card
+              elevation={2}
+              sx={{
+                background: `linear-gradient(135deg, ${stat.color} 0%, white 100%)`,
+                borderRadius: 3,
+                transition: "transform 0.2s, box-shadow 0.2s",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: 6,
+                },
+              }}
+            >
+              <CardContent>
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box>
+                    <Typography color="text.secondary" variant="body2" gutterBottom>
+                      {stat.title}
+                    </Typography>
+                    <Typography variant="h4" fontWeight="bold">
+                      {stat.value}
+                    </Typography>
+                  </Box>
+                  {stat.icon}
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* Products Table */}
+      <Card elevation={3} sx={{ borderRadius: 3 }}>
         <CardContent>
-          <Box display="flex" gap={2} mb={3}>
+          {/* Search and Filters */}
+          <Box display="flex" gap={2} mb={3} flexWrap="wrap">
             <TextField
               fullWidth
-              placeholder="Search by name or SKU..."
+              placeholder="🔍 Search by product name or SKU..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <Search />
+                    <Search color="action" />
                   </InputAdornment>
                 ),
               }}
+              sx={{ flex: 1, minWidth: 300 }}
             />
             <FormControl sx={{ minWidth: 200 }}>
               <InputLabel>Category</InputLabel>
@@ -187,84 +276,104 @@ export default function AdminProductsPage() {
                 <MenuItem value="">All Categories</MenuItem>
                 {categories.map((cat) => (
                   <MenuItem key={cat} value={cat}>
-                    {cat}
+                    📂 {cat}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
           </Box>
 
-          <TableContainer component={Paper} variant="outlined">
+          {/* Table */}
+          <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
             <Table>
-              <TableHead>
+              <TableHead sx={{ bgcolor: "#f5f5f5" }}>
                 <TableRow>
-                  <TableCell>Image</TableCell>
-                  <TableCell>Name</TableCell>
-                  <TableCell>SKU</TableCell>
-                  <TableCell>Price</TableCell>
-                  <TableCell>Stock</TableCell>
-                  <TableCell>Category</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell><strong>Image</strong></TableCell>
+                  <TableCell><strong>Product</strong></TableCell>
+                  <TableCell><strong>SKU</strong></TableCell>
+                  <TableCell><strong>Category</strong></TableCell>
+                  <TableCell><strong>Price</strong></TableCell>
+                  <TableCell><strong>Stock</strong></TableCell>
+                  <TableCell align="right"><strong>Actions</strong></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {filteredProducts.length > 0 ? (
                   filteredProducts.map((product) => (
-                    <TableRow key={product._id} hover>
+                    <TableRow key={product._id} hover sx={{ "&:hover": { bgcolor: "#fafafa" } }}>
                       <TableCell>
-                        <Box
-                          component="img"
+                        <Avatar
                           src={product.image}
                           alt={product.name}
-                          sx={{
-                            width: 50,
-                            height: 50,
-                            objectFit: "cover",
-                            borderRadius: 1,
-                          }}
+                          variant="rounded"
+                          sx={{ width: 50, height: 50 }}
                         />
                       </TableCell>
                       <TableCell>
-                        <Typography fontWeight={600}>{product.name}</Typography>
+                        <Typography variant="body2" fontWeight={600}>
+                          {product.name}
+                        </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2" fontFamily="monospace">
+                        <Typography variant="body2" fontFamily="monospace" color="text.secondary">
                           {product.sku}
                         </Typography>
                       </TableCell>
-                      <TableCell fontWeight={600}>${product.price.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <Chip label={product.category} size="small" variant="outlined" />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" fontWeight={700} color="success.main">
+                          ${product.price.toFixed(2)}
+                        </Typography>
+                      </TableCell>
                       <TableCell>
                         <Chip
-                          label={product.stock}
-                          color={product.stock > 10 ? "success" : product.stock > 0 ? "warning" : "error"}
+                          label={`${product.stock} units`}
                           size="small"
+                          color={product.stock < 10 ? "error" : "success"}
+                          sx={{ fontWeight: 600 }}
                         />
                       </TableCell>
-                      <TableCell>{product.category}</TableCell>
                       <TableCell align="right">
-                        <IconButton
-                          color="primary"
-                          size="small"
-                          onClick={() => router.push(`/admin/products/${product._id}`)}
-                        >
-                          <Edit />
-                        </IconButton>
-                        <IconButton
-                          color="error"
-                          size="small"
-                          onClick={() => handleDeleteClick(product)}
-                        >
-                          <Delete />
-                        </IconButton>
+                        <Box display="flex" gap={1} justifyContent="flex-end">
+                          <Tooltip title="Edit Product">
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              onClick={() => router.push(`/admin/products/${product._id}`)}
+                            >
+                              <Edit fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Delete Product">
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => setDeleteDialog({ open: true, product })}
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                      <Typography color="text.secondary">
+                    <TableCell colSpan={7} align="center" sx={{ py: 8 }}>
+                      <ShoppingBag sx={{ fontSize: 60, color: "#9e9e9e", mb: 2 }} />
+                      <Typography variant="h6" color="text.secondary">
                         {searchQuery || categoryFilter ? "No products found" : "No products yet"}
                       </Typography>
+                      <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        onClick={() => router.push("/admin/products/create")}
+                        sx={{ mt: 2 }}
+                      >
+                        Add Your First Product
+                      </Button>
                     </TableCell>
                   </TableRow>
                 )}
@@ -272,9 +381,9 @@ export default function AdminProductsPage() {
             </Table>
           </TableContainer>
 
-          <Box mt={2}>
+          <Box mt={3}>
             <Typography variant="body2" color="text.secondary">
-              Total: {filteredProducts.length} product{filteredProducts.length !== 1 ? "s" : ""}
+              Showing <strong>{filteredProducts.length}</strong> of <strong>{products.length}</strong> products
             </Typography>
           </Box>
         </CardContent>
@@ -284,17 +393,20 @@ export default function AdminProductsPage() {
       <Dialog
         open={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false, product: null })}
+        PaperProps={{ sx: { borderRadius: 3 } }}
       >
-        <DialogTitle>Delete Product</DialogTitle>
+        <DialogTitle sx={{ fontWeight: "bold" }}>⚠️ Confirm Deletion</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete <strong>{deleteDialog.product?.name}</strong>? This
-          action cannot be undone.
+          <Typography>
+            Are you sure you want to delete{" "}
+            <strong>"{deleteDialog.product?.name}"</strong>? This action cannot be undone.
+          </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialog({ open: false, product: null })}>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setDeleteDialog({ open: false, product: null })} variant="outlined">
             Cancel
           </Button>
-          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+          <Button onClick={handleDeleteProduct} variant="contained" color="error" startIcon={<Delete />}>
             Delete
           </Button>
         </DialogActions>

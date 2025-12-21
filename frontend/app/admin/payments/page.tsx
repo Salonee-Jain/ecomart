@@ -30,10 +30,9 @@ import {
     Search,
     TrendingUp,
     CheckCircle,
-    Cancel,
     HourglassEmpty,
     Check,
-    Close,
+    Payment as PaymentIcon,
 } from "@mui/icons-material";
 import { getAllPayments, confirmPayment, markPaymentSucceeded } from "@/services/admin.service";
 
@@ -44,7 +43,6 @@ interface Payment {
     amount: number;
     currency: string;
     status: string;
-    paymentMethod: string;
     user: {
         _id: string;
         name: string;
@@ -56,13 +54,11 @@ interface Payment {
         isPaid: boolean;
         isDelivered: boolean;
         isCancelled: boolean;
-        paymentMethod: string;
         itemsCount: number;
     };
     createdAt: string;
     updatedAt: string;
     paidAt: string | null;
-    metadata?: any;
 }
 
 export default function AdminPaymentsPage() {
@@ -77,7 +73,6 @@ export default function AdminPaymentsPage() {
         totalRevenue: 0,
         successfulPayments: 0,
         pendingPayments: 0,
-        failedPayments: 0,
     });
 
     useEffect(() => {
@@ -105,29 +100,27 @@ export default function AdminPaymentsPage() {
 
     const fetchPayments = async () => {
         try {
-            // Get all payments from dedicated endpoint
+            setLoading(true);
             const data = await getAllPayments();
-            const paymentsData = data.payments || [];
 
+            const paymentsData = data.payments || [];
             setPayments(paymentsData);
             setFilteredPayments(paymentsData);
 
             // Calculate stats
-            const successful = paymentsData.filter((p: any) => p.status === "succeeded");
-            const totalRevenue = successful.reduce(
-                (sum: number, p: any) => sum + p.amount,
-                0
-            );
+            const totalRev = paymentsData
+                .filter((p: Payment) => p.status === "succeeded")
+                .reduce((sum: number, p: Payment) => sum + p.amount, 0);
 
             setStats({
-                totalRevenue,
-                successfulPayments: successful.length,
-                pendingPayments: paymentsData.filter((p: any) => p.status === "pending").length,
-                failedPayments: 0,
+                totalRevenue: totalRev,
+                successfulPayments: paymentsData.filter((p: Payment) => p.status === "succeeded").length,
+                pendingPayments: paymentsData.filter((p: Payment) => p.status === "pending").length,
             });
+
+            setLoading(false);
         } catch (err: any) {
-            setError(err.response?.data?.message || "Failed to load payments");
-        } finally {
+            setError("Failed to load payments");
             setLoading(false);
         }
     };
@@ -137,24 +130,20 @@ export default function AdminPaymentsPage() {
         setSuccess("");
 
         try {
-            const response = await fetch(
-                `http://localhost:5000/api/orders/${orderId}/pay`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem("token")}`,
-                    },
-                }
-            );
+            const response = await fetch(`http://localhost:5000/api/orders/${orderId}/pay`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
 
-            if (!response.ok) throw new Error("Failed to update payment");
+            if (!response.ok) throw new Error("Failed to mark order as paid");
 
-            setSuccess("Payment marked as paid");
+            setSuccess("Order marked as paid successfully");
             fetchPayments();
             setTimeout(() => setSuccess(""), 3000);
         } catch (err: any) {
-            setError(err.message || "Failed to update payment");
+            setError(err.message || "Failed to mark as paid");
         }
     };
 
@@ -164,7 +153,7 @@ export default function AdminPaymentsPage() {
 
         try {
             await confirmPayment(paymentIntentId);
-            setSuccess("Payment confirmed successfully");
+            setSuccess("Payment confirmed successfully!");
             fetchPayments();
             setTimeout(() => setSuccess(""), 3000);
         } catch (err: any) {
@@ -228,89 +217,78 @@ export default function AdminPaymentsPage() {
 
     if (loading) {
         return (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-                <CircularProgress />
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+                <CircularProgress size={60} />
             </Box>
         );
     }
 
-    const statCards = [
+    const statsCards = [
         {
             title: "Total Revenue",
             value: `$${stats.totalRevenue.toFixed(2)}`,
-            icon: <TrendingUp sx={{ fontSize: 30 }} />,
-            color: "#4caf50",
-            bgColor: "#e8f5e9",
+            icon: <TrendingUp sx={{ fontSize: 40, color: "#4caf50" }} />,
+            color: "#e8f5e9",
         },
         {
             title: "Successful Payments",
             value: stats.successfulPayments,
-            icon: <CheckCircle sx={{ fontSize: 30 }} />,
-            color: "#2196f3",
-            bgColor: "#e3f2fd",
+            icon: <CheckCircle sx={{ fontSize: 40, color: "#2196f3" }} />,
+            color: "#e3f2fd",
         },
         {
             title: "Pending Payments",
             value: stats.pendingPayments,
-            icon: <HourglassEmpty sx={{ fontSize: 30 }} />,
-            color: "#ff9800",
-            bgColor: "#fff3e0",
-        },
-        {
-            title: "Failed Payments",
-            value: stats.failedPayments,
-            icon: <Cancel sx={{ fontSize: 30 }} />,
-            color: "#f44336",
-            bgColor: "#ffebee",
+            icon: <HourglassEmpty sx={{ fontSize: 40, color: "#ff9800" }} />,
+            color: "#fff3e0",
         },
     ];
 
     return (
-        <Box>
-            <Typography variant="h4" fontWeight={700} gutterBottom>
-                Payment Management
-            </Typography>
-            <Typography variant="body1" color="text.secondary" mb={4}>
-                View and manage all payment transactions
+        <Box sx={{ p: 3 }}>
+            <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ mb: 3 }}>
+                💳 Payment Management
             </Typography>
 
             {error && (
-                <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>
+                <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError("")}>
                     {error}
                 </Alert>
             )}
 
             {success && (
-                <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess("")}>
+                <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess("")}>
                     {success}
                 </Alert>
             )}
 
             {/* Stats Cards */}
-            <Grid container spacing={3} mb={4}>
-                {statCards.map((card, index) => (
-                    <Grid item xs={12} sm={6} md={3} key={index}>
-                        <Card>
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+                {statsCards.map((stat, index) => (
+                    <Grid item xs={12} sm={6} md={4} key={index}>
+                        <Card
+                            elevation={2}
+                            sx={{
+                                background: `linear-gradient(135deg, ${stat.color} 0%, white 100%)`,
+                                borderRadius: 3,
+                                transition: "transform 0.2s, box-shadow 0.2s",
+                                "&:hover": {
+                                    transform: "translateY(-4px)",
+                                    boxShadow: 6,
+                                },
+                            }}
+                        >
                             <CardContent>
-                                <Box display="flex" justifyContent="space-between" alignItems="start">
+                                <Box display="flex" justifyContent="space-between" alignItems="center">
                                     <Box>
-                                        <Typography variant="body2" color="text.secondary" gutterBottom>
-                                            {card.title}
+                                        <Typography color="text.secondary" variant="body2" gutterBottom>
+                                            {stat.title}
                                         </Typography>
-                                        <Typography variant="h5" fontWeight={700}>
-                                            {card.value}
+                                        <Typography variant="h4" fontWeight="bold">
+                                            {stat.value}
                                         </Typography>
                                     </Box>
-                                    <Box
-                                        sx={{
-                                            p: 1.5,
-                                            borderRadius: 2,
-                                            bgcolor: card.bgColor,
-                                            color: card.color,
-                                        }}
-                                    >
-                                        {card.icon}
-                                    </Box>
+                                    {stat.icon}
                                 </Box>
                             </CardContent>
                         </Card>
@@ -318,21 +296,24 @@ export default function AdminPaymentsPage() {
                 ))}
             </Grid>
 
-            <Card>
+            {/* Payments Table */}
+            <Card elevation={3} sx={{ borderRadius: 3 }}>
                 <CardContent>
-                    <Box display="flex" gap={2} mb={3}>
+                    {/* Search and Filters */}
+                    <Box display="flex" gap={2} mb={3} flexWrap="wrap">
                         <TextField
                             fullWidth
-                            placeholder="Search by order ID or customer..."
+                            placeholder="🔍 Search by Order ID, customer name, or email..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <Search />
+                                        <Search color="action" />
                                     </InputAdornment>
                                 ),
                             }}
+                            sx={{ flex: 1, minWidth: 300 }}
                         />
                         <FormControl sx={{ minWidth: 200 }}>
                             <InputLabel>Status</InputLabel>
@@ -342,39 +323,39 @@ export default function AdminPaymentsPage() {
                                 onChange={(e) => setStatusFilter(e.target.value)}
                             >
                                 <MenuItem value="">All Payments</MenuItem>
-                                <MenuItem value="succeeded">Successful</MenuItem>
-                                <MenuItem value="pending">Pending</MenuItem>
-                                <MenuItem value="failed">Failed</MenuItem>
+                                <MenuItem value="succeeded">✅ Successful</MenuItem>
+                                <MenuItem value="pending">⏳ Pending</MenuItem>
+                                <MenuItem value="failed">❌ Failed</MenuItem>
                             </Select>
                         </FormControl>
                     </Box>
 
-                    <TableContainer component={Paper} variant="outlined">
+                    {/* Table */}
+                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
                         <Table>
-                            <TableHead>
+                            <TableHead sx={{ bgcolor: "#f5f5f5" }}>
                                 <TableRow>
-                                    <TableCell>Payment ID</TableCell>
-                                    <TableCell>Order ID</TableCell>
-                                    <TableCell>Payment Intent</TableCell>
-                                    <TableCell>Customer</TableCell>
-                                    <TableCell>Amount</TableCell>
-                                    <TableCell>Method</TableCell>
-                                    <TableCell>Status</TableCell>
-                                    <TableCell>Date</TableCell>
-                                    <TableCell align="right">Actions</TableCell>
+                                    <TableCell><strong>Payment ID</strong></TableCell>
+                                    <TableCell><strong>Order ID</strong></TableCell>
+                                    <TableCell><strong>Payment Intent</strong></TableCell>
+                                    <TableCell><strong>Customer</strong></TableCell>
+                                    <TableCell><strong>Amount</strong></TableCell>
+                                    <TableCell><strong>Status</strong></TableCell>
+                                    <TableCell><strong>Date</strong></TableCell>
+                                    <TableCell align="right"><strong>Actions</strong></TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {filteredPayments.length > 0 ? (
                                     filteredPayments.map((payment) => (
-                                        <TableRow key={payment._id} hover>
+                                        <TableRow key={payment._id} hover sx={{ "&:hover": { bgcolor: "#fafafa" } }}>
                                             <TableCell>
                                                 <Tooltip title="Click to copy Payment ID">
                                                     <Typography
                                                         variant="body2"
                                                         fontFamily="monospace"
                                                         fontSize="0.75rem"
-                                                        sx={{ cursor: 'pointer' }}
+                                                        sx={{ cursor: "pointer", color: "#1976d2" }}
                                                         onClick={() => navigator.clipboard.writeText(payment._id)}
                                                     >
                                                         {payment._id}
@@ -387,7 +368,7 @@ export default function AdminPaymentsPage() {
                                                         variant="body2"
                                                         fontFamily="monospace"
                                                         fontSize="0.75rem"
-                                                        sx={{ cursor: 'pointer' }}
+                                                        sx={{ cursor: "pointer", color: "#1976d2" }}
                                                         onClick={() => navigator.clipboard.writeText(payment.orderId)}
                                                     >
                                                         {payment.orderId}
@@ -401,7 +382,7 @@ export default function AdminPaymentsPage() {
                                                             variant="body2"
                                                             fontFamily="monospace"
                                                             fontSize="0.75rem"
-                                                            sx={{ cursor: 'pointer' }}
+                                                            sx={{ cursor: "pointer", color: "#1976d2" }}
                                                             onClick={() => navigator.clipboard.writeText(payment.paymentIntentId)}
                                                         >
                                                             {payment.paymentIntentId}
@@ -412,74 +393,61 @@ export default function AdminPaymentsPage() {
                                                 )}
                                             </TableCell>
                                             <TableCell>
-                                                <Typography>{payment.user?.name || "Unknown"}</Typography>
+                                                <Typography variant="body2" fontWeight={600}>
+                                                    {payment.user?.name || "Unknown"}
+                                                </Typography>
                                                 <Typography variant="caption" color="text.secondary">
                                                     {payment.user?.email}
                                                 </Typography>
                                             </TableCell>
                                             <TableCell>
-                                                <Typography fontWeight={600}>
+                                                <Typography variant="body2" fontWeight={700} color="success.main">
                                                     ${payment.amount.toFixed(2)}
                                                 </Typography>
                                             </TableCell>
                                             <TableCell>
                                                 <Chip
-                                                    label={(payment.paymentMethod || 'stripe').toUpperCase()}
+                                                    label={payment.status.toUpperCase()}
+                                                    color={payment.status === "succeeded" ? "success" : payment.status === "pending" ? "warning" : "error"}
                                                     size="small"
-                                                    variant="outlined"
+                                                    sx={{ fontWeight: 600 }}
                                                 />
                                             </TableCell>
                                             <TableCell>
-                                                <Chip
-                                                    label={payment.status}
-                                                    color={payment.status === "succeeded" ? "success" : "warning"}
-                                                    size="small"
-                                                />
-                                            </TableCell>
-                                            <TableCell>
-                                                {new Date(payment.createdAt).toLocaleDateString()}
+                                                <Typography variant="body2">
+                                                    {new Date(payment.createdAt).toLocaleDateString()}
+                                                </Typography>
                                             </TableCell>
                                             <TableCell align="right">
-                                                {payment.order.isPaid ? (
-                                                    <Chip
-                                                        label={payment.order.isDelivered ? "Delivered" : "Paid"}
-                                                        size="small"
-                                                        color={payment.order.isDelivered ? "success" : "info"}
-                                                    />
+                                                {payment.order.isDelivered ? (
+                                                    <Chip label="✓ Delivered" size="small" color="success" />
+                                                ) : payment.order.isPaid ? (
+                                                    <Chip label="✓ Paid" size="small" color="info" />
                                                 ) : (
-                                                    <Box display="flex" gap={1}>
-                                                        <Tooltip title="Mark as Paid (Order Only)">
-                                                            <IconButton
-                                                                size="small"
-                                                                color="success"
-                                                                onClick={() => handleMarkAsPaid(payment.orderId)}
-                                                            >
-                                                                <Check />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        {payment.status !== "succeeded" && (
-                                                            <Tooltip title={payment.paymentIntentId ? "Confirm Payment (Stripe)" : "Create & Confirm Payment"}>
-                                                                <IconButton
-                                                                    size="small"
-                                                                    color="primary"
-                                                                    onClick={() => handleCreateAndConfirmPayment(payment.orderId, payment.paymentIntentId)}
-                                                                >
-                                                                    <CheckCircle />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                        )}
-                                                    </Box>
+                                                    <Tooltip title={payment.paymentIntentId ? "Confirm Payment via Stripe" : "Create & Confirm Payment"}>
+                                                        <IconButton
+                                                            size="small"
+                                                            color="primary"
+                                                            onClick={() => handleCreateAndConfirmPayment(payment.orderId, payment.paymentIntentId)}
+                                                            sx={{
+                                                                bgcolor: "#1976d2",
+                                                                color: "white",
+                                                                "&:hover": { bgcolor: "#1565c0" },
+                                                            }}
+                                                        >
+                                                            <CheckCircle fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
                                                 )}
                                             </TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                                            <Typography color="text.secondary">
-                                                {searchQuery || statusFilter
-                                                    ? "No payments found"
-                                                    : "No payments yet"}
+                                        <TableCell colSpan={8} align="center" sx={{ py: 8 }}>
+                                            <PaymentIcon sx={{ fontSize: 60, color: "#9e9e9e", mb: 2 }} />
+                                            <Typography variant="h6" color="text.secondary">
+                                                {searchQuery || statusFilter ? "No payments found" : "No payments yet"}
                                             </Typography>
                                         </TableCell>
                                     </TableRow>
@@ -488,10 +456,12 @@ export default function AdminPaymentsPage() {
                         </Table>
                     </TableContainer>
 
-                    <Box mt={2}>
+                    <Box mt={3} display="flex" justifyContent="space-between" alignItems="center">
                         <Typography variant="body2" color="text.secondary">
-                            Total: {filteredPayments.length} payment
-                            {filteredPayments.length !== 1 ? "s" : ""}
+                            Showing <strong>{filteredPayments.length}</strong> of <strong>{payments.length}</strong> payments
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                            💡 Click on IDs to copy them
                         </Typography>
                     </Box>
                 </CardContent>

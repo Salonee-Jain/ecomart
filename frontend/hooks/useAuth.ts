@@ -20,7 +20,7 @@ export const useAuth = () => {
     }
 
     getProfile()
-      .then((data) => setUser(data))
+      .then((response) => setUser(response.data))
       .catch(() => {
         localStorage.removeItem("token");
         setUser(null);

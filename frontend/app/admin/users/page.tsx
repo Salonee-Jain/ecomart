@@ -14,24 +14,21 @@ import {
     TableRow,
     Paper,
     Chip,
-    IconButton,
     Alert,
     CircularProgress,
     TextField,
     InputAdornment,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
+    Avatar,
+    Grid,
 } from "@mui/material";
 import {
-    Delete,
     Search,
+    People,
     AdminPanelSettings,
     Person,
+    Email,
 } from "@mui/icons-material";
-import { getAllUsers, updateUserRole, deleteUser } from "@/services/admin.service";
+import { getAllUsers } from "@/services/admin.service";
 
 interface User {
     _id: string;
@@ -41,16 +38,17 @@ interface User {
     createdAt: string;
 }
 
-export default function UsersPage() {
+export default function AdminUsersPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
-    const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; user: User | null }>({
-        open: false,
-        user: null,
+
+    const [stats, setStats] = useState({
+        totalUsers: 0,
+        adminUsers: 0,
+        regularUsers: 0,
     });
 
     useEffect(() => {
@@ -58,23 +56,32 @@ export default function UsersPage() {
     }, []);
 
     useEffect(() => {
+        let filtered = users;
+
         if (searchQuery.trim()) {
-            const filtered = users.filter(
+            filtered = filtered.filter(
                 (user) =>
                     user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                     user.email.toLowerCase().includes(searchQuery.toLowerCase())
             );
-            setFilteredUsers(filtered);
-        } else {
-            setFilteredUsers(users);
         }
+
+        setFilteredUsers(filtered);
     }, [searchQuery, users]);
 
     const fetchUsers = async () => {
         try {
             const data = await getAllUsers();
-            setUsers(data.users);
-            setFilteredUsers(data.users);
+            setUsers(data);
+            setFilteredUsers(data);
+
+            const admins = data.filter((u: User) => u.isAdmin).length;
+
+            setStats({
+                totalUsers: data.length,
+                adminUsers: admins,
+                regularUsers: data.length - admins,
+            });
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to load users");
         } finally {
@@ -82,142 +89,185 @@ export default function UsersPage() {
         }
     };
 
-    const handleToggleAdmin = async (user: User) => {
-        setError("");
-        setSuccess("");
-
-        try {
-            await updateUserRole(user._id, !user.isAdmin);
-            setSuccess(`${user.name} role updated successfully`);
-            fetchUsers();
-            setTimeout(() => setSuccess(""), 3000);
-        } catch (err: any) {
-            setError(err.response?.data?.message || "Failed to update role");
-        }
-    };
-
-    const handleDeleteClick = (user: User) => {
-        setDeleteDialog({ open: true, user });
-    };
-
-    const handleDeleteConfirm = async () => {
-        if (!deleteDialog.user) return;
-
-        setError("");
-        setSuccess("");
-
-        try {
-            await deleteUser(deleteDialog.user._id);
-            setSuccess(`${deleteDialog.user.name} deleted successfully`);
-            setDeleteDialog({ open: false, user: null });
-            fetchUsers();
-            setTimeout(() => setSuccess(""), 3000);
-        } catch (err: any) {
-            setError(err.response?.data?.message || "Failed to delete user");
-            setDeleteDialog({ open: false, user: null });
-        }
-    };
-
     if (loading) {
         return (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-                <CircularProgress />
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+                <CircularProgress size={60} />
             </Box>
         );
     }
 
+    const statsCards = [
+        {
+            title: "Total Users",
+            value: stats.totalUsers,
+            icon: <People sx={{ fontSize: 40, color: "#1976d2" }} />,
+            color: "#e3f2fd",
+        },
+        {
+            title: "Administrators",
+            value: stats.adminUsers,
+            icon: <AdminPanelSettings sx={{ fontSize: 40, color: "#f44336" }} />,
+            color: "#ffebee",
+        },
+        {
+            title: "Regular Users",
+            value: stats.regularUsers,
+            icon: <Person sx={{ fontSize: 40, color: "#4caf50" }} />,
+            color: "#e8f5e9",
+        },
+    ];
+
+    const getInitials = (name: string) => {
+        return name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2);
+    };
+
+    const getAvatarColor = (name: string) => {
+        const colors = ["#1976d2", "#4caf50", "#ff9800", "#9c27b0", "#e91e63", "#00bcd4"];
+        const index = name.charCodeAt(0) % colors.length;
+        return colors[index];
+    };
+
     return (
-        <Box>
-            <Typography variant="h4" fontWeight={700} gutterBottom>
-                User Management
-            </Typography>
-            <Typography variant="body1" color="text.secondary" mb={4}>
-                Manage user accounts and permissions
+        <Box sx={{ p: 3 }}>
+            <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ mb: 3 }}>
+                👥 User Management
             </Typography>
 
             {error && (
-                <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>
+                <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError("")}>
                     {error}
                 </Alert>
             )}
 
-            {success && (
-                <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess("")}>
-                    {success}
-                </Alert>
-            )}
+            {/* Stats Cards */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+                {statsCards.map((stat, index) => (
+                    <Grid item xs={12} sm={6} md={4} key={index}>
+                        <Card
+                            elevation={2}
+                            sx={{
+                                background: `linear-gradient(135deg, ${stat.color} 0%, white 100%)`,
+                                borderRadius: 3,
+                                transition: "transform 0.2s, box-shadow 0.2s",
+                                "&:hover": {
+                                    transform: "translateY(-4px)",
+                                    boxShadow: 6,
+                                },
+                            }}
+                        >
+                            <CardContent>
+                                <Box display="flex" justifyContent="space-between" alignItems="center">
+                                    <Box>
+                                        <Typography color="text.secondary" variant="body2" gutterBottom>
+                                            {stat.title}
+                                        </Typography>
+                                        <Typography variant="h4" fontWeight="bold">
+                                            {stat.value}
+                                        </Typography>
+                                    </Box>
+                                    {stat.icon}
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
 
-            <Card>
+            {/* Users Table */}
+            <Card elevation={3} sx={{ borderRadius: 3 }}>
                 <CardContent>
+                    {/* Search */}
                     <Box mb={3}>
                         <TextField
                             fullWidth
-                            placeholder="Search by name or email..."
+                            placeholder="🔍 Search by name or email..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <Search />
+                                        <Search color="action" />
                                     </InputAdornment>
                                 ),
                             }}
                         />
                     </Box>
 
-                    <TableContainer component={Paper} variant="outlined">
+                    {/* Table */}
+                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
                         <Table>
-                            <TableHead>
+                            <TableHead sx={{ bgcolor: "#f5f5f5" }}>
                                 <TableRow>
-                                    <TableCell>Name</TableCell>
-                                    <TableCell>Email</TableCell>
-                                    <TableCell>Role</TableCell>
-                                    <TableCell>Joined</TableCell>
-                                    <TableCell align="right">Actions</TableCell>
+                                    <TableCell><strong>User</strong></TableCell>
+                                    <TableCell><strong>Email</strong></TableCell>
+                                    <TableCell><strong>Role</strong></TableCell>
+                                    <TableCell><strong>Joined</strong></TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {filteredUsers.length > 0 ? (
                                     filteredUsers.map((user) => (
-                                        <TableRow key={user._id} hover>
+                                        <TableRow key={user._id} hover sx={{ "&:hover": { bgcolor: "#fafafa" } }}>
                                             <TableCell>
-                                                <Box display="flex" alignItems="center" gap={1}>
-                                                    {user.isAdmin ? (
-                                                        <AdminPanelSettings color="primary" fontSize="small" />
-                                                    ) : (
-                                                        <Person color="disabled" fontSize="small" />
-                                                    )}
-                                                    <Typography>{user.name}</Typography>
+                                                <Box display="flex" alignItems="center" gap={2}>
+                                                    <Avatar
+                                                        sx={{
+                                                            bgcolor: getAvatarColor(user.name),
+                                                            fontWeight: "bold",
+                                                        }}
+                                                    >
+                                                        {getInitials(user.name)}
+                                                    </Avatar>
+                                                    <Typography variant="body2" fontWeight={600}>
+                                                        {user.name}
+                                                    </Typography>
                                                 </Box>
                                             </TableCell>
-                                            <TableCell>{user.email}</TableCell>
                                             <TableCell>
-                                                <Chip
-                                                    label={user.isAdmin ? "Admin" : "User"}
-                                                    color={user.isAdmin ? "primary" : "default"}
-                                                    size="small"
-                                                    onClick={() => handleToggleAdmin(user)}
-                                                    sx={{ cursor: "pointer" }}
-                                                />
+                                                <Box display="flex" alignItems="center" gap={1}>
+                                                    <Email fontSize="small" color="action" />
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        {user.email}
+                                                    </Typography>
+                                                </Box>
                                             </TableCell>
                                             <TableCell>
-                                                {new Date(user.createdAt).toLocaleDateString()}
+                                                {user.isAdmin ? (
+                                                    <Chip
+                                                        icon={<AdminPanelSettings fontSize="small" />}
+                                                        label="Administrator"
+                                                        color="error"
+                                                        size="small"
+                                                        sx={{ fontWeight: 600 }}
+                                                    />
+                                                ) : (
+                                                    <Chip
+                                                        icon={<Person fontSize="small" />}
+                                                        label="Customer"
+                                                        color="default"
+                                                        size="small"
+                                                        sx={{ fontWeight: 600 }}
+                                                    />
+                                                )}
                                             </TableCell>
-                                            <TableCell align="right">
-                                                <IconButton
-                                                    color="error"
-                                                    size="small"
-                                                    onClick={() => handleDeleteClick(user)}
-                                                >
-                                                    <Delete />
-                                                </IconButton>
+                                            <TableCell>
+                                                <Typography variant="body2">
+                                                    {new Date(user.createdAt).toLocaleDateString()}
+                                                </Typography>
                                             </TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
-                                            <Typography color="text.secondary">
+                                        <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
+                                            <People sx={{ fontSize: 60, color: "#9e9e9e", mb: 2 }} />
+                                            <Typography variant="h6" color="text.secondary">
                                                 {searchQuery ? "No users found" : "No users yet"}
                                             </Typography>
                                         </TableCell>
@@ -227,33 +277,13 @@ export default function UsersPage() {
                         </Table>
                     </TableContainer>
 
-                    <Box mt={2}>
+                    <Box mt={3}>
                         <Typography variant="body2" color="text.secondary">
-                            Total: {filteredUsers.length} user{filteredUsers.length !== 1 ? "s" : ""}
+                            Showing <strong>{filteredUsers.length}</strong> of <strong>{users.length}</strong> users
                         </Typography>
                     </Box>
                 </CardContent>
             </Card>
-
-            {/* Delete Confirmation Dialog */}
-            <Dialog
-                open={deleteDialog.open}
-                onClose={() => setDeleteDialog({ open: false, user: null })}
-            >
-                <DialogTitle>Delete User</DialogTitle>
-                <DialogContent>
-                    Are you sure you want to delete <strong>{deleteDialog.user?.name}</strong>? This
-                    action cannot be undone.
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setDeleteDialog({ open: false, user: null })}>
-                        Cancel
-                    </Button>
-                    <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
         </Box>
     );
 }

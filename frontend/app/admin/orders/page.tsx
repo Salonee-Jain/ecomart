@@ -24,8 +24,17 @@ import {
     InputLabel,
     IconButton,
     Tooltip,
+    Grid,
+    Button,
 } from "@mui/material";
-import { Search, Visibility } from "@mui/icons-material";
+import {
+    Search,
+    Visibility,
+    LocalShipping,
+    CheckCircle,
+    ShoppingCart,
+    AttachMoney,
+} from "@mui/icons-material";
 import { getAllOrders, markOrderDelivered } from "@/services/admin.service";
 import { useRouter } from "next/navigation";
 
@@ -35,8 +44,9 @@ interface Order {
     totalPrice: number;
     isPaid: boolean;
     isDelivered: boolean;
+    isCancelled?: boolean;
     createdAt: string;
-    items: any[];
+    orderItems: any[];
 }
 
 export default function AdminOrdersPage() {
@@ -48,6 +58,13 @@ export default function AdminOrdersPage() {
     const [success, setSuccess] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
+
+    const [stats, setStats] = useState({
+        totalOrders: 0,
+        totalRevenue: 0,
+        pendingDelivery: 0,
+        delivered: 0,
+    });
 
     useEffect(() => {
         fetchOrders();
@@ -82,6 +99,18 @@ export default function AdminOrdersPage() {
             const data = await getAllOrders();
             setOrders(data);
             setFilteredOrders(data);
+
+            // Calculate stats
+            const totalRev = data.reduce((sum: number, order: Order) => sum + order.totalPrice, 0);
+            const delivered = data.filter((o: Order) => o.isDelivered).length;
+            const pendingDelivery = data.filter((o: Order) => o.isPaid && !o.isDelivered).length;
+
+            setStats({
+                totalOrders: data.length,
+                totalRevenue: totalRev,
+                pendingDelivery,
+                delivered,
+            });
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to load orders");
         } finally {
@@ -96,58 +125,119 @@ export default function AdminOrdersPage() {
 
         try {
             await markOrderDelivered(orderId);
-            setSuccess("Order marked as delivered");
+            setSuccess("✅ Order marked as delivered!");
             fetchOrders();
             setTimeout(() => setSuccess(""), 3000);
         } catch (err: any) {
-            setError(err.response?.data?.message || "Failed to update order");
+            setError(err.response?.data?.message || "Failed to mark as delivered");
         }
     };
 
     if (loading) {
         return (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-                <CircularProgress />
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+                <CircularProgress size={60} />
             </Box>
         );
     }
 
+    const statsCards = [
+        {
+            title: "Total Orders",
+            value: stats.totalOrders,
+            icon: <ShoppingCart sx={{ fontSize: 40, color: "#1976d2" }} />,
+            color: "#e3f2fd",
+        },
+        {
+            title: "Total Revenue",
+            value: `$${stats.totalRevenue.toFixed(2)}`,
+            icon: <AttachMoney sx={{ fontSize: 40, color: "#4caf50" }} />,
+            color: "#e8f5e9",
+        },
+        {
+            title: "Pending Delivery",
+            value: stats.pendingDelivery,
+            icon: <LocalShipping sx={{ fontSize: 40, color: "#ff9800" }} />,
+            color: "#fff3e0",
+        },
+        {
+            title: "Delivered",
+            value: stats.delivered,
+            icon: <CheckCircle sx={{ fontSize: 40, color: "#9c27b0" }} />,
+            color: "#f3e5f5",
+        },
+    ];
+
     return (
-        <Box>
-            <Typography variant="h4" fontWeight={700} gutterBottom>
-                Order Management
-            </Typography>
-            <Typography variant="body1" color="text.secondary" mb={4}>
-                Manage and track all orders
+        <Box sx={{ p: 3 }}>
+            <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ mb: 3 }}>
+                📦 Order Management
             </Typography>
 
             {error && (
-                <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>
+                <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError("")}>
                     {error}
                 </Alert>
             )}
 
             {success && (
-                <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess("")}>
+                <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess("")}>
                     {success}
                 </Alert>
             )}
 
-            <Card>
+            {/* Stats Cards */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+                {statsCards.map((stat, index) => (
+                    <Grid item xs={12} sm={6} md={3} key={index}>
+                        <Card
+                            elevation={2}
+                            sx={{
+                                background: `linear-gradient(135deg, ${stat.color} 0%, white 100%)`,
+                                borderRadius: 3,
+                                transition: "transform 0.2s, box-shadow 0.2s",
+                                "&:hover": {
+                                    transform: "translateY(-4px)",
+                                    boxShadow: 6,
+                                },
+                            }}
+                        >
+                            <CardContent>
+                                <Box display="flex" justifyContent="space-between" alignItems="center">
+                                    <Box>
+                                        <Typography color="text.secondary" variant="body2" gutterBottom>
+                                            {stat.title}
+                                        </Typography>
+                                        <Typography variant="h4" fontWeight="bold">
+                                            {stat.value}
+                                        </Typography>
+                                    </Box>
+                                    {stat.icon}
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
+
+            {/* Orders Table */}
+            <Card elevation={3} sx={{ borderRadius: 3 }}>
                 <CardContent>
-                    <Box display="flex" gap={2} mb={3}>
+                    {/* Search and Filters */}
+                    <Box display="flex" gap={2} mb={3} flexWrap="wrap">
                         <TextField
                             fullWidth
-                            placeholder="Search by order ID or customer..."
+                            placeholder="🔍 Search by Order ID, customer name, or email..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <Search />
+                                        <Search color="action" />
                                     </InputAdornment>
                                 ),
                             }}
+                            sx={{ flex: 1, minWidth: 300 }}
                         />
                         <FormControl sx={{ minWidth: 200 }}>
                             <InputLabel>Status</InputLabel>
@@ -157,23 +247,26 @@ export default function AdminOrdersPage() {
                                 onChange={(e) => setStatusFilter(e.target.value)}
                             >
                                 <MenuItem value="">All Orders</MenuItem>
-                                <MenuItem value="pending">Pending</MenuItem>
-                                <MenuItem value="paid">Processing</MenuItem>
-                                <MenuItem value="delivered">Delivered</MenuItem>
+                                <MenuItem value="pending">⏳ Pending Payment</MenuItem>
+                                <MenuItem value="paid">💳 Paid</MenuItem>
+                                <MenuItem value="delivered">✅ Delivered</MenuItem>
                             </Select>
                         </FormControl>
                     </Box>
 
-                    <TableContainer component={Paper} variant="outlined">
+                    {/* Table */}
+                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
                         <Table>
-                            <TableHead>
+                            <TableHead sx={{ bgcolor: "#f5f5f5" }}>
                                 <TableRow>
-                                    <TableCell>Order ID</TableCell>
-                                    <TableCell>Customer</TableCell>
-                                    <TableCell>Total</TableCell>
-                                    <TableCell>Status</TableCell>
-                                    <TableCell>Date</TableCell>
-                                    <TableCell align="center">Actions</TableCell>
+                                    <TableCell><strong>Order ID</strong></TableCell>
+                                    <TableCell><strong>Customer</strong></TableCell>
+                                    <TableCell><strong>Items</strong></TableCell>
+                                    <TableCell><strong>Total</strong></TableCell>
+                                    <TableCell><strong>Payment</strong></TableCell>
+                                    <TableCell><strong>Delivery</strong></TableCell>
+                                    <TableCell><strong>Date</strong></TableCell>
+                                    <TableCell align="right"><strong>Actions</strong></TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -182,7 +275,10 @@ export default function AdminOrdersPage() {
                                         <TableRow
                                             key={order._id}
                                             hover
-                                            sx={{ cursor: "pointer" }}
+                                            sx={{
+                                                cursor: "pointer",
+                                                "&:hover": { bgcolor: "#fafafa" },
+                                            }}
                                             onClick={() => router.push(`/orders/${order._id}`)}
                                         >
                                             <TableCell>
@@ -191,7 +287,7 @@ export default function AdminOrdersPage() {
                                                         variant="body2"
                                                         fontFamily="monospace"
                                                         fontSize="0.75rem"
-                                                        sx={{ cursor: 'pointer' }}
+                                                        sx={{ color: "#1976d2", cursor: "pointer" }}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             navigator.clipboard.writeText(order._id);
@@ -202,57 +298,83 @@ export default function AdminOrdersPage() {
                                                 </Tooltip>
                                             </TableCell>
                                             <TableCell>
-                                                <Typography>{order.user?.name || "Unknown"}</Typography>
+                                                <Typography variant="body2" fontWeight={600}>
+                                                    {order.user?.name || "Guest"}
+                                                </Typography>
                                                 <Typography variant="caption" color="text.secondary">
                                                     {order.user?.email}
                                                 </Typography>
                                             </TableCell>
-                                            <TableCell fontWeight={600}>${order.totalPrice.toFixed(2)}</TableCell>
+                                            <TableCell>
+                                                <Typography variant="body2">
+                                                    {order.orderItems?.length || 0} items
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography variant="body2" fontWeight={700} color="success.main">
+                                                    ${order.totalPrice.toFixed(2)}
+                                                </Typography>
+                                            </TableCell>
                                             <TableCell>
                                                 <Chip
-                                                    label={
-                                                        order.isDelivered
-                                                            ? "Delivered"
-                                                            : order.isPaid
-                                                                ? "Processing"
-                                                                : "Pending"
-                                                    }
-                                                    color={
-                                                        order.isDelivered
-                                                            ? "success"
-                                                            : order.isPaid
-                                                                ? "info"
-                                                                : "warning"
-                                                    }
+                                                    label={order.isPaid ? "✓ Paid" : "⏳ Pending"}
+                                                    color={order.isPaid ? "success" : "warning"}
                                                     size="small"
-                                                    onClick={(e) => {
-                                                        if (!order.isDelivered && order.isPaid) {
-                                                            handleMarkDelivered(order._id, e);
-                                                        }
-                                                    }}
-                                                    sx={{
-                                                        cursor: !order.isDelivered && order.isPaid ? "pointer" : "default",
-                                                    }}
+                                                    sx={{ fontWeight: 600 }}
                                                 />
                                             </TableCell>
-                                            <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
-                                            <TableCell align="center">
-                                                <IconButton
+                                            <TableCell>
+                                                <Chip
+                                                    label={order.isDelivered ? "✓ Delivered" : "📦 Pending"}
+                                                    color={order.isDelivered ? "success" : "default"}
                                                     size="small"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        router.push(`/orders/${order._id}`);
-                                                    }}
-                                                >
-                                                    <Visibility />
-                                                </IconButton>
+                                                    sx={{ fontWeight: 600 }}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography variant="body2">
+                                                    {new Date(order.createdAt).toLocaleDateString()}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell align="right">
+                                                <Box display="flex" gap={1} justifyContent="flex-end">
+                                                    <Tooltip title="View Details">
+                                                        <IconButton
+                                                            size="small"
+                                                            color="primary"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                router.push(`/orders/${order._id}`);
+                                                            }}
+                                                        >
+                                                            <Visibility fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    {order.isPaid && !order.isDelivered && (
+                                                        <Tooltip title="Mark as Delivered">
+                                                            <IconButton
+                                                                size="small"
+                                                                color="success"
+                                                                onClick={(e) => handleMarkDelivered(order._id, e)}
+                                                                sx={{
+                                                                    bgcolor: "#4caf50",
+                                                                    color: "white",
+                                                                    "&:hover": { bgcolor: "#45a049" },
+                                                                }}
+                                                            >
+                                                                <LocalShipping fontSize="small" />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    )}
+                                                </Box>
                                             </TableCell>
                                         </TableRow>
                                     ))
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                                            <Typography color="text.secondary">
+                                        <TableCell colSpan={8} align="center" sx={{ py: 8 }}>
+                                            <ShoppingCart sx={{ fontSize: 60, color: "#9e9e9e", mb: 2 }} />
+                                            <Typography variant="h6" color="text.secondary">
                                                 {searchQuery || statusFilter ? "No orders found" : "No orders yet"}
                                             </Typography>
                                         </TableCell>
@@ -262,9 +384,12 @@ export default function AdminOrdersPage() {
                         </Table>
                     </TableContainer>
 
-                    <Box mt={2}>
+                    <Box mt={3} display="flex" justifyContent="space-between" alignItems="center">
                         <Typography variant="body2" color="text.secondary">
-                            Total: {filteredOrders.length} order{filteredOrders.length !== 1 ? "s" : ""}
+                            Showing <strong>{filteredOrders.length}</strong> of <strong>{orders.length}</strong> orders
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                            💡 Click on rows to view order details
                         </Typography>
                     </Box>
                 </CardContent>

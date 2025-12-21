@@ -374,7 +374,6 @@ backend/
 
 * `POST /api/payment/create-intent` - Create payment intent
 * `POST /api/payment/confirm/:paymentIntentId` - Confirm payment (Testing)
-* `POST /api/payment/webhook` - Stripe webhook handler
 * `GET /api/payment/:id` - Get payment details
 
 ### Users

@@ -82,7 +82,7 @@ export default function CartPage() {
 
     setUpdating(productId);
     setError("");
-    
+
     try {
       const response = await fetch(`http://localhost:5000/api/cart/${productId}`, {
         method: "PUT",
@@ -100,7 +100,7 @@ export default function CartPage() {
 
       const data = await response.json();
       console.log("Update response:", data); // Debug log
-      
+
       // Set items from the updated cart
       setCartItems(data.items || []);
       setSuccessMessage("Cart updated");
@@ -129,7 +129,7 @@ export default function CartPage() {
     if (type === 'item' && productId) {
       setUpdating(productId);
       setError("");
-      
+
       try {
         const response = await fetch(`http://localhost:5000/api/cart/${productId}`, {
           method: "DELETE",
@@ -158,7 +158,7 @@ export default function CartPage() {
             },
           })
         );
-        
+
         await Promise.all(deletePromises);
         await fetchCart();
         setSuccessMessage("Cart cleared");
@@ -220,255 +220,314 @@ export default function CartPage() {
   }
 
   return (
-    <Container sx={{ py: 8 }}>
-      <Button
-        startIcon={<ArrowBack />}
-        onClick={() => router.push("/products")}
-        sx={{ mb: 3 }}
-      >
-        Continue Shopping
-      </Button>
+    <Box sx={{
+      background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+      minHeight: "calc(100vh - 64px)",
+      py: 6,
+    }}>
+      <Container sx={{ py: 2 }}>
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={() => router.push("/products")}
+          sx={{
+            mb: 3,
+            fontWeight: 600,
+            borderRadius: 2,
+          }}
+        >
+          Continue Shopping
+        </Button>
 
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4} flexWrap="wrap" gap={2}>
-        <Box display="flex" alignItems="center" gap={2}>
-          <Typography variant="h3" fontWeight={800}>
-            Shopping Cart
-          </Typography>
-          <Chip 
-            label={`${cartItems.length} ${cartItems.length === 1 ? 'item' : 'items'}`}
-            color="primary"
-            size="medium"
-          />
+        <Box
+          sx={{
+            mb: 4,
+            p: 3,
+            borderRadius: 3,
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 2,
+            boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
+          }}
+        >
+          <Box display="flex" alignItems="center" gap={2}>
+            <ShoppingCart sx={{ fontSize: 40 }} />
+            <Typography variant="h3" fontWeight={900}>
+              🛒 Shopping Cart
+            </Typography>
+            <Chip
+              label={`${cartItems.length} ${cartItems.length === 1 ? 'item' : 'items'}`}
+              sx={{
+                bgcolor: "rgba(255, 255, 255, 0.2)",
+                color: "white",
+                fontWeight: 700,
+              }}
+              size="medium"
+            />
+          </Box>
+          {cartItems.length > 0 && (
+            <Button
+              variant="contained"
+              onClick={clearCart}
+              startIcon={<Delete />}
+              sx={{
+                bgcolor: "rgba(255, 255, 255, 0.2)",
+                "&:hover": {
+                  bgcolor: "rgba(255, 255, 255, 0.3)",
+                },
+                fontWeight: 600,
+                borderRadius: 2,
+              }}
+            >
+              Clear Cart
+            </Button>
+          )}
         </Box>
-        {cartItems.length > 0 && (
-          <Button 
-            variant="outlined" 
-            color="error" 
-            onClick={clearCart}
-            startIcon={<Delete />}
-            size="small"
-          >
-            Clear Cart
-          </Button>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>
+            {error}
+          </Alert>
         )}
-      </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>
-          {error}
-        </Alert>
-      )}
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={8}>
+            {cartItems.map((item, index) => (
+              <Card
+                key={item.product}
+                elevation={3}
+                sx={{
+                  mb: 2,
+                  opacity: updating === item.product ? 0.6 : 1,
+                  transition: 'all 0.3s ease',
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  background: "white",
+                  '&:hover': {
+                    boxShadow: "0 8px 25px rgba(0,0,0,0.12)",
+                    transform: "translateY(-2px)",
+                  },
+                  animation: `fadeIn 0.4s ease ${index * 0.08}s backwards`,
+                  '@keyframes fadeIn': {
+                    from: { opacity: 0, transform: 'translateY(20px)' },
+                    to: { opacity: 1, transform: 'translateY(0)' },
+                  },
+                  position: "relative",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: "3px",
+                    background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
+                  },
+                }}
+              >
+                <CardContent>
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={3} sm={2} md={1.5}>
+                      <Box
+                        component="img"
+                        src={item.image}
+                        alt={item.name}
+                        sx={{
+                          width: "100%",
+                          maxWidth: 80,
+                          height: "auto",
+                          aspectRatio: "1/1",
+                          borderRadius: 1,
+                          objectFit: "cover",
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={9} sm={10} md={4.5}>
+                      <Typography variant="h6" gutterBottom noWrap>
+                        {item.name}
+                      </Typography>
+                      <Typography variant="h6" color="primary" fontWeight="bold">
+                        ${(item.price || 0).toFixed(2)}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" display="block">
+                        SKU: {item.sku}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={7} sm={6} md={3}>
+                      <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            updateQuantity(item.product, item.quantity - 1)
+                          }
+                          disabled={
+                            item.quantity <= 1 || updating === item.product
+                          }
+                          color="primary"
+                          sx={{
+                            border: '1px solid',
+                            borderColor: 'primary.main',
+                          }}
+                        >
+                          <Remove fontSize="small" />
+                        </IconButton>
+                        <Typography fontWeight="bold" minWidth={40} textAlign="center" fontSize="1.1rem">
+                          {item.quantity}
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            updateQuantity(item.product, item.quantity + 1)
+                          }
+                          disabled={updating === item.product}
+                          color="primary"
+                          sx={{
+                            border: '1px solid',
+                            borderColor: 'primary.main',
+                          }}
+                        >
+                          <Add fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={3} sm={4} md={2}>
+                      <Typography variant="h6" fontWeight="bold" textAlign="right">
+                        ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={2} sm={2} md={1}>
+                      <IconButton
+                        color="error"
+                        onClick={() => removeItem(item.product)}
+                        disabled={updating === item.product}
+                        size="small"
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            ))}
+          </Grid>
 
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={8}>
-          {cartItems.map((item, index) => (
-            <Card 
-              key={item.product} 
-              sx={{ 
-                mb: 2,
-                opacity: updating === item.product ? 0.6 : 1,
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  boxShadow: 3,
-                },
-                animation: `fadeIn 0.3s ease ${index * 0.1}s backwards`,
-                '@keyframes fadeIn': {
-                  from: { opacity: 0, transform: 'translateY(20px)' },
-                  to: { opacity: 1, transform: 'translateY(0)' },
-                },
+          <Grid item xs={12} md={4}>
+            <Card
+              elevation={4}
+              sx={{
+                position: 'sticky',
+                top: 80,
+                borderRadius: 3,
+                background: "white",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
               }}
             >
               <CardContent>
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={3} sm={2} md={1.5}>
-                    <Box
-                      component="img"
-                      src={item.image}
-                      alt={item.name}
-                      sx={{
-                        width: "100%",
-                        maxWidth: 80,
-                        height: "auto",
-                        aspectRatio: "1/1",
-                        borderRadius: 1,
-                        objectFit: "cover",
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={9} sm={10} md={4.5}>
-                    <Typography variant="h6" gutterBottom noWrap>
-                      {item.name}
-                    </Typography>
-                    <Typography variant="h6" color="primary" fontWeight="bold">
-                      ${(item.price || 0).toFixed(2)}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" display="block">
-                      SKU: {item.sku}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={7} sm={6} md={3}>
-                    <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
-                      <IconButton
-                        size="small"
-                        onClick={() =>
-                          updateQuantity(item.product, item.quantity - 1)
-                        }
-                        disabled={
-                          item.quantity <= 1 || updating === item.product
-                        }
-                        color="primary"
-                        sx={{ 
-                          border: '1px solid',
-                          borderColor: 'primary.main',
-                        }}
-                      >
-                        <Remove fontSize="small" />
-                      </IconButton>
-                      <Typography fontWeight="bold" minWidth={40} textAlign="center" fontSize="1.1rem">
-                        {item.quantity}
-                      </Typography>
-                      <IconButton
-                        size="small"
-                        onClick={() =>
-                          updateQuantity(item.product, item.quantity + 1)
-                        }
-                        disabled={updating === item.product}
-                        color="primary"
-                        sx={{ 
-                          border: '1px solid',
-                          borderColor: 'primary.main',
-                        }}
-                      >
-                        <Add fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={3} sm={4} md={2}>
-                    <Typography variant="h6" fontWeight="bold" textAlign="right">
-                      ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={2} sm={2} md={1}>
-                    <IconButton
-                      color="error"
-                      onClick={() => removeItem(item.product)}
-                      disabled={updating === item.product}
-                      size="small"
-                    >
-                      <Delete />
-                    </IconButton>
-                  </Grid>
-                </Grid>
+                <Typography variant="h5" fontWeight={700} mb={2}>
+                  Order Summary
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+
+                <Box display="flex" justifyContent="space-between" mb={1.5}>
+                  <Typography color="text.secondary">
+                    Subtotal ({cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}):
+                  </Typography>
+                  <Typography fontWeight="medium">
+                    ${calculateTotal().toFixed(2)}
+                  </Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between" mb={1.5}>
+                  <Typography color="text.secondary">Shipping:</Typography>
+                  <Chip
+                    label="FREE"
+                    size="small"
+                    color="success"
+                    sx={{ fontWeight: 'bold' }}
+                  />
+                </Box>
+                <Box display="flex" justifyContent="space-between" mb={2}>
+                  <Typography color="text.secondary">Tax (10%):</Typography>
+                  <Typography fontWeight="medium">
+                    ${(calculateTotal() * 0.1).toFixed(2)}
+                  </Typography>
+                </Box>
+
+                <Divider sx={{ my: 2 }} />
+
+                <Box display="flex" justifyContent="space-between" mb={3}>
+                  <Typography variant="h6" fontWeight="bold">
+                    Total:
+                  </Typography>
+                  <Typography variant="h5" fontWeight="bold" color="primary">
+                    ${(calculateTotal() * 1.1).toFixed(2)}
+                  </Typography>
+                </Box>
+
+                <Button
+                  variant="contained"
+                  fullWidth
+                  size="large"
+                  onClick={handleCheckout}
+                  startIcon={<ShoppingCart />}
+                  sx={{
+                    mb: 2,
+                    py: 1.5,
+                    fontSize: '1.1rem',
+                  }}
+                >
+                  Proceed to Checkout
+                </Button>
+
+                <Box sx={{ mt: 2, p: 2, bgcolor: 'success.lighter', borderRadius: 1 }}>
+                  <Typography variant="body2" color="success.dark" textAlign="center">
+                    🎉 You're eligible for FREE shipping!
+                  </Typography>
+                </Box>
               </CardContent>
             </Card>
-          ))}
+          </Grid>
         </Grid>
 
-        <Grid item xs={12} md={4}>
-          <Card sx={{ position: 'sticky', top: 80 }}>
-            <CardContent>
-              <Typography variant="h5" fontWeight={700} mb={2}>
-                Order Summary
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
+        <Dialog
+          open={deleteDialog.open}
+          onClose={handleDeleteCancel}
+          aria-labelledby="delete-dialog-title"
+        >
+          <DialogTitle id="delete-dialog-title">
+            {deleteDialog.type === 'all' ? 'Clear Cart?' : 'Remove Item?'}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              {deleteDialog.type === 'all'
+                ? `Are you sure you want to remove all ${cartItems.length} items from your cart? This action cannot be undone.`
+                : 'Are you sure you want to remove this item from your cart?'}
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDeleteCancel} color="primary">
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteConfirm}
+              color="error"
+              variant="contained"
+              autoFocus
+            >
+              {deleteDialog.type === 'all' ? 'Clear Cart' : 'Remove'}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-              <Box display="flex" justifyContent="space-between" mb={1.5}>
-                <Typography color="text.secondary">
-                  Subtotal ({cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}):
-                </Typography>
-                <Typography fontWeight="medium">
-                  ${calculateTotal().toFixed(2)}
-                </Typography>
-              </Box>
-              <Box display="flex" justifyContent="space-between" mb={1.5}>
-                <Typography color="text.secondary">Shipping:</Typography>
-                <Chip 
-                  label="FREE" 
-                  size="small" 
-                  color="success" 
-                  sx={{ fontWeight: 'bold' }}
-                />
-              </Box>
-              <Box display="flex" justifyContent="space-between" mb={2}>
-                <Typography color="text.secondary">Tax (10%):</Typography>
-                <Typography fontWeight="medium">
-                  ${(calculateTotal() * 0.1).toFixed(2)}
-                </Typography>
-              </Box>
-
-              <Divider sx={{ my: 2 }} />
-
-              <Box display="flex" justifyContent="space-between" mb={3}>
-                <Typography variant="h6" fontWeight="bold">
-                  Total:
-                </Typography>
-                <Typography variant="h5" fontWeight="bold" color="primary">
-                  ${(calculateTotal() * 1.1).toFixed(2)}
-                </Typography>
-              </Box>
-
-              <Button
-                variant="contained"
-                fullWidth
-                size="large"
-                onClick={handleCheckout}
-                startIcon={<ShoppingCart />}
-                sx={{ 
-                  mb: 2,
-                  py: 1.5,
-                  fontSize: '1.1rem',
-                }}
-              >
-                Proceed to Checkout
-              </Button>
-
-              <Box sx={{ mt: 2, p: 2, bgcolor: 'success.lighter', borderRadius: 1 }}>
-                <Typography variant="body2" color="success.dark" textAlign="center">
-                  🎉 You're eligible for FREE shipping!
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      <Dialog
-        open={deleteDialog.open}
-        onClose={handleDeleteCancel}
-        aria-labelledby="delete-dialog-title"
-      >
-        <DialogTitle id="delete-dialog-title">
-          {deleteDialog.type === 'all' ? 'Clear Cart?' : 'Remove Item?'}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            {deleteDialog.type === 'all'
-              ? `Are you sure you want to remove all ${cartItems.length} items from your cart? This action cannot be undone.`
-              : 'Are you sure you want to remove this item from your cart?'}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDeleteCancel} color="primary">
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleDeleteConfirm} 
-            color="error" 
-            variant="contained"
-            autoFocus
-          >
-            {deleteDialog.type === 'all' ? 'Clear Cart' : 'Remove'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Snackbar
-        open={!!successMessage}
-        autoHideDuration={3000}
-        onClose={() => setSuccessMessage("")}
-        message={successMessage}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      />
-    </Container>
+        <Snackbar
+          open={!!successMessage}
+          autoHideDuration={3000}
+          onClose={() => setSuccessMessage("")}
+          message={successMessage}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        />
+      </Container>
+    </Box>
   );
 }

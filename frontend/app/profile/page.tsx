@@ -220,287 +220,332 @@ export default function ProfilePage() {
   }
 
   return (
-    <Container sx={{ py: 8 }}>
-      <Typography variant="h3" fontWeight={800} mb={4}>
-        My Profile
-      </Typography>
+    <Box sx={{
+      background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+      minHeight: "calc(100vh - 64px)",
+      py: 6,
+    }}>
+      <Container sx={{ py: 2 }}>
+        <Box
+          sx={{
+            mb: 4,
+            p: 3,
+            borderRadius: 3,
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
+          }}
+        >
+          <Person sx={{ fontSize: 40 }} />
+          <Typography variant="h3" fontWeight={900}>
+            👤 My Profile
+          </Typography>
+        </Box>
 
-      <Grid container spacing={3}>
-        {/* Profile Summary Card */}
-        <Grid item xs={12} md={4}>
-          <Card>
-            <CardContent sx={{ textAlign: "center", py: 4 }}>
-              <Avatar
+        <Grid container spacing={3}>
+          {/* Profile Summary Card */}
+          <Grid item xs={12} md={4}>
+            <Card>
+              <CardContent sx={{ textAlign: "center", py: 4 }}>
+                <Avatar
+                  sx={{
+                    width: 100,
+                    height: 100,
+                    mx: "auto",
+                    mb: 2,
+                    bgcolor: "primary.main",
+                    fontSize: "2.5rem",
+                  }}
+                >
+                  {user.name.charAt(0).toUpperCase()}
+                </Avatar>
+                <Typography variant="h5" fontWeight={700} gutterBottom>
+                  {user.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  {user.email}
+                </Typography>
+                {user.isAdmin && (
+                  <Chip label="Admin" color="primary" size="small" sx={{ mt: 1 }} />
+                )}
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="body2" color="text.secondary">
+                  Member since: {new Date(user.createdAt).toLocaleDateString()}
+                </Typography>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  fullWidth
+                  sx={{ mt: 3 }}
+                  onClick={handleLogout}
+                >
+                  Logout
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Quick Stats */}
+            <Card sx={{ mt: 3 }}>
+              <CardContent>
+                <Typography variant="h6" fontWeight={700} mb={2}>
+                  Quick Stats
+                </Typography>
+                <Box display="flex" justifyContent="space-between" mb={2}>
+                  <Typography variant="body2" color="text.secondary">
+                    Total Orders:
+                  </Typography>
+                  <Typography variant="body2" fontWeight="bold">
+                    {orders.length}
+                  </Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between" mb={2}>
+                  <Typography variant="body2" color="text.secondary">
+                    Completed:
+                  </Typography>
+                  <Typography variant="body2" fontWeight="bold">
+                    {orders.filter((o) => o.isDelivered).length}
+                  </Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between">
+                  <Typography variant="body2" color="text.secondary">
+                    Total Spent:
+                  </Typography>
+                  <Typography variant="body2" fontWeight="bold" color="primary">
+                    ${orders.reduce((sum, o) => sum + o.totalPrice, 0).toFixed(2)}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Profile Details & Orders */}
+          <Grid item xs={12} md={8}>
+            <Card
+              elevation={4}
+              sx={{
+                borderRadius: 3,
+                overflow: "hidden",
+                background: "white",
+              }}
+            >
+              <Tabs
+                value={tabValue}
+                onChange={(_, newValue) => setTabValue(newValue)}
                 sx={{
-                  width: 100,
-                  height: 100,
-                  mx: "auto",
-                  mb: 2,
-                  bgcolor: "primary.main",
-                  fontSize: "2.5rem",
+                  borderBottom: 1,
+                  borderColor: "divider",
+                  bgcolor: "rgba(102, 126, 234, 0.05)",
+                  "& .MuiTab-root": {
+                    fontWeight: 600,
+                    textTransform: "none",
+                    fontSize: "1rem",
+                  },
+                  "& .Mui-selected": {
+                    color: "#667eea !important",
+                  },
+                  "& .MuiTabs-indicator": {
+                    backgroundColor: "#667eea",
+                    height: 3,
+                  },
                 }}
               >
-                {user.name.charAt(0).toUpperCase()}
-              </Avatar>
-              <Typography variant="h5" fontWeight={700} gutterBottom>
-                {user.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                {user.email}
-              </Typography>
-              {user.isAdmin && (
-                <Chip label="Admin" color="primary" size="small" sx={{ mt: 1 }} />
-              )}
-              <Divider sx={{ my: 2 }} />
-              <Typography variant="body2" color="text.secondary">
-                Member since: {new Date(user.createdAt).toLocaleDateString()}
-              </Typography>
-              <Button
-                variant="outlined"
-                color="error"
-                fullWidth
-                sx={{ mt: 3 }}
-                onClick={handleLogout}
-              >
-                Logout
-              </Button>
-            </CardContent>
-          </Card>
 
-          {/* Quick Stats */}
-          <Card sx={{ mt: 3 }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} mb={2}>
-                Quick Stats
-              </Typography>
-              <Box display="flex" justifyContent="space-between" mb={2}>
-                <Typography variant="body2" color="text.secondary">
-                  Total Orders:
-                </Typography>
-                <Typography variant="body2" fontWeight="bold">
-                  {orders.length}
-                </Typography>
-              </Box>
-              <Box display="flex" justifyContent="space-between" mb={2}>
-                <Typography variant="body2" color="text.secondary">
-                  Completed:
-                </Typography>
-                <Typography variant="body2" fontWeight="bold">
-                  {orders.filter((o) => o.isDelivered).length}
-                </Typography>
-              </Box>
-              <Box display="flex" justifyContent="space-between">
-                <Typography variant="body2" color="text.secondary">
-                  Total Spent:
-                </Typography>
-                <Typography variant="body2" fontWeight="bold" color="primary">
-                  ${orders.reduce((sum, o) => sum + o.totalPrice, 0).toFixed(2)}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+                <Tab label="Account Settings" />
+                <Tab label="Change Password" />
+                <Tab label="Order History" />
+              </Tabs>
 
-        {/* Profile Details & Orders */}
-        <Grid item xs={12} md={8}>
-          <Card>
-            <Tabs
-              value={tabValue}
-              onChange={(_, newValue) => setTabValue(newValue)}
-              sx={{ borderBottom: 1, borderColor: "divider" }}
-            >
-              <Tab label="Account Settings" />
-              <Tab label="Change Password" />
-              <Tab label="Order History" />
-            </Tabs>
+              <CardContent sx={{ p: 3 }}>
+                {error && (
+                  <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError("")}>
+                    {error}
+                  </Alert>
+                )}
+                {success && (
+                  <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess("")}>
+                    {success}
+                  </Alert>
+                )}
 
-            <CardContent sx={{ p: 3 }}>
-              {error && (
-                <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError("")}>
-                  {error}
-                </Alert>
-              )}
-              {success && (
-                <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess("")}>
-                  {success}
-                </Alert>
-              )}
-
-              {/* Account Settings Tab */}
-              {tabValue === 0 && (
-                <Box>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                    <Typography variant="h6" fontWeight={700}>
-                      Account Information
-                    </Typography>
-                    {!editing ? (
-                      <Button
-                        startIcon={<Edit />}
-                        variant="outlined"
-                        onClick={() => setEditing(true)}
-                      >
-                        Edit
-                      </Button>
-                    ) : (
-                      <Box display="flex" gap={1}>
+                {/* Account Settings Tab */}
+                {tabValue === 0 && (
+                  <Box>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+                      <Typography variant="h6" fontWeight={700}>
+                        Account Information
+                      </Typography>
+                      {!editing ? (
                         <Button
-                          startIcon={<Save />}
-                          variant="contained"
-                          onClick={handleUpdateProfile}
-                        >
-                          Save
-                        </Button>
-                        <Button
-                          startIcon={<Cancel />}
+                          startIcon={<Edit />}
                           variant="outlined"
-                          onClick={() => {
-                            setEditing(false);
-                            setFormData({
-                              ...formData,
-                              name: user.name,
-                              email: user.email,
-                            });
-                          }}
+                          onClick={() => setEditing(true)}
                         >
-                          Cancel
+                          Edit
+                        </Button>
+                      ) : (
+                        <Box display="flex" gap={1}>
+                          <Button
+                            startIcon={<Save />}
+                            variant="contained"
+                            onClick={handleUpdateProfile}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            startIcon={<Cancel />}
+                            variant="outlined"
+                            onClick={() => {
+                              setEditing(false);
+                              setFormData({
+                                ...formData,
+                                name: user.name,
+                                email: user.email,
+                              });
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </Box>
+                      )}
+                    </Box>
+
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Name"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          disabled={!editing}
+                          InputProps={{
+                            startAdornment: <Person sx={{ mr: 1, color: "text.secondary" }} />,
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Email"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          disabled={!editing}
+                          InputProps={{
+                            startAdornment: <Email sx={{ mr: 1, color: "text.secondary" }} />,
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
+
+                {/* Change Password Tab */}
+                {tabValue === 1 && (
+                  <Box>
+                    <Typography variant="h6" fontWeight={700} mb={3}>
+                      Change Password
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="New Password"
+                          name="newPassword"
+                          type="password"
+                          value={formData.newPassword}
+                          onChange={handleInputChange}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Confirm New Password"
+                          name="confirmPassword"
+                          type="password"
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Button
+                          variant="contained"
+                          onClick={handleChangePassword}
+                          fullWidth
+                        >
+                          Change Password
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
+
+                {/* Order History Tab */}
+                {tabValue === 2 && (
+                  <Box>
+                    <Typography variant="h6" fontWeight={700} mb={3}>
+                      Recent Orders
+                    </Typography>
+                    {orders.length === 0 ? (
+                      <Box textAlign="center" py={4}>
+                        <ShoppingBag sx={{ fontSize: 60, color: "text.secondary", mb: 2 }} />
+                        <Typography color="text.secondary">No orders yet</Typography>
+                        <Button
+                          variant="contained"
+                          sx={{ mt: 2 }}
+                          onClick={() => router.push("/products")}
+                        >
+                          Start Shopping
                         </Button>
                       </Box>
+                    ) : (
+                      orders.slice(0, 5).map((order) => (
+                        <Card key={order._id} sx={{ mb: 2 }}>
+                          <CardContent>
+                            <Box display="flex" justifyContent="space-between" alignItems="center">
+                              <Box>
+                                <Typography variant="body2" fontWeight="bold">
+                                  Order #{order._id.slice(-8).toUpperCase()}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  {new Date(order.createdAt).toLocaleDateString()}
+                                </Typography>
+                              </Box>
+                              <Box textAlign="right">
+                                <Typography variant="body2" fontWeight="bold" color="primary">
+                                  ${order.totalPrice.toFixed(2)}
+                                </Typography>
+                                <Chip
+                                  label={order.isDelivered ? "Delivered" : order.isPaid ? "Processing" : "Pending"}
+                                  size="small"
+                                  color={order.isDelivered ? "success" : order.isPaid ? "info" : "warning"}
+                                />
+                              </Box>
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      ))
+                    )}
+                    {orders.length > 5 && (
+                      <Button
+                        variant="outlined"
+                        fullWidth
+                        onClick={() => router.push("/orders")}
+                      >
+                        View All Orders
+                      </Button>
                     )}
                   </Box>
-
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        disabled={!editing}
-                        InputProps={{
-                          startAdornment: <Person sx={{ mr: 1, color: "text.secondary" }} />,
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        disabled={!editing}
-                        InputProps={{
-                          startAdornment: <Email sx={{ mr: 1, color: "text.secondary" }} />,
-                        }}
-                      />
-                    </Grid>
-                  </Grid>
-                </Box>
-              )}
-
-              {/* Change Password Tab */}
-              {tabValue === 1 && (
-                <Box>
-                  <Typography variant="h6" fontWeight={700} mb={3}>
-                    Change Password
-                  </Typography>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="New Password"
-                        name="newPassword"
-                        type="password"
-                        value={formData.newPassword}
-                        onChange={handleInputChange}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Confirm New Password"
-                        name="confirmPassword"
-                        type="password"
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Button
-                        variant="contained"
-                        onClick={handleChangePassword}
-                        fullWidth
-                      >
-                        Change Password
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </Box>
-              )}
-
-              {/* Order History Tab */}
-              {tabValue === 2 && (
-                <Box>
-                  <Typography variant="h6" fontWeight={700} mb={3}>
-                    Recent Orders
-                  </Typography>
-                  {orders.length === 0 ? (
-                    <Box textAlign="center" py={4}>
-                      <ShoppingBag sx={{ fontSize: 60, color: "text.secondary", mb: 2 }} />
-                      <Typography color="text.secondary">No orders yet</Typography>
-                      <Button
-                        variant="contained"
-                        sx={{ mt: 2 }}
-                        onClick={() => router.push("/products")}
-                      >
-                        Start Shopping
-                      </Button>
-                    </Box>
-                  ) : (
-                    orders.slice(0, 5).map((order) => (
-                      <Card key={order._id} sx={{ mb: 2 }}>
-                        <CardContent>
-                          <Box display="flex" justifyContent="space-between" alignItems="center">
-                            <Box>
-                              <Typography variant="body2" fontWeight="bold">
-                                Order #{order._id.slice(-8).toUpperCase()}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {new Date(order.createdAt).toLocaleDateString()}
-                              </Typography>
-                            </Box>
-                            <Box textAlign="right">
-                              <Typography variant="body2" fontWeight="bold" color="primary">
-                                ${order.totalPrice.toFixed(2)}
-                              </Typography>
-                              <Chip
-                                label={order.isDelivered ? "Delivered" : order.isPaid ? "Processing" : "Pending"}
-                                size="small"
-                                color={order.isDelivered ? "success" : order.isPaid ? "info" : "warning"}
-                              />
-                            </Box>
-                          </Box>
-                        </CardContent>
-                      </Card>
-                    ))
-                  )}
-                  {orders.length > 5 && (
-                    <Button
-                      variant="outlined"
-                      fullWidth
-                      onClick={() => router.push("/orders")}
-                    >
-                      View All Orders
-                    </Button>
-                  )}
-                </Box>
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-      </Grid>
-    </Container>
+      </Container>
+    </Box>
   );
 }

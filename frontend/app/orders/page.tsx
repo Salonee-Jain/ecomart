@@ -21,6 +21,7 @@ import {
   CheckCircle,
   Cancel,
   Visibility,
+  ArrowBack,
 } from "@mui/icons-material";
 import { getToken, isAuthenticated } from "@/lib/auth";
 
@@ -135,97 +136,185 @@ export default function OrdersPage() {
   }
 
   return (
-    <Container sx={{ py: 8 }}>
-      <Typography variant="h3" fontWeight={800} mb={4}>
-        My Orders
-      </Typography>
+    <Box sx={{
+      background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+      minHeight: "calc(100vh - 64px)",
+      py: 6,
+    }}>
+      <Container sx={{ py: 2 }}>
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={() => router.push("/profile")}
+          sx={{
+            mb: 3,
+            fontWeight: 600,
+            borderRadius: 2,
+          }}
+        >
+          Back to Profile
+        </Button>
 
-      <Grid container spacing={3}>
-        {orders.map((order) => (
-          <Grid item xs={12} key={order._id}>
-            <Card
-              sx={{
-                "&:hover": { boxShadow: 6 },
-                transition: "all 0.3s ease",
-              }}
-            >
-              <CardContent>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={8}>
-                    <Box display="flex" alignItems="center" gap={1} mb={2}>
-                      <Typography variant="h6" fontWeight="bold">
-                        Order #{order._id.slice(-8).toUpperCase()}
-                      </Typography>
-                      <Chip
-                        icon={getStatusIcon(order)}
-                        label={getStatusText(order)}
-                        color={getStatusColor(order)}
-                        size="small"
-                      />
-                    </Box>
+        <Box
+          sx={{
+            mb: 4,
+            p: 3,
+            borderRadius: 3,
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "white",
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
+          }}
+        >
+          <ShoppingBag sx={{ fontSize: 40 }} />
+          <Typography variant="h3" fontWeight={900}>
+            📝 My Orders
+          </Typography>
+        </Box>
 
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Placed on: {new Date(order.createdAt).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </Typography>
+        <Grid container spacing={3}>
+          {orders.map((order, index) => (
+            <Grid item xs={12} key={order._id}>
+              <Card
+                elevation={3}
+                sx={{
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  background: "white",
+                  position: "relative",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: "3px",
+                    background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
+                  },
+                  "&:hover": {
+                    boxShadow: "0 8px 25px rgba(0,0,0,0.12)",
+                    transform: "translateY(-2px)",
+                  },
+                  transition: "all 0.3s ease",
+                  animation: `fadeIn 0.4s ease ${index * 0.1}s backwards`,
+                  "@keyframes fadeIn": {
+                    from: { opacity: 0, transform: "translateY(20px)" },
+                    to: { opacity: 1, transform: "translateY(0)" },
+                  },
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Grid container spacing={3} alignItems="stretch">
+                    <Grid item xs={12} sm={8}>
+                      <Box display="flex" flexDirection="column" height="100%">
+                        <Box display="flex" alignItems="center" gap={1} mb={2}>
+                          <Typography variant="h6" fontWeight="bold">
+                            Order #{order._id.slice(-8).toUpperCase()}
+                          </Typography>
+                          <Chip
+                            icon={getStatusIcon(order)}
+                            label={getStatusText(order)}
+                            color={getStatusColor(order)}
+                            size="small"
+                          />
+                        </Box>
 
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Payment: {order.paymentMethod.toUpperCase()}
-                    </Typography>
-
-                    <Divider sx={{ my: 2 }} />
-
-                    <Box>
-                      {order.orderItems.slice(0, 2).map((item, idx) => (
-                        <Typography key={idx} variant="body2" gutterBottom>
-                          • {item.name} x {item.quantity}
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          📅 Placed on: {new Date(order.createdAt).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
                         </Typography>
-                      ))}
-                      {order.orderItems.length > 2 && (
-                        <Typography variant="body2" color="text.secondary">
-                          +{order.orderItems.length - 2} more items
-                        </Typography>
-                      )}
-                    </Box>
-                  </Grid>
 
-                  <Grid item xs={12} sm={4}>
-                    <Box
-                      display="flex"
-                      flexDirection="column"
-                      alignItems={{ xs: "flex-start", sm: "flex-end" }}
-                      height="100%"
-                      justifyContent="space-between"
-                    >
-                      <Box textAlign={{ xs: "left", sm: "right" }} mb={2}>
-                        <Typography variant="body2" color="text.secondary">
-                          Total Amount
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          💳 Payment: {order.paymentMethod.toUpperCase()}
                         </Typography>
-                        <Typography variant="h5" fontWeight="bold" color="primary">
-                          ${order.totalPrice.toFixed(2)}
-                        </Typography>
+
+                        <Divider sx={{ my: 2 }} />
+
+                        <Box flexGrow={1}>
+                          <Typography variant="subtitle2" fontWeight="600" gutterBottom>
+                            Items:
+                          </Typography>
+                          {order.orderItems.slice(0, 2).map((item, idx) => (
+                            <Typography key={idx} variant="body2" gutterBottom>
+                              • {item.name} x {item.quantity}
+                            </Typography>
+                          ))}
+                          {order.orderItems.length > 2 && (
+                            <Typography variant="body2" color="text.secondary">
+                              +{order.orderItems.length - 2} more items
+                            </Typography>
+                          )}
+                        </Box>
                       </Box>
+                    </Grid>
 
-                      <Button
-                        variant="outlined"
-                        startIcon={<Visibility />}
-                        onClick={() => router.push(`/orders/${order._id}`)}
-                        fullWidth
-                        sx={{ maxWidth: { sm: 200 } }}
+                    <Grid item xs={12} sm={4}>
+                      <Box
+                        display="flex"
+                        flexDirection="column"
+                        alignItems={{ xs: "flex-start", sm: "flex-end" }}
+                        height="100%"
+                        justifyContent="space-between"
+                        gap={2}
                       >
-                        View Details
-                      </Button>
-                    </Box>
+                        <Box
+                          textAlign={{ xs: "left", sm: "right" }}
+                          sx={{
+                            p: 2,
+                            borderRadius: 2,
+                            background: "linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%)",
+                            border: "1px solid rgba(102, 126, 234, 0.2)",
+                            width: "100%",
+                          }}
+                        >
+                          <Typography variant="body2" color="text.secondary" gutterBottom>
+                            Total Amount
+                          </Typography>
+                          <Typography
+                            variant="h5"
+                            fontWeight="bold"
+                            sx={{
+                              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                              backgroundClip: "text",
+                              WebkitBackgroundClip: "text",
+                              WebkitTextFillColor: "transparent",
+                            }}
+                          >
+                            ${order.totalPrice.toFixed(2)}
+                          </Typography>
+                        </Box>
+
+                        <Button
+                          variant="outlined"
+                          startIcon={<Visibility />}
+                          onClick={() => router.push(`/orders/${order._id}`)}
+                          fullWidth
+                          sx={{
+                            borderRadius: 2,
+                            borderColor: "#667eea",
+                            color: "#667eea",
+                            fontWeight: 600,
+                            "&:hover": {
+                              borderColor: "#764ba2",
+                              background: "rgba(102, 126, 234, 0.08)",
+                            },
+                          }}
+                        >
+                          View Details
+                        </Button>
+                      </Box>
+                    </Grid>
                   </Grid>
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-    </Container>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+    </Box>
   );
 }

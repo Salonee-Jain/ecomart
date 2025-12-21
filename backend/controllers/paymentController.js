@@ -58,64 +58,6 @@ export const createPaymentIntent = async (req, res) => {
   });
 };
 
-// @desc   Handle Stripe webhook events
-// @route  POST /api/payment/webhook
-// @access Public (Stripe)
-export const handleWebhook = async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-  } catch (err) {
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  // Handle the event
-  switch (event.type) {
-    case 'payment_intent.succeeded':
-      const paymentIntent = event.data.object;
-      
-      // Update payment status in database
-      await Payment.findOneAndUpdate(
-        { paymentIntentId: paymentIntent.id },
-        { 
-          status: 'succeeded',
-          paymentMethod: paymentIntent.payment_method
-        }
-      );
-      
-      break;
-
-    case 'payment_intent.payment_failed':
-      const failedIntent = event.data.object;
-      
-      await Payment.findOneAndUpdate(
-        { paymentIntentId: failedIntent.id },
-        { status: 'failed' }
-      );
-      
-      break;
-
-    case 'payment_intent.canceled':
-      const canceledIntent = event.data.object;
-      
-      await Payment.findOneAndUpdate(
-        { paymentIntentId: canceledIntent.id },
-        { status: 'canceled' }
-      );
-      
-      break;
-
-    default:
-      console.log(`Unhandled event type ${event.type}`);
-  }
-
-  res.json({ received: true });
-};
-
 // @desc   Get payment by ID
 // @route  GET /api/payment/:id
 // @access Private
@@ -137,4 +79,45 @@ export const getPaymentById = async (req, res) => {
   }
 
   res.json(payment);
+};
+
+// @desc   Confirm payment intent (Testing/Simulation)
+// @route  POST /api/payment/confirm/:paymentIntentId
+// @access Private
+export const confirmPaymentIntent = async (req, res) => {
+  const { paymentIntentId } = req.params;
+  const { paymentMethod } = req.body;
+
+  try {
+    // Default to test card if no payment method provided
+    const pm = paymentMethod || 'pm_card_visa';
+
+    // Confirm the payment intent
+    const confirmedIntent = await stripe.paymentIntents.confirm(
+      paymentIntentId,
+      { payment_method: pm }
+    );
+
+    // Update payment status in database
+    await Payment.findOneAndUpdate(
+      { paymentIntentId: paymentIntentId },
+      { 
+        status: confirmedIntent.status,
+        paymentMethod: confirmedIntent.payment_method
+      }
+    );
+
+    res.json({
+      success: true,
+      message: "Payment intent confirmed successfully",
+      paymentIntent: {
+        id: confirmedIntent.id,
+        status: confirmedIntent.status,
+        amount: confirmedIntent.amount / 100,
+        currency: confirmedIntent.currency
+      }
+    });
+  } catch (error) {
+    return errorResponse(res, 400, `Failed to confirm payment: ${error.message}`);
+  }
 };

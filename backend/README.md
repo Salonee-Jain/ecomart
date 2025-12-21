@@ -1,19 +1,21 @@
-# 🚀 EcoMart Backend (Node.js + Express + MongoDB + Stripe)
+# 🚀 **EcoMart Backend (Node.js + Express + MongoDB + Stripe + RabbitMQ)**
 
-This backend provides:
+This backend supports:
 
 * 🛒 Cart (MongoDB)
-* 📦 Orders with stock validation
-* 💳 Stripe PaymentIntent integration
-* 🔔 Stripe Webhooks (mark order paid + reduce stock)
+* 📦 Orders + stock validation
+* 💳 Stripe payments (PaymentIntent)
+* 🔔 Stripe webhook (mark order paid + reduce stock)
+* 📧 Email notifications (RabbitMQ + Worker + Nodemailer)
+* 🐰 RabbitMQ for async background jobs
 * 🔐 JWT Authentication
-* 🧱 MongoDB Models (User, Product, Order, Cart, Payment)
+* 🧱 Models: User, Product, Order, Cart, Payment
 
-This README includes **only what you MUST know** to run Stripe payment flow successfully.
+This README contains **exactly what you need** to run the entire flow end-to-end.
 
 ---
 
-## ✅ 1. Install Dependencies
+# ✅ **1. Install Dependencies**
 
 ```bash
 cd backend
@@ -22,9 +24,7 @@ npm install
 
 ---
 
-## ⚙️ 2. Environment Variables
-
-Create `.env`:
+# ⚙️ **2. Create `.env` File**
 
 ```
 PORT=5010
@@ -32,23 +32,80 @@ MONGO_URI=your_mongo_uri
 JWT_SECRET=your_secret
 
 STRIPE_SECRET_KEY=sk_test_xxxxx
-STRIPE_WEBHOOK_SECRET=whsec_xxxxx   # Added after Stripe CLI step
+STRIPE_WEBHOOK_SECRET=whsec_xxxxx   # from Stripe CLI
+
 CLIENT_URL=http://localhost:5173
+
+# Email (Gmail)
+EMAIL_USER=yourgmail@gmail.com
+EMAIL_PASS=your16digitapppassword
+
+# RabbitMQ
+RABBITMQ_URL=amqp://admin:admin@localhost:5672
 ```
 
 ---
 
-## 🚀 3. Start Backend
+# 🐰 **3. RabbitMQ Setup (Docker)**
+
+We are using **Docker Compose**, not `docker run`.
+
+### Start RabbitMQ:
 
 ```bash
+docker compose up -d
+```
+
+Check container:
+
+```bash
+docker ps
+```
+
+RabbitMQ dashboard:
+
+👉 [http://localhost:15672](http://localhost:15672)
+Login:
+
+```
+admin / admin    (if you configured this)
+or
+guest / guest    (default)
+```
+
+---
+
+# 🚀 **4. Start Backend + Worker (TWO terminals required)**
+
+### Terminal 1 — Start Backend API
+
+```bash
+cd backend
 npm run dev
 ```
 
+### Terminal 2 — Start Worker
+
+Worker runs in background to process payment emails:
+
+```bash
+cd backend
+node workers/emailWorker.js
+```
+
+Expected logs:
+
+```
+🐰 RabbitMQ connected
+📦 Worker connected to MongoDB
+🐰 Worker started, listening for email jobs
+```
+
 ---
 
-## 🔔 4. Stripe Webhook Setup (IMPORTANT)
+# 🔔 **5. Stripe Webhook Setup (IMPORTANT)**
 
-Stripe webhooks MUST be defined **before** `express.json()`.
+Stripe webhook route **must be BEFORE** `express.json()`.
 
 In `app.js`:
 
@@ -64,9 +121,10 @@ app.use(express.json());
 
 ---
 
-## 🧪 5. Stripe CLI Setup (Local Testing)
+# 🧪 **6. Stripe CLI Setup (Local Payment Testing)**
 
 Install Stripe CLI:
+
 [https://stripe.com/docs/stripe-cli](https://stripe.com/docs/stripe-cli)
 
 Login:
@@ -75,19 +133,19 @@ Login:
 stripe login
 ```
 
-Start webhook listener:
+Start webhook forwarding:
 
 ```bash
 stripe listen --forward-to localhost:5010/api/payment/webhook
 ```
 
-Terminal prints:
+Output shows:
 
 ```
 Webhook signing secret: whsec_xxxxx
 ```
 
-Add it to `.env`:
+Put this inside `.env`:
 
 ```
 STRIPE_WEBHOOK_SECRET=whsec_xxxxx
@@ -97,9 +155,9 @@ Restart backend.
 
 ---
 
-## 💳 6. Create PaymentIntent (via API)
+# 💳 **7. Create PaymentIntent (API)**
 
-Send POST request:
+POST request:
 
 ```
 POST /api/payment/create-intent
@@ -110,23 +168,23 @@ Response:
 ```json
 {
   "clientSecret": "pi_XXX_secret_YYY",
-  "paymentId": "payment_db_id"
+  "paymentIntentId": "pi_XXX"
 }
 ```
 
-Copy **paymentIntentId** from Stripe response.
+Copy **paymentIntentId**.
 
 ---
 
-## 🎉 7. Simulate Payment Success
+# 🎉 **8. Confirm Payment (Simulate Stripe Success)**
 
-Run:
+Using Stripe’s test card:
 
 ```bash
 stripe payment_intents confirm pi_XXX --payment-method pm_card_visa
 ```
 
-If success, Stripe automatically sends:
+This triggers:
 
 ```
 payment_intent.succeeded
@@ -135,76 +193,127 @@ payment_intent.succeeded
 Your webhook will:
 
 ✔ mark order as paid
-✔ reduce stock
-✔ update payment status in DB
+✔ reduce product stock
+✔ insert payment record (if implemented)
+✔ send job to RabbitMQ
+
+Worker will:
+
+✔ consume job
+✔ load order + user
+✔ send confirmation email
 
 ---
 
-## 📘 8. Verify
+# 📧 **9. Gmail Email Setup (Must Use App Password)**
 
-### Order:
+Enable 2-Step Verification:
+
+👉 [https://myaccount.google.com/security](https://myaccount.google.com/security)
+
+Generate App Password:
+
+👉 [https://myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+
+Use this in `.env`:
+
+```
+EMAIL_USER=yourgmail@gmail.com
+EMAIL_PASS=abcdefghijklmnop
+```
+
+Restart worker:
+
+```bash
+node workers/emailWorker.js
+```
+
+---
+
+# 📘 **10. Verify Payment Flow**
+
+### Check order:
 
 ```
 GET /api/orders/:id
 ```
 
-Expect:
+Should show:
 
 ```json
 {
-  "isPaid": true,
-  "paidAt": "2025-12-21T..."
+  "isPaid": true
 }
 ```
 
-### Product:
+### Check product stock:
 
 ```
 GET /api/products/:id
 ```
 
-Stock reduced.
+Stock decreased.
 
-### Payment:
+### Check email worker logs:
 
 ```
-GET /api/payment/:id
+📩 Received job: {...}
+📧 Email sent to: user@email.com
 ```
-
-Status should be `"succeeded"`.
 
 ---
 
-## 🎯 Done
+# 🐳 **11. Docker Commands You Used**
 
-Your backend is now fully configured for **local Stripe payments**, **webhooks**, **cart**, **orders**, and **inventory**.
+Start RabbitMQ:
+
+```bash
+docker compose up -d
+```
+
+Stop:
+
+```bash
+docker compose down
+```
+
+Restart:
+
+```bash
+docker compose restart
+```
+
+View logs:
+
+```bash
+docker logs ecomart-rabbitmq
+```
 
 ---
 
-## 📂 Project Structure
+# 🧱 **12. Backend Structure (Final Project)**
 
 ```
 backend/
-├── config/
-│   ├── db.js           # MongoDB connection
-│   └── stripe.js       # Stripe configuration
 ├── controllers/
 │   ├── authController.js
 │   ├── cartController.js
 │   ├── orderController.js
 │   ├── paymentController.js
-│   ├── productController.js
-│   └── userController.js
+│   └── stripeWebhookController.js
+│
 ├── middleware/
 │   ├── authMiddleware.js
 │   ├── adminMiddleware.js
 │   └── errorMiddleware.js
+│
 ├── models/
 │   ├── User.js
 │   ├── Product.js
 │   ├── Order.js
 │   ├── Cart.js
 │   └── Payment.js
+│
 ├── routes/
 │   ├── authRoutes.js
 │   ├── cartRoutes.js
@@ -212,52 +321,64 @@ backend/
 │   ├── paymentRoutes.js
 │   ├── productRoutes.js
 │   └── userRoutes.js
+│
 ├── utils/
 │   ├── generateToken.js
-│   └── errorResponse.js
-├── app.js
+│   ├── errorResponse.js
+│   ├── rabbitmq.js
+│   ├── sendEmail.js
+│   └── paymentEmailTemplate.js
+│
+├── workers/
+│   └── emailWorker.js
+│
 ├── server.js
-└── package.json
+└── app.js
 ```
 
 ---
 
-## 🔑 API Endpoints
+# 🎯 **13. API Endpoints Summary**
 
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
-- `POST /api/auth/logout` - Logout user
+### Auth
+
+* `POST /api/auth/register`
+* `POST /api/auth/login`
+* `POST /api/auth/logout`
 
 ### Products
-- `GET /api/products` - Get all products (with filters)
-- `GET /api/products/:id` - Get single product
-- `POST /api/products` - Create product (Admin)
-- `PUT /api/products/:id` - Update product (Admin)
-- `DELETE /api/products/:id` - Delete product (Admin)
+
+* `GET /api/products`
+* `GET /api/products/:id`
+* `POST /api/products` (Admin)
+* `PUT /api/products/:id`
+* `DELETE /api/products/:id`
 
 ### Cart
-- `GET /api/cart` - Get user's cart
-- `POST /api/cart` - Add item to cart
-- `PUT /api/cart/:productId` - Update cart item
-- `DELETE /api/cart/:productId` - Remove item from cart
-- `DELETE /api/cart` - Clear cart
-- `POST /api/cart/merge` - Merge guest cart
+
+* `GET /api/cart`
+* `POST /api/cart`
+* `PUT /api/cart/:productId`
+* `DELETE /api/cart/:productId`
+* `DELETE /api/cart`
+* `POST /api/cart/merge`
 
 ### Orders
-- `POST /api/orders` - Create new order
-- `GET /api/orders/my` - Get user's orders
-- `GET /api/orders/:id` - Get order by ID
-- `GET /api/orders` - Get all orders (Admin)
-- `PUT /api/orders/:id/paid` - Mark order as paid
-- `PUT /api/orders/:id/deliver` - Mark order as delivered (Admin)
-- `PUT /api/orders/:id/cancel` - Cancel order
+
+* `POST /api/orders`
+* `GET /api/orders/my`
+* `GET /api/orders/:id`
+* `GET /api/orders` (Admin)
 
 ### Payment
-- `POST /api/payment/create-intent` - Create payment intent
-- `POST /api/payment/webhook` - Stripe webhook handler
-- `GET /api/payment/:id` - Get payment details
+
+* `POST /api/payment/create-intent` - Create payment intent
+* `POST /api/payment/confirm/:paymentIntentId` - Confirm payment (Testing)
+* `POST /api/payment/webhook` - Stripe webhook handler
+* `GET /api/payment/:id` - Get payment details
 
 ### Users
-- `GET /api/users` - Get all users (Admin)
-- `GET /api/users/:id` - Get user by ID (Admin)
+
+* `GET /api/users` (Admin)
+* `GET /api/users/:id` (Admin)
+

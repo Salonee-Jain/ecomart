@@ -192,7 +192,7 @@ export default function CheckoutPage() {
 
   const handleStripePayment = async (order: any) => {
     try {
-      const response = await fetch("http://localhost:5000/api/payments/create-checkout-session", {
+      const response = await fetch("http://localhost:5000/api/payment/create-intent", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -200,8 +200,6 @@ export default function CheckoutPage() {
         },
         body: JSON.stringify({
           orderId: order._id,
-          amount: calculateTotal(),
-          currency: "usd",
         }),
       });
 
@@ -209,10 +207,10 @@ export default function CheckoutPage() {
         throw new Error("Failed to create payment session");
       }
 
-      const { sessionUrl } = await response.json();
+      const { clientSecret, stripePaymentIntentId } = await response.json();
       
-      // Redirect to Stripe checkout
-      window.location.href = sessionUrl;
+      // Redirect to payment page with client secret
+      router.push(`/payment?clientSecret=${clientSecret}&orderId=${order._id}`);
     } catch (err: any) {
       setError(`Order created but payment failed: ${err.message}`);
       setProcessing(false);

@@ -20,3 +20,9 @@ export const removeToken = () => {
 export const isAuthenticated = (): boolean => {
   return !!getToken();
 };
+
+export const logout = () => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("token");
+  }
+};

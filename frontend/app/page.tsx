@@ -15,6 +15,7 @@ import {
 import useProducts from "@/hooks/useProducts";
 import AddToCartButton from "@/components/AddToCartButton";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Product {
   _id: string;
@@ -25,6 +26,7 @@ interface Product {
 }
 
 export default function HomePage() {
+  const router = useRouter();
   const { products, loading, error } = useProducts({ limit: 6 });
 
   if (loading) {
@@ -75,7 +77,14 @@ export default function HomePage() {
                   height: "100%",
                   display: "flex",
                   flexDirection: "column",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    boxShadow: 6,
+                    transform: "translateY(-4px)",
+                  },
                 }}
+                onClick={() => router.push(`/products/${p._id}`)}
               >
                 <CardMedia
                   component="img"
@@ -96,7 +105,9 @@ export default function HomePage() {
                   >
                     ${p.price.toFixed(2)}
                   </Typography>
-                  <AddToCartButton productId={p._id} />
+                  <Box onClick={(e) => e.stopPropagation()}>
+                    <AddToCartButton productId={p._id} />
+                  </Box>
                 </CardContent>
               </Card>
             </Grid>

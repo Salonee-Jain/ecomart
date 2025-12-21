@@ -1,5 +1,15 @@
 "use client";
 
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  TextField,
+  Typography,
+  Paper,
+  Alert,
+} from "@mui/material";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -19,7 +29,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const {data} = await login({ email, password });
+      const data = await login({ email, password });
       localStorage.setItem("token", data.token);
       router.push("/");
     } catch {
@@ -30,74 +40,119 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white/80 backdrop-blur border border-gray-100 shadow-xl p-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back 🌱
-          </h1>
-          <p className="text-gray-600 text-sm mt-2">
-            Login to continue shopping sustainably
-          </p>
-        </div>
+    <Grid container minHeight="100vh">
+      {/* LEFT BRAND PANEL */}
+      <Grid
+        item
+        xs={false}
+        md={6}
+        sx={{
+          display: { xs: "none", md: "flex" },
+          background:
+            "linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%)",
+          color: "white",
+          alignItems: "center",
+          px: 8,
+        }}
+      >
+        <Box maxWidth={480}>
+          <Typography variant="h3" fontWeight={800}>
+            EcoMart 🌱
+          </Typography>
+          <Typography mt={3} fontSize={18} color="rgba(255,255,255,0.9)">
+            Thoughtfully designed sustainable products that look good
+            and do good.
+          </Typography>
+        </Box>
+      </Grid>
 
-        {/* Error */}
-        {error && (
-          <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition"
-            />
-          </div>
-
-          <button
-            disabled={loading}
-            className="w-full rounded-lg bg-green-600 text-white py-2.5 font-semibold tracking-wide hover:bg-green-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+      {/* RIGHT LOGIN PANEL */}
+      <Grid
+        item
+        xs={12}
+        md={6}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Container maxWidth="sm">
+          <Paper
+            elevation={4}
+            sx={{
+              p: 5,
+              borderRadius: 3,
+            }}
           >
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
-        </form>
+            <Typography variant="h4" fontWeight={700}>
+              Sign in
+            </Typography>
+            <Typography color="text.secondary" mt={1}>
+              Welcome back — continue to EcoMart
+            </Typography>
 
-        {/* Footer */}
-        <p className="mt-8 text-center text-sm text-gray-600">
-          Don’t have an account?{" "}
-          <Link
-            href="/register"
-            className="font-semibold text-green-600 hover:underline"
-          >
-            Create one
-          </Link>
-        </p>
-      </div>
-    </div>
+            {error && (
+              <Alert severity="error" sx={{ mt: 3 }}>
+                {error}
+              </Alert>
+            )}
+
+            <Box component="form" mt={4} onSubmit={handleSubmit}>
+              <TextField
+                label="Email"
+                type="email"
+                fullWidth
+                margin="normal"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+
+              <TextField
+                label="Password"
+                type="password"
+                fullWidth
+                margin="normal"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+
+              <Button
+                type="submit"
+                fullWidth
+                size="large"
+                variant="contained"
+                sx={{
+                  mt: 3,
+                  py: 1.4,
+                  fontWeight: 600,
+                  backgroundColor: "#2e7d32",
+                  "&:hover": {
+                    backgroundColor: "#1b5e20",
+                  },
+                }}
+                disabled={loading}
+              >
+                {loading ? "Signing in..." : "Sign In"}
+              </Button>
+            </Box>
+
+            <Typography textAlign="center" mt={4} fontSize={14}>
+              Don’t have an account?{" "}
+              <Link
+                href="/register"
+                style={{
+                  color: "#2e7d32",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                }}
+              >
+                Create one
+              </Link>
+            </Typography>
+          </Paper>
+        </Container>
+      </Grid>
+    </Grid>
   );
 }

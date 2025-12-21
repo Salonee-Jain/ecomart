@@ -1,8 +1,17 @@
 "use client";
 
+import {
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+  Paper,
+  Alert,
+} from "@mui/material";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { register } from "@/services/auth.service";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -11,61 +20,62 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-
     try {
       const data = await register({ name, email, password });
       localStorage.setItem("token", data.token);
       router.push("/");
-    } catch (err: any) {
+    } catch {
       setError("Registration failed");
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-16">
-      <h1 className="text-2xl font-bold mb-6">Register</h1>
+    <Container maxWidth="sm" sx={{ py: 10 }}>
+      <Paper sx={{ p: 5 }}>
+        <Typography variant="h4" fontWeight={700}>
+          Create Account
+        </Typography>
 
-      {error && (
-        <p className="bg-red-100 text-red-600 p-2 mb-4 rounded">
-          {error}
-        </p>
-      )}
+        {error && (
+          <Alert severity="error" sx={{ mt: 3 }}>
+            {error}
+          </Alert>
+        )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Name"
-          className="w-full border p-2 rounded"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
+        <Box component="form" mt={4} onSubmit={submit}>
+          <TextField
+            label="Name"
+            fullWidth
+            margin="normal"
+            onChange={(e) => setName(e.target.value)}
+          />
+          <TextField
+            label="Email"
+            fullWidth
+            margin="normal"
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <TextField
+            label="Password"
+            type="password"
+            fullWidth
+            margin="normal"
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full border p-2 rounded"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full border p-2 rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-
-        <button className="w-full bg-green-600 text-white py-2 rounded">
-          Register
-        </button>
-      </form>
-    </div>
+          <Button
+            fullWidth
+            variant="contained"
+            size="large"
+            sx={{ mt: 3 }}
+            type="submit"
+          >
+            Register
+          </Button>
+        </Box>
+      </Paper>
+    </Container>
   );
 }

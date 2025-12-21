@@ -1,12 +1,8 @@
-import "@/styles/globals.css";
-
-
-
-import Navbar from "@/components/Navbar";
+import ClientProviders from "@/components/ClientProviders";
 
 export const metadata = {
   title: "EcoMart",
-  description: "Eco-friendly ecommerce store",
+  description: "Sustainable shopping platform",
 };
 
 export default function RootLayout({
@@ -17,10 +13,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Navbar />
-        <main className="max-w-7xl mx-auto p-4">
-          {children}
-        </main>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );

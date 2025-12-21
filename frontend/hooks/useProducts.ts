@@ -1,15 +1,20 @@
 "use client";
-import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
 
-export default function ProtectedRoute({ children }: any) {
-  const { user } = useAuth();
-  const router = useRouter();
+import { useEffect, useState } from "react";
+import { getProducts } from "@/services/product.service";
 
-  if (!user) {
-    router.push("/login");
-    return null;
-  }
+const useProducts = () => {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  return children;
-}
+  useEffect(() => {
+    getProducts().then((p) => {
+      let products = p.products;
+      setProducts(products);
+    }).finally(() => setLoading(false));
+  }, []);
+
+  return { products, loading };
+};
+
+export default useProducts;

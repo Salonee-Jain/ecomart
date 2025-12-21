@@ -88,4 +88,5 @@ export class ProductController {
   async deleteProduct(@Param('id') id: string) {
     return this.productService.deleteProduct(id);
   }
+
 }

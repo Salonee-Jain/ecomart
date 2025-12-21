@@ -1,51 +1,60 @@
 "use client";
 
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+  Button,
+} from "@mui/material";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Navbar() {
-    const { user, loading } = useAuth();
+  const { user } = useAuth();
 
-    return (
-        <nav className="border-b p-4 flex justify-between">
-            <Link href="/" className="font-bold text-green-600">
-                EcoMart
-            </Link>
+  return (
+    <AppBar
+      position="sticky"
+      elevation={0}
+      sx={{
+        backgroundColor: "white",
+        borderBottom: "1px solid #eee",
+      }}
+    >
+      <Toolbar sx={{ justifyContent: "space-between" }}>
+        <Typography
+          variant="h6"
+          fontWeight={800}
+          color="primary"
+          component={Link}
+          href="/"
+          sx={{ textDecoration: "none" }}
+        >
+          EcoMart
+        </Typography>
 
-            {!loading && (
-                <div className="space-x-4">
-                    <Link href="/cart">Cart</Link>
+        <Box>
+          <Button component={Link} href="/cart">
+            Cart
+          </Button>
 
-                    {user ? (
-                        <>
-                            <Link href="/orders">Orders</Link>
-                            {user.isAdmin && <Link href="/admin/products">Admin</Link>}
-                            <button
-                                className="ml-4 text-red-600"
-                                onClick={() => {
-                                    localStorage.removeItem("token");
-                                    window.location.href = "/login";
-                                }}
-                            >
-                                Logout
-                            </button>
-                        </>
-                    ) : (
-                        <>
-                            <Link href="/login">Login</Link>
-                            <Link href="/register">Register</Link>
-                            <button
-                                onClick={() => {
-                                    localStorage.removeItem("token");
-                                    window.location.href = "/login";
-                                }}
-                            >
-                                Logout
-                            </button>
-                        </>
-                    )}
-                </div>
-            )}
-        </nav>
-    );
+          {user ? (
+            <Button
+              onClick={() => {
+                localStorage.removeItem("token");
+                window.location.href = "/login";
+              }}
+            >
+              Logout
+            </Button>
+          ) : (
+            <Button component={Link} href="/login">
+              Login
+            </Button>
+          )}
+        </Box>
+      </Toolbar>
+    </AppBar>
+  );
 }

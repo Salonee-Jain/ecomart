@@ -7,7 +7,6 @@ export const getProducts = async (params?: {
   maxPrice?: number;
   page?: number;
   limit?: number;
-  sort?: "latest" | "price_asc" | "price_desc";
 }) => {
   const res = await api.get("/products", { params });
   return res.data;

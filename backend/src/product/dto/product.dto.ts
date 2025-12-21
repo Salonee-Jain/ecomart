@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsString, IsNumber, IsOptional, Min } from 'class-validator';
+import { 
+  IsNotEmpty, 
+  IsString, 
+  IsNumber, 
+  IsOptional, 
+  Min, 
+  IsNumberString 
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateProductDto {
@@ -28,12 +35,18 @@ export class CreateProductDto {
   @IsString()
   category: string;
 
-  @ApiProperty({ description: 'Product description', example: 'Ergonomic wireless mouse with 2.4GHz connection' })
+  @ApiProperty({
+    description: 'Product description',
+    example: 'Ergonomic wireless mouse with 2.4GHz connection'
+  })
   @IsNotEmpty()
   @IsString()
   description: string;
 
-  @ApiProperty({ description: 'Product image URL', example: 'https://example.com/images/mouse.jpg' })
+  @ApiProperty({
+    description: 'Product image URL',
+    example: 'https://example.com/images/mouse.jpg'
+  })
   @IsNotEmpty()
   @IsString()
   image: string;
@@ -77,7 +90,10 @@ export class UpdateProductDto {
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ description: 'Product image URL', example: 'https://example.com/images/mouse.jpg' })
+  @ApiPropertyOptional({
+    description: 'Product image URL',
+    example: 'https://example.com/images/mouse.jpg'
+  })
   @IsOptional()
   @IsString()
   image?: string;
@@ -100,27 +116,32 @@ export class QueryProductDto {
   @IsString()
   category?: string;
 
-  @ApiPropertyOptional({ description: 'Minimum price filter', example: 10 })
+  @ApiPropertyOptional({ description: 'Minimum price filter', example: '10' })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  minPrice?: number;
+  @IsNumberString()
+  minPrice?: string;
 
-  @ApiPropertyOptional({ description: 'Maximum price filter', example: 100 })
+  @ApiPropertyOptional({ description: 'Maximum price filter', example: '100' })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
-  maxPrice?: number;
+  @IsNumberString()
+  maxPrice?: string;
 
-  @ApiPropertyOptional({ description: 'Page number for pagination', example: 1, default: 1 })
+  @ApiPropertyOptional({ description: 'Page number for pagination', example: '1', default: '1' })
   @IsOptional()
-  @IsNumber()
-  @Min(1)
-  page?: number;
+  @IsNumberString()
+  page?: string;
 
-  @ApiPropertyOptional({ description: 'Items per page', example: 10, default: 10 })
+  @ApiPropertyOptional({ description: 'Items per page', example: '10', default: '10' })
   @IsOptional()
-  @IsNumber()
-  @Min(1)
-  limit?: number;
+  @IsNumberString()
+  limit?: string;
+
+  @ApiPropertyOptional({
+    description: 'Sort order',
+    example: 'price_asc',
+    enum: ['latest', 'price_asc', 'price_desc', 'stock', 'alpha']
+  })
+  @IsOptional()
+  @IsString()
+  sort?: string;
 }

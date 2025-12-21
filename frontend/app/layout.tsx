@@ -1,4 +1,5 @@
 import ClientProviders from "@/components/ClientProviders";
+import "./globals.css";
 
 export const metadata = {
   title: "EcoMart",
@@ -12,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body style={{ margin: 0, padding: 0 }}>
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>

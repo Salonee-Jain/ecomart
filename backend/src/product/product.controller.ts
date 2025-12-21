@@ -27,6 +27,13 @@ export class ProductController {
   async getProductAnalytics() {
     return this.productService.getProductAnalytics();
   }
+  
+  @Get('categories')
+  @ApiOperation({ summary: 'Get all product categories' })
+  @ApiResponse({ status: 200, description: 'List of categories' })
+  async getCategories() {
+    return this.productService.getAllCategories();
+}
 
   @Get(':id')
   @ApiOperation({ summary: 'Get product by ID' })
@@ -65,6 +72,7 @@ export class ProductController {
     return this.productService.bulkDeleteProducts(ids);
   }
 
+
   @Put(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth('JWT-auth')
@@ -88,5 +96,7 @@ export class ProductController {
   async deleteProduct(@Param('id') id: string) {
     return this.productService.deleteProduct(id);
   }
+
+
 
 }

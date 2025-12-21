@@ -9,8 +9,8 @@ export class ProductService {
   constructor(@InjectModel(Product.name) private productModel: Model<ProductDocument>) {}
 
   async getProducts(queryDto: QueryProductDto) {
-    const pageSize = queryDto.limit || 10;
-    const page = queryDto.page || 1;
+    const pageSize = Number(queryDto.limit) || 10;
+    const page = Number(queryDto.page) || 1;
 
     // Build query object
     const query: any = {};
@@ -29,12 +29,12 @@ export class ProductService {
     }
 
     // Filter by price range
-    if (queryDto.minPrice || queryDto.maxPrice) {
+    if (Number(queryDto.minPrice) || Number(queryDto.maxPrice)) {
       query.price = {};
-      if (queryDto.minPrice) {
+      if (Number(queryDto.minPrice)) {
         query.price.$gte = Number(queryDto.minPrice);
       }
-      if (queryDto.maxPrice) {
+      if (Number(queryDto.maxPrice)) {
         query.price.$lte = Number(queryDto.maxPrice);
       }
     }
@@ -159,4 +159,9 @@ export class ProductService {
       throw new Error(`Failed to fetch product analytics: ${error.message}`);
     }
   }
+
+  async getAllCategories() {
+  return this.productModel.distinct("category");
+}
+
 }

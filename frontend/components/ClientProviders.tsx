@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeProvider, CssBaseline } from "@mui/material";
+import { ThemeProvider } from "@mui/material";
 import theme from "@/lib/theme";
 import dynamic from "next/dynamic";
 
@@ -15,7 +15,6 @@ export default function ClientProviders({
 }) {
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
       <Navbar />
       {children}
     </ThemeProvider>

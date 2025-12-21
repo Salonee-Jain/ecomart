@@ -6,14 +6,16 @@ import {
   bulkCreateProducts,
   updateProduct,
   deleteProduct,
-  bulkDeleteProducts
+  bulkDeleteProducts,
+  getProductAnalytics
 } from "../controllers/productController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { admin } from "../middleware/adminMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", protect,getProducts);
+router.get("/analytics", protect, admin, getProductAnalytics);
+router.get("/", protect, getProducts);
 router.get("/:id", protect, getProductById);
 
 router.post("/", protect, admin, createProduct);

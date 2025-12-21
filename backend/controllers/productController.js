@@ -141,4 +141,47 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
+// @desc   Get product analytics (Admin)
+// @route  GET /api/products/analytics
+// @access Admin
+export const getProductAnalytics = async (req, res) => {
+  try {
+    const totalProducts = await Product.countDocuments();
+    const outOfStock = await Product.countDocuments({ stock: 0 });
+    const lowStock = await Product.countDocuments({ stock: { $gt: 0, $lt: 10 } });
+
+    // Low stock products
+    const lowStockProducts = await Product.find({ stock: { $lt: 10 } })
+      .sort({ stock: 1 })
+      .limit(10);
+
+    // Category breakdown
+    const categoryStats = await Product.aggregate([
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 },
+          totalStock: { $sum: "$stock" }
+        }
+      },
+      {
+        $sort: { count: -1 }
+      }
+    ]);
+
+    res.json({
+      summary: {
+        total: totalProducts,
+        outOfStock,
+        lowStock,
+        inStock: totalProducts - outOfStock
+      },
+      lowStockProducts,
+      categoryStats
+    });
+  } catch (error) {
+    return errorResponse(res, 500, `Failed to fetch product analytics: ${error.message}`);
+  }
+};
+
 

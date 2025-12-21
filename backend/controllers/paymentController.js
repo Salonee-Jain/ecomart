@@ -81,6 +81,25 @@ export const getPaymentById = async (req, res) => {
   res.json(payment);
 };
 
+// @desc   Get all payments (Admin)
+// @route  GET /api/payment/all
+// @access Admin
+export const getAllPayments = async (req, res) => {
+  try {
+    const payments = await Payment.find()
+      .populate("user", "name email")
+      .populate("order")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      count: payments.length,
+      payments
+    });
+  } catch (error) {
+    return errorResponse(res, 500, `Failed to fetch payments: ${error.message}`);
+  }
+};
+
 // @desc   Confirm payment intent (Testing/Simulation)
 // @route  POST /api/payment/confirm/:paymentIntentId
 // @access Private

@@ -140,6 +140,67 @@ export const markOrderPaid = async (req, res) => {
   res.json(updatedOrder);
 };
 
+// @desc   Get dashboard analytics (Admin)
+// @route  GET /api/orders/analytics
+// @access Admin
+export const getOrderAnalytics = async (req, res) => {
+  try {
+    const totalOrders = await Order.countDocuments();
+    const paidOrders = await Order.find({ isPaid: true });
+    const totalRevenue = paidOrders.reduce((sum, order) => sum + order.totalPrice, 0);
+
+    const pendingOrders = await Order.countDocuments({ isPaid: false, isCancelled: false });
+    const completedOrders = await Order.countDocuments({ isDelivered: true });
+    const cancelledOrders = await Order.countDocuments({ isCancelled: true });
+
+    // Recent orders
+    const recentOrders = await Order.find()
+      .populate("user", "name email")
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    // Monthly revenue (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const monthlyRevenue = await Order.aggregate([
+      {
+        $match: {
+          isPaid: true,
+          paidAt: { $gte: sixMonthsAgo }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$paidAt" },
+            month: { $month: "$paidAt" }
+          },
+          revenue: { $sum: "$totalPrice" },
+          orders: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { "_id.year": 1, "_id.month": 1 }
+      }
+    ]);
+
+    res.json({
+      summary: {
+        totalOrders,
+        totalRevenue: totalRevenue.toFixed(2),
+        pendingOrders,
+        completedOrders,
+        cancelledOrders
+      },
+      recentOrders,
+      monthlyRevenue
+    });
+  } catch (error) {
+    return errorResponse(res, 500, `Failed to fetch analytics: ${error.message}`);
+  }
+};
+
 
 
 // @desc   Cancel order + restock items

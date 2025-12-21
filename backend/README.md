@@ -298,9 +298,12 @@ backend/
 ├── controllers/
 │   ├── authController.js
 │   ├── cartController.js
+│   ├── emailController.js
 │   ├── orderController.js
 │   ├── paymentController.js
-│   └── stripeWebhookController.js
+│   ├── productController.js
+│   ├── stripeWebhookController.js
+│   └── userController.js
 │
 ├── middleware/
 │   ├── authMiddleware.js
@@ -317,6 +320,7 @@ backend/
 ├── routes/
 │   ├── authRoutes.js
 │   ├── cartRoutes.js
+│   ├── emailRoutes.js
 │   ├── orderRoutes.js
 │   ├── paymentRoutes.js
 │   ├── productRoutes.js
@@ -350,9 +354,12 @@ backend/
 
 * `GET /api/products`
 * `GET /api/products/:id`
+* `GET /api/products/analytics` (Admin) - Product analytics & stock levels
 * `POST /api/products` (Admin)
-* `PUT /api/products/:id`
-* `DELETE /api/products/:id`
+* `POST /api/products/bulk` (Admin)
+* `PUT /api/products/:id` (Admin)
+* `DELETE /api/products/:id` (Admin)
+* `DELETE /api/products/bulk` (Admin)
 
 ### Cart
 
@@ -367,17 +374,31 @@ backend/
 
 * `POST /api/orders`
 * `GET /api/orders/my`
+* `GET /api/orders/analytics` (Admin) - Dashboard analytics & revenue
 * `GET /api/orders/:id`
 * `GET /api/orders` (Admin)
+* `PUT /api/orders/:id/paid` (Admin)
+* `PUT /api/orders/:id/delivered` (Admin)
+* `PUT /api/orders/:id/cancel`
 
 ### Payment
 
 * `POST /api/payment/create-intent` - Create payment intent
 * `POST /api/payment/confirm/:paymentIntentId` - Confirm payment (Testing)
+* `POST /api/payment/webhook` - Stripe webhook handler
+* `GET /api/payment/all` (Admin) - Get all payments
 * `GET /api/payment/:id` - Get payment details
 
-### Users
+### Users (Admin)
 
-* `GET /api/users` (Admin)
-* `GET /api/users/:id` (Admin)
+* `GET /api/users` - Get all users
+* `GET /api/users/:id` - Get user by ID
+* `PUT /api/users/:id/role` - Update user admin status
+* `DELETE /api/users/:id` - Delete user
+
+### Email (Testing)
+
+* `POST /api/email/test` - Test email configuration
+* `POST /api/email/payment-success/:orderId` - Test payment email
+* `POST /api/email/send` - Send custom email
 

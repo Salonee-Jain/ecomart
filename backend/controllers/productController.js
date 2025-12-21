@@ -1,71 +1,107 @@
-import asyncHandler from 'express-async-handler';
-import Product from '../models/Product.js';
+import Product from "../models/Product.js";
 
-export const getProducts = asyncHandler(async (req, res) => {
+// @desc   Get all products
+// @route  GET /api/products
+export const getProducts = async (req, res) => {
   const products = await Product.find({});
-  res.json(products);
-});
+  res.json({count: products.length, products});
+};
 
-export const getProductById = asyncHandler(async (req, res) => {
+// @desc   Get single product
+// @route  GET /api/products/:id
+export const getProductById = async (req, res) => {
   const product = await Product.findById(req.params.id);
 
   if (product) {
     res.json(product);
   } else {
     res.status(404);
-    throw new Error('Product not found');
+    throw new Error("Product not found");
   }
-});
+};
 
-export const createProduct = asyncHandler(async (req, res) => {
-  const { name, description, price, image, category, stock, ecoFriendly, sustainabilityRating } = req.body;
+// @desc   Create product (ADMIN)
+// @route  POST /api/products
+export const createProduct = async (req, res) => {
+  try {
+    const product = new Product(req.body);
+    const createdProduct = await product.save();
+    res.status(201).json(createdProduct);
+  } catch (error) {
+    if (error.code === 11000) {
+      res.status(400);
+      throw new Error("Product with this SKU already exists");
+    }
+    throw error;
+  }
+};
 
-  const product = new Product({
-    name,
-    description,
-    price,
-    image,
-    category,
-    stock,
-    ecoFriendly,
-    sustainabilityRating,
+
+// @desc   Bulk create products (ADMIN)
+// @route  POST /api/products/bulk
+export const bulkCreateProducts = async (req, res) => {
+  try {
+    const createdProducts = await Product.insertMany(req.body, {
+      ordered: false
+    });
+
+    res.status(201).json({
+      count: createdProducts.length,
+      products: createdProducts
+    });
+  } catch (error) {
+    res.status(207).json({
+      message: "Some products may already exist",
+      error: error.message
+    });
+  }
+};
+
+
+
+export const bulkDeleteProducts = async (req, res) => {
+  const ids = req.body.filter(item => item._id).map(item => item._id);
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ message: "No product IDs provided" });
+  }
+
+  const result = await Product.deleteMany({ _id: { $in: ids } });
+
+  res.json({
+    message: `${result.deletedCount} products deleted`
   });
+}
 
-  const createdProduct = await product.save();
-  res.status(201).json(createdProduct);
-});
 
-export const updateProduct = asyncHandler(async (req, res) => {
-  const { name, description, price, image, category, stock, ecoFriendly, sustainabilityRating } = req.body;
 
+// @desc   Update product (ADMIN)
+// @route  PUT /api/products/:id
+export const updateProduct = async (req, res) => {
   const product = await Product.findById(req.params.id);
 
   if (product) {
-    product.name = name || product.name;
-    product.description = description || product.description;
-    product.price = price || product.price;
-    product.image = image || product.image;
-    product.category = category || product.category;
-    product.stock = stock !== undefined ? stock : product.stock;
-    product.ecoFriendly = ecoFriendly !== undefined ? ecoFriendly : product.ecoFriendly;
-    product.sustainabilityRating = sustainabilityRating || product.sustainabilityRating;
-
+    Object.assign(product, req.body);
     const updatedProduct = await product.save();
     res.json(updatedProduct);
   } else {
     res.status(404);
-    throw new Error('Product not found');
+    throw new Error("Product not found");
   }
-});
+};
 
-export const deleteProduct = asyncHandler(async (req, res) => {
+// @desc   Delete product (ADMIN)
+// @route  DELETE /api/products/:id
+export const deleteProduct = async (req, res) => {
   const product = await Product.findById(req.params.id);
 
   if (product) {
     await product.deleteOne();
-    res.json({ message: 'Product removed' });
+    res.json({ message: "Product removed" });
   } else {
     res.status(404);
-    throw new Error('Product not found');
+    throw new Error("Product not found");
   }
-});
+};
+
+

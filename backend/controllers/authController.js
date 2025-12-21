@@ -40,3 +40,8 @@ export const loginUser = async (req, res) => {
     res.status(401).json({ message: "Invalid email or password" });
   }
 };
+
+
+export const logoutUser = async (req, res) => {
+  res.json({ message: "User logged out successfully" });
+}

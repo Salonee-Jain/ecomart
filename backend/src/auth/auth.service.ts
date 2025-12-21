@@ -75,6 +75,19 @@ export class AuthService {
     return { message: 'User logged out successfully' };
   }
 
+
+  async getProfile(userId: string) {
+    let user = await this.userModel.findOne({ _id: userId });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      isAdmin: user.isAdmin,
+    };
+  }
   private generateToken(id: string): string {
     return this.jwtService.sign(
       { id },

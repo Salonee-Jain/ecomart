@@ -1,7 +1,8 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, Req, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
+import { AuthGuard } from '@nestjs/passport/dist/auth.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -31,5 +32,14 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User successfully logged out' })
   async logout() {
     return this.authService.logout();
+  }
+
+
+  @Get('profile')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiOperation({ summary: 'Get user profile' })
+  @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
+  async getProfile(@Req() req) {
+    return this.authService.getProfile(req.user._id);
   }
 }

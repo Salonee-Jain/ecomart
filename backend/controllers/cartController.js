@@ -65,6 +65,43 @@ export const addToCart = async (req, res) => {
   res.json(cart);
 };
 
+// @desc   Update cart item quantity
+// @route  PUT /api/cart/:productId
+// @access Private
+export const updateCartItem = async (req, res) => {
+  const { quantity } = req.body;
+  const { productId } = req.params;
+
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    return errorResponse(res, 404, "Product not found");
+  }
+
+  if (quantity > product.stock) {
+    return errorResponse(res, 400, `Only ${product.stock} items left in stock`);
+  }
+
+  const cart = await Cart.findOne({ user: req.user._id });
+
+  if (!cart) {
+    return errorResponse(res, 404, "Cart not found");
+  }
+
+  const existingItem = cart.items.find(
+    (item) => item.product.toString() === productId
+  );
+
+  if (!existingItem) {
+    return errorResponse(res, 404, "Item not found in cart");
+  }
+
+  existingItem.quantity = quantity;
+
+  await cart.save();
+  res.json(cart);
+};
+
 
 // @desc   Remove item from cart
 // @route  DELETE /api/cart/:productId

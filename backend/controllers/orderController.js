@@ -96,12 +96,6 @@ export const getAllOrders = async (req, res) => {
   res.json(orders);
 };
 
-
-// @desc   Mark order as paid
-// @route  PUT /api/orders/:id/pay
-// @access Private
-import Product from "../models/Product.js";
-
 export const markOrderPaid = async (req, res) => {
   const order = await Order.findById(req.params.id);
 

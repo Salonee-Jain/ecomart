@@ -1,81 +1,175 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
-  Box,
-  Button,
   Container,
+  Box,
   TextField,
+  Button,
   Typography,
-  Paper,
   Alert,
+  Card,
+  CardContent,
+  Link as MuiLink,
 } from "@mui/material";
-import { useState } from "react";
-import { register } from "@/services/auth.service";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { saveToken, isAuthenticated } from "@/lib/auth";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const data = await register({ name, email, password });
-      localStorage.setItem("token", data.token);
+  useEffect(() => {
+    // Redirect if already logged in
+    if (isAuthenticated()) {
       router.push("/");
-    } catch {
-      setError("Registration failed");
+    }
+  }, [router]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed");
+      }
+
+      // Save token using utility function
+      saveToken(data.token);
+      router.push("/");
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Container maxWidth="sm" sx={{ py: 10 }}>
-      <Paper sx={{ p: 5 }}>
-        <Typography variant="h4" fontWeight={700}>
-          Create Account
-        </Typography>
-
-        {error && (
-          <Alert severity="error" sx={{ mt: 3 }}>
-            {error}
-          </Alert>
-        )}
-
-        <Box component="form" mt={4} onSubmit={submit}>
-          <TextField
-            label="Name"
-            fullWidth
-            margin="normal"
-            onChange={(e) => setName(e.target.value)}
-          />
-          <TextField
-            label="Email"
-            fullWidth
-            margin="normal"
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextField
-            label="Password"
-            type="password"
-            fullWidth
-            margin="normal"
-            onChange={(e) => setPassword(e.target.value)}
-          />
-
-          <Button
-            fullWidth
-            variant="contained"
-            size="large"
-            sx={{ mt: 3 }}
-            type="submit"
+    <Container maxWidth="sm" sx={{ py: 8 }}>
+      <Card>
+        <CardContent sx={{ p: 4 }}>
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            gutterBottom
+            textAlign="center"
           >
-            Register
-          </Button>
-        </Box>
-      </Paper>
+            Create Account
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            textAlign="center"
+            mb={3}
+          >
+            Join EcoMart for sustainable shopping
+          </Typography>
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+
+          <Box component="form" onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              label="Full Name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Confirm Password"
+              name="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              margin="normal"
+            />
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              size="large"
+              disabled={loading}
+              sx={{ mt: 3, mb: 2 }}
+            >
+              {loading ? "Creating Account..." : "Sign Up"}
+            </Button>
+
+            <Typography variant="body2" textAlign="center">
+              Already have an account?{" "}
+              <MuiLink component={Link} href="/login" underline="hover">
+                Sign In
+              </MuiLink>
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
     </Container>
   );
 }

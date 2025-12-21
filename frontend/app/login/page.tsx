@@ -1,27 +1,40 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
-  Box,
-  Button,
   Container,
-  Grid,
+  Box,
   TextField,
+  Button,
   Typography,
-  Paper,
   Alert,
+  Card,
+  CardContent,
+  Link as MuiLink,
 } from "@mui/material";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { login } from "@/services/auth.service";
+import { useRouter } from "next/navigation";
+import { saveToken, isAuthenticated } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Redirect if already logged in
+    if (isAuthenticated()) {
+      router.push("/");
+    }
+  }, [router]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,130 +42,98 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const data = await login({ email, password });
-      localStorage.setItem("token", data.token);
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      // Save token using utility function
+      saveToken(data.token);
       router.push("/");
-    } catch {
-      setError("Invalid email or password");
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message || "Invalid credentials");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Grid container minHeight="100vh">
-      {/* LEFT BRAND PANEL */}
-      <Grid
-        item
-        xs={false}
-        md={6}
-        sx={{
-          display: { xs: "none", md: "flex" },
-          background:
-            "linear-gradient(135deg, #2e7d32 0%, #66bb6a 100%)",
-          color: "white",
-          alignItems: "center",
-          px: 8,
-        }}
-      >
-        <Box maxWidth={480}>
-          <Typography variant="h3" fontWeight={800}>
-            EcoMart 🌱
-          </Typography>
-          <Typography mt={3} fontSize={18} color="rgba(255,255,255,0.9)">
-            Thoughtfully designed sustainable products that look good
-            and do good.
-          </Typography>
-        </Box>
-      </Grid>
-
-      {/* RIGHT LOGIN PANEL */}
-      <Grid
-        item
-        xs={12}
-        md={6}
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
-        <Container maxWidth="sm">
-          <Paper
-            elevation={4}
-            sx={{
-              p: 5,
-              borderRadius: 3,
-            }}
+    <Container maxWidth="sm" sx={{ py: 8 }}>
+      <Card>
+        <CardContent sx={{ p: 4 }}>
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            gutterBottom
+            textAlign="center"
           >
-            <Typography variant="h4" fontWeight={700}>
-              Sign in
+            Welcome Back
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            textAlign="center"
+            mb={3}
+          >
+            Sign in to your EcoMart account
+          </Typography>
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+
+          <Box component="form" onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Password"
+              name="password"
+              type="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              margin="normal"
+            />
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              size="large"
+              disabled={loading}
+              sx={{ mt: 3, mb: 2 }}
+            >
+              {loading ? "Signing In..." : "Sign In"}
+            </Button>
+
+            <Typography variant="body2" textAlign="center">
+              Don't have an account?{" "}
+              <MuiLink component={Link} href="/register" underline="hover">
+                Sign Up
+              </MuiLink>
             </Typography>
-            <Typography color="text.secondary" mt={1}>
-              Welcome back — continue to EcoMart
-            </Typography>
-
-            {error && (
-              <Alert severity="error" sx={{ mt: 3 }}>
-                {error}
-              </Alert>
-            )}
-
-            <Box component="form" mt={4} onSubmit={handleSubmit}>
-              <TextField
-                label="Email"
-                type="email"
-                fullWidth
-                margin="normal"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-
-              <TextField
-                label="Password"
-                type="password"
-                fullWidth
-                margin="normal"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-
-              <Button
-                type="submit"
-                fullWidth
-                size="large"
-                variant="contained"
-                sx={{
-                  mt: 3,
-                  py: 1.4,
-                  fontWeight: 600,
-                  backgroundColor: "#2e7d32",
-                  "&:hover": {
-                    backgroundColor: "#1b5e20",
-                  },
-                }}
-                disabled={loading}
-              >
-                {loading ? "Signing in..." : "Sign In"}
-              </Button>
-            </Box>
-
-            <Typography textAlign="center" mt={4} fontSize={14}>
-              Don’t have an account?{" "}
-              <Link
-                href="/register"
-                style={{
-                  color: "#2e7d32",
-                  fontWeight: 600,
-                  textDecoration: "none",
-                }}
-              >
-                Create one
-              </Link>
-            </Typography>
-          </Paper>
-        </Container>
-      </Grid>
-    </Grid>
+          </Box>
+        </CardContent>
+      </Card>
+    </Container>
   );
 }

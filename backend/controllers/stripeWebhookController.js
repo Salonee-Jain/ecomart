@@ -2,6 +2,14 @@ import stripe from "../config/stripe.js";
 import Order from "../models/Order.js";
 import Product from "../models/Product.js";
 import { errorResponse } from "../utils/errorResponse.js";
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 export const stripeWebhook = async (req, res) => {
   let event;
@@ -15,9 +23,9 @@ export const stripeWebhook = async (req, res) => {
   } catch (err) {
     return errorResponse(res, 400, `Webhook Error: ${err.message}`);
   }
-
   // Payment succeeded
-  if (event.type === "payment_intent.succeeded") {
+
+  if (process.env.NODE_ENV == "development" && event.type === "payment_intent.created") {
     const intent = event.data.object;
 
     const orderId = intent.metadata.orderId;

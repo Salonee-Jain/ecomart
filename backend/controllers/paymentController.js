@@ -11,7 +11,7 @@ export const createPaymentIntent = async (req, res) => {
   const order = await Order.findById(orderId);
 
   if (!order) {
-    return res.status(404).json({ status: 404, message: "Order not found" });
+    return errorResponse(res, 404, "Order not found");
   }
 
   // User can only pay for their own order (admin bypass optional)
@@ -19,7 +19,7 @@ export const createPaymentIntent = async (req, res) => {
     !req.user.isAdmin &&
     order.user.toString() !== req.user._id.toString()
   ) {
-    return res.status(403).json({ status: 403, message: "Not authorized" });
+    return errorResponse(res, 403, "Not authorized");
   }
 
   const paymentIntent = await stripe.paymentIntents.create({

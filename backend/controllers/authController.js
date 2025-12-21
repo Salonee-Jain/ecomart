@@ -1,12 +1,13 @@
 import User from "../models/User.js";
-import generateToken from "../utils/generateToken.js";import { errorResponse } from "../utils/errorResponse.js";
+import generateToken from "../utils/generateToken.js";
+import { errorResponse } from "../utils/errorResponse.js";
 // @route   POST /api/auth/register
 export const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
 
   const userExists = await User.findOne({ email });
   if (userExists) {
-    return res.status(400).json({ status: 400, message: "User already exists" });
+    return errorResponse(res, 400, "User already exists");
   }
 
   const user = await User.create({ name, email, password, isAdmin: req.body.isAdmin ?? false });

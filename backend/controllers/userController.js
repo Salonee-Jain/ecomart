@@ -12,7 +12,7 @@ export const getUserById = async (req, res) => {
   const user = await User.findById(req.params.id).select("-password");
 
   if (!user) {
-    return res.status(404).json({ status: 404, message: "User not found" });
+    return errorResponse(res, 404, "User not found");
   }
 
   res.json(user);

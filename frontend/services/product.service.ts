@@ -16,3 +16,8 @@ export const getProducts = async (params?: {
 export const getProductById = (id: string) =>
   api.get(`/products/${id}`);
 
+export const getCategories = async () => {
+  const res = await api.get("/products/categories");
+  return res.data;
+};
+

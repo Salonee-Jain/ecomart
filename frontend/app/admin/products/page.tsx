@@ -43,7 +43,7 @@ import {
   AttachMoney,
   ShoppingBag,
 } from "@mui/icons-material";
-import { getProducts } from "@/services/product.service";
+import { getProducts, getCategories } from "@/services/product.service";
 import { deleteProduct } from "@/services/admin.service";
 
 interface Product {
@@ -60,6 +60,7 @@ export default function AdminProductsPage() {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -79,6 +80,7 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
@@ -123,6 +125,17 @@ export default function AdminProductsPage() {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const data = await getCategories();
+      setCategories(data);
+    } catch (err: any) {
+      console.error("Failed to load categories:", err);
+      // Fallback to extracting categories from products if API fails
+      setCategories([]);
+    }
+  };
+
   const handleDeleteProduct = async () => {
     if (!deleteDialog.product) return;
 
@@ -141,7 +154,10 @@ export default function AdminProductsPage() {
     }
   };
 
-  const categories = [...new Set(products.map((p) => p.category))];
+  // Use fetched categories, fallback to unique categories from products if needed
+  const displayCategories = categories.length > 0 
+    ? categories 
+    : [...new Set(products.map((p) => p.category))];
 
   if (loading) {
     return (
@@ -274,7 +290,7 @@ export default function AdminProductsPage() {
                 onChange={(e) => setCategoryFilter(e.target.value)}
               >
                 <MenuItem value="">All Categories</MenuItem>
-                {categories.map((cat) => (
+                {displayCategories.map((cat) => (
                   <MenuItem key={cat} value={cat}>
                     📂 {cat}
                   </MenuItem>

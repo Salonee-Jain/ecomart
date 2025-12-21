@@ -7,6 +7,7 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import { errorHandler } from "./middleware/errorMiddleware.js";
 import cartRoutes from "./routes/cartRoutes.js";
+import { stripeWebhook } from "./controllers/stripeWebhookController.js";
 
 const app = express();
 
@@ -16,6 +17,8 @@ app.post(
   express.raw({ type: "application/json" }),
   stripeWebhook
 );
+
+
 app.use(express.json());
 
 app.get("/", (req, res) => {

@@ -65,7 +65,25 @@ stripe listen --forward-to localhost:5000/api/payment/webhook
 ```
 Copy the webhook signing secret to your `.env` as `STRIPE_WEBHOOK_SECRET`
 
-## 📡 API Endpoints
+## � API Documentation
+
+Interactive Swagger documentation is available at: **`http://localhost:5000/api/docs`**
+
+The Swagger UI provides:
+- Complete API reference for all endpoints
+- Request/response schemas with examples
+- Interactive "Try it out" functionality
+- JWT authentication support (click "Authorize" button)
+- Detailed parameter descriptions
+
+**To authenticate in Swagger:**
+1. Register or login via `/api/auth/register` or `/api/auth/login`
+2. Copy the `token` from the response
+3. Click the "Authorize" button (top right)
+4. Enter: `Bearer <your_token_here>`
+5. Click "Authorize" to save
+
+## �📡 API Endpoints
 
 ### 🔐 Authentication
 | Method | Endpoint | Description | Auth |

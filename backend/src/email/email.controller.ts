@@ -1,4 +1,5 @@
 import { Controller, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EmailService } from './email.service';
@@ -8,6 +9,8 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AdminGuard } from '../guards/admin.guard';
 import { NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 
+@ApiTags('Email')
+@ApiBearerAuth('JWT-auth')
 @Controller('email')
 @UseGuards(JwtAuthGuard)
 export class EmailController {
@@ -17,6 +20,10 @@ export class EmailController {
   ) {}
 
   @Post('test')
+  @ApiOperation({ summary: 'Send test email' })
+  @ApiResponse({ status: 200, description: 'Test email sent successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 400, description: 'Bad request - email recipient required' })
   async sendTestEmail(@Body() sendTestEmailDto: SendTestEmailDto) {
     const { to, subject, html } = sendTestEmailDto;
 

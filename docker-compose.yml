@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: ecomart-rabbitmq
+    ports:
+      - "5672:5672"     # AMQP (backend connects)
+      - "15672:15672"   # UI Dashboard
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    networks:
+      - ecomart-net
+
+networks:
+  ecomart-net:
+    driver: bridge

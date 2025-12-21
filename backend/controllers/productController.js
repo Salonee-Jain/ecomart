@@ -3,9 +3,49 @@ import Product from "../models/Product.js";
 // @desc   Get all products
 // @route  GET /api/products
 export const getProducts = async (req, res) => {
-  const products = await Product.find({});
-  res.json({count: products.length, products});
+  const pageSize = Number(req.query.limit) || 10;
+  const page = Number(req.query.page) || 1;
+  // Build query object
+  const query = {};
+
+  // Search by keyword
+  if (req.query.keyword) {
+    query.name = {
+      $regex: req.query.keyword,
+      $options: "i"
+    };
+  }
+
+  // Filter by category
+  if (req.query.category) {
+    query.category = req.query.category;
+  }
+
+  // Filter by price range
+  if (req.query.minPrice || req.query.maxPrice) {
+    query.price = {};
+    if (req.query.minPrice) {
+      query.price.$gte = Number(req.query.minPrice);
+    }
+    if (req.query.maxPrice) {
+      query.price.$lte = Number(req.query.maxPrice);
+    }
+  }
+
+  const count = await Product.countDocuments(query);
+
+  const products = await Product.find(query)
+    .limit(pageSize)
+    .skip(pageSize * (page - 1));
+
+  res.json({
+    total: count,
+    products,
+    page,
+    pages: Math.ceil(count / pageSize),
+  });
 };
+
 
 // @desc   Get single product
 // @route  GET /api/products/:id

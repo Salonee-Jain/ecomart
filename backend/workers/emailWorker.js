@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import { paymentSuccessTemplate } from "../utils/paymentEmailTemplate.js";
 
 // Load .env
 const __filename = fileURLToPath(import.meta.url);
@@ -35,11 +36,10 @@ const startWorker = async () => {
         if (!order) throw new Error("Order not found");
 
         const user = order.user;
-
         await sendEmail(
           user.email,
           "Your Payment Was Successful 🎉",
-          `<h1>Order ${order._id} Paid</h1><p>Thanks for your purchase!</p>`
+          paymentSuccessTemplate(order)
         );
 
         console.log("📧 Email sent to:", user.email);

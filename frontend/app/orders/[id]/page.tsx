@@ -191,230 +191,322 @@ export default function OrderDetailPage() {
   }
 
   return (
-    <Container sx={{ py: 8 }}>
-      <Button
-        startIcon={<ArrowBack />}
-        onClick={() => router.push("/orders")}
-        sx={{ mb: 3 }}
-      >
-        Back to Orders
-      </Button>
+    <Box sx={{
+      background: "#FFFFFF",
+      minHeight: "calc(100vh - 64px)",
+      py: 4,
+    }}>
+      <Container sx={{ py: 2 }}>
+        <Button
+          startIcon={<ArrowBack />}
+          onClick={() => router.push("/orders")}
+          sx={{
+            mb: 3,
+            fontWeight: 600,
+            borderRadius: 2,
+            color: "#191919",
+            "&:hover": {
+              backgroundColor: "#F8F9FA",
+              color: "#EB1700",
+            },
+          }}
+        >
+          Back to Orders
+        </Button>
 
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4} flexWrap="wrap" gap={2}>
-        <Box>
-          <Typography variant="h3" fontWeight={800}>
-            Order Details
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Order ID: {order._id}
-          </Typography>
+        <Box
+          sx={{
+            mb: 4,
+            py: 3,
+            px: 4,
+            borderRadius: 2,
+            background: "#FAFAFA",
+            border: "1px solid #E8E8E8",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 2,
+          }}
+        >
+          <Box>
+            <Box display="flex" alignItems="center" gap={2} mb={1}>
+              <Receipt sx={{ fontSize: 36, color: "#EB1700" }} />
+              <Typography variant="h3" fontWeight={700} sx={{ color: "#191919", letterSpacing: "-0.5px" }}>
+                Order Details
+              </Typography>
+            </Box>
+            <Typography variant="body2" color="text.secondary" sx={{ color: "#767676" }}>
+              Order ID: #{order._id.slice(-8).toUpperCase()}
+            </Typography>
+          </Box>
+          <Chip
+            label={getStatusText()}
+            color={getStatusColor()}
+            size="medium"
+            icon={
+              order.isCancelled ? <Cancel /> :
+                order.isDelivered ? <CheckCircle /> :
+                  order.isPaid ? <LocalShipping /> : <Payment />
+            }
+            sx={{
+              fontWeight: 600,
+              px: 2,
+              py: 2.5,
+            }}
+          />
         </Box>
-        <Chip
-          label={getStatusText()}
-          color={getStatusColor()}
-          size="large"
-          icon={
-            order.isCancelled ? <Cancel /> :
-            order.isDelivered ? <CheckCircle /> :
-            order.isPaid ? <LocalShipping /> : <Payment />
-          }
-        />
-      </Box>
 
-      <Grid container spacing={3}>
-        {/* Order Items */}
-        <Grid item xs={12} md={8}>
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} mb={2}>
-                Order Items
-              </Typography>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Product</TableCell>
-                      <TableCell align="center">Quantity</TableCell>
-                      <TableCell align="right">Price</TableCell>
-                      <TableCell align="right">Total</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {order.orderItems.map((item) => (
-                      <TableRow key={item.product}>
-                        <TableCell>
-                          <Box display="flex" alignItems="center" gap={2}>
-                            <Box
-                              component="img"
-                              src={item.image}
-                              alt={item.name}
-                              sx={{ width: 50, height: 50, objectFit: "cover", borderRadius: 1 }}
-                            />
-                            <Box>
-                              <Typography variant="body2" fontWeight="medium">
-                                {item.name}
-                              </Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                SKU: {item.sku}
-                              </Typography>
-                            </Box>
-                          </Box>
-                        </TableCell>
-                        <TableCell align="center">{item.quantity}</TableCell>
-                        <TableCell align="right">${item.price.toFixed(2)}</TableCell>
-                        <TableCell align="right" fontWeight="bold">
-                          ${(item.price * item.quantity).toFixed(2)}
-                        </TableCell>
+        <Grid container spacing={3}>
+          {/* Order Items */}
+          <Grid item xs={12} md={8}>
+            <Card
+              elevation={0}
+              sx={{
+                mb: 3,
+                borderRadius: 2,
+                border: "1px solid #E8E8E8",
+              }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" fontWeight={700} mb={2} sx={{ color: "#191919" }}>
+                  Order Items
+                </Typography>
+                <TableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow sx={{ backgroundColor: "#FAFAFA" }}>
+                        <TableCell sx={{ fontWeight: 600, color: "#191919" }}>Product</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 600, color: "#191919" }}>Quantity</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600, color: "#191919" }}>Price</TableCell>
+                        <TableCell align="right" sx={{ fontWeight: 600, color: "#191919" }}>Total</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
+                    </TableHead>
+                    <TableBody>
+                      {order.orderItems.map((item) => (
+                        <TableRow key={item.product} sx={{ "&:hover": { backgroundColor: "#FAFAFA" } }}>
+                          <TableCell>
+                            <Box display="flex" alignItems="center" gap={2}>
+                              <Box
+                                component="img"
+                                src={item.image}
+                                alt={item.name}
+                                sx={{ width: 60, height: 60, objectFit: "cover", borderRadius: 1, border: "1px solid #E8E8E8" }}
+                              />
+                              <Box>
+                                <Typography variant="body2" fontWeight={600} sx={{ color: "#191919" }}>
+                                  {item.name}
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary" sx={{ color: "#767676" }}>
+                                  SKU: {item.sku}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 600 }}>{item.quantity}</TableCell>
+                          <TableCell align="right" sx={{ color: "#EB1700", fontWeight: 600 }}>${item.price.toFixed(2)}</TableCell>
+                          <TableCell align="right" sx={{ color: "#EB1700", fontWeight: 700, fontSize: "1.1rem" }}>
+                            ${(item.price * item.quantity).toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </CardContent>
+            </Card>
 
-          {/* Shipping Address */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} mb={2}>
-                Shipping Address
-              </Typography>
-              <Typography variant="body2">
-                {order.shippingAddress.address}<br />
-                {order.shippingAddress.city}, {order.shippingAddress.postalCode}<br />
-                {order.shippingAddress.country}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Order Summary */}
-        <Grid item xs={12} md={4}>
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} mb={2}>
-                Order Summary
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-
-              <Box display="flex" justifyContent="space-between" mb={1}>
-                <Typography>Items:</Typography>
-                <Typography>${order.itemsPrice.toFixed(2)}</Typography>
-              </Box>
-              <Box display="flex" justifyContent="space-between" mb={1}>
-                <Typography>Shipping:</Typography>
-                <Typography>
-                  {order.shippingPrice === 0 ? "FREE" : `$${order.shippingPrice.toFixed(2)}`}
+            {/* Shipping Address */}
+            <Card
+              elevation={0}
+              sx={{
+                borderRadius: 2,
+                border: "1px solid #E8E8E8",
+              }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" fontWeight={700} mb={2} sx={{ color: "#191919" }}>
+                  Shipping Address
                 </Typography>
-              </Box>
-              <Box display="flex" justifyContent="space-between" mb={2}>
-                <Typography>Tax:</Typography>
-                <Typography>${order.taxPrice.toFixed(2)}</Typography>
-              </Box>
+                <Box sx={{ p: 2, backgroundColor: "#FAFAFA", borderRadius: 1 }}>
+                  <Typography variant="body2" sx={{ lineHeight: 1.8 }}>
+                    {order.shippingAddress.address}<br />
+                    {order.shippingAddress.city}, {order.shippingAddress.postalCode}<br />
+                    {order.shippingAddress.country}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
 
-              <Divider sx={{ my: 2 }} />
-
-              <Box display="flex" justifyContent="space-between" mb={3}>
-                <Typography variant="h6" fontWeight="bold">
-                  Total:
+          {/* Order Summary */}
+          <Grid item xs={12} md={4}>
+            <Card
+              elevation={0}
+              sx={{
+                mb: 3,
+                borderRadius: 2,
+                border: "1px solid #E8E8E8",
+              }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" fontWeight={700} mb={2} sx={{ color: "#191919" }}>
+                  Order Summary
                 </Typography>
-                <Typography variant="h5" fontWeight="bold" color="primary">
-                  ${order.totalPrice.toFixed(2)}
+                <Divider sx={{ mb: 2 }} />
+
+                <Box display="flex" justifyContent="space-between" mb={1.5}>
+                  <Typography sx={{ color: "#767676" }}>Items:</Typography>
+                  <Typography fontWeight={600}>${order.itemsPrice.toFixed(2)}</Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between" mb={1.5}>
+                  <Typography sx={{ color: "#767676" }}>Shipping:</Typography>
+                  <Typography fontWeight={600}>
+                    {order.shippingPrice === 0 ? (
+                      <Chip label="FREE" size="small" sx={{ bgcolor: "#10B981", color: "white", fontWeight: 600 }} />
+                    ) : (
+                      `$${order.shippingPrice.toFixed(2)}`
+                    )}
+                  </Typography>
+                </Box>
+                <Box display="flex" justifyContent="space-between" mb={2}>
+                  <Typography sx={{ color: "#767676" }}>Tax:</Typography>
+                  <Typography fontWeight={600}>${order.taxPrice.toFixed(2)}</Typography>
+                </Box>
+
+                <Divider sx={{ my: 2 }} />
+
+                <Box display="flex" justifyContent="space-between" mb={3} sx={{ p: 2, backgroundColor: "#FFF5F5", borderRadius: 1 }}>
+                  <Typography variant="h6" fontWeight={700}>
+                    Total:
+                  </Typography>
+                  <Typography variant="h5" fontWeight={700} sx={{ color: "#EB1700" }}>
+                    ${order.totalPrice.toFixed(2)}
+                  </Typography>
+                </Box>
+
+                {!order.isPaid && !order.isCancelled && (
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    onClick={handlePayNow}
+                    disabled={processing}
+                    startIcon={<Payment />}
+                    sx={{
+                      mb: 2,
+                      py: 1.5,
+                      background: "#EB1700",
+                      boxShadow: "none",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      "&:hover": {
+                        background: "#C91400",
+                        boxShadow: "0 2px 8px rgba(235, 23, 0, 0.3)",
+                      },
+                    }}
+                  >
+                    {processing ? "Processing..." : "Pay Now"}
+                  </Button>
+                )}
+
+                {!order.isDelivered && !order.isCancelled && (
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    size="large"
+                    onClick={handleCancelOrder}
+                    disabled={processing}
+                    startIcon={<Cancel />}
+                    sx={{
+                      borderColor: "#E8E8E8",
+                      color: "#EB1700",
+                      fontWeight: 600,
+                      textTransform: "none",
+                      borderRadius: 2,
+                      py: 1.5,
+                      "&:hover": {
+                        borderColor: "#EB1700",
+                        backgroundColor: "#FFF5F5",
+                      },
+                    }}
+                  >
+                    Cancel Order
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Payment & Delivery Info */}
+            <Card
+              elevation={0}
+              sx={{
+                borderRadius: 2,
+                border: "1px solid #E8E8E8",
+              }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h6" fontWeight={700} mb={2} sx={{ color: "#191919" }}>
+                  Order Information
                 </Typography>
-              </Box>
+                <Divider sx={{ mb: 2 }} />
 
-              {!order.isPaid && !order.isCancelled && (
-                <Button
-                  variant="contained"
-                  fullWidth
-                  size="large"
-                  onClick={handlePayNow}
-                  disabled={processing}
-                  startIcon={<Payment />}
-                  sx={{ mb: 2 }}
-                >
-                  {processing ? "Processing..." : "Pay Now"}
-                </Button>
-              )}
-
-              {!order.isDelivered && !order.isCancelled && (
-                <Button
-                  variant="outlined"
-                  color="error"
-                  fullWidth
-                  size="large"
-                  onClick={handleCancelOrder}
-                  disabled={processing}
-                  startIcon={<Cancel />}
-                >
-                  Cancel Order
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Payment & Delivery Info */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} mb={2}>
-                Order Information
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-
-              <Box mb={2}>
-                <Typography variant="body2" color="text.secondary">
-                  Payment Method
-                </Typography>
-                <Typography variant="body1" textTransform="capitalize">
-                  {order.paymentMethod}
-                </Typography>
-              </Box>
-
-              <Box mb={2}>
-                <Typography variant="body2" color="text.secondary">
-                  Order Date
-                </Typography>
-                <Typography variant="body1">
-                  {new Date(order.createdAt).toLocaleString()}
-                </Typography>
-              </Box>
-
-              {order.paidAt && (
                 <Box mb={2}>
-                  <Typography variant="body2" color="text.secondary">
-                    Paid At
+                  <Typography variant="body2" color="text.secondary" sx={{ color: "#767676", mb: 0.5 }}>
+                    Payment Method
                   </Typography>
-                  <Typography variant="body1">
-                    {new Date(order.paidAt).toLocaleString()}
+                  <Typography variant="body1" textTransform="capitalize" fontWeight={600}>
+                    {order.paymentMethod}
                   </Typography>
                 </Box>
-              )}
 
-              {order.deliveredAt && (
                 <Box mb={2}>
-                  <Typography variant="body2" color="text.secondary">
-                    Delivered At
+                  <Typography variant="body2" color="text.secondary" sx={{ color: "#767676", mb: 0.5 }}>
+                    Order Date
                   </Typography>
-                  <Typography variant="body1">
-                    {new Date(order.deliveredAt).toLocaleString()}
+                  <Typography variant="body1" fontWeight={600}>
+                    {new Date(order.createdAt).toLocaleString()}
                   </Typography>
                 </Box>
-              )}
 
-              {order.cancelledAt && (
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Cancelled At
-                  </Typography>
-                  <Typography variant="body1">
-                    {new Date(order.cancelledAt).toLocaleString()}
-                  </Typography>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
+                {order.paidAt && (
+                  <Box mb={2}>
+                    <Typography variant="body2" color="text.secondary" sx={{ color: "#767676", mb: 0.5 }}>
+                      Paid At
+                    </Typography>
+                    <Typography variant="body1" fontWeight={600} sx={{ color: "#10B981" }}>
+                      {new Date(order.paidAt).toLocaleString()}
+                    </Typography>
+                  </Box>
+                )}
+
+                {order.deliveredAt && (
+                  <Box mb={2}>
+                    <Typography variant="body2" color="text.secondary" sx={{ color: "#767676", mb: 0.5 }}>
+                      Delivered At
+                    </Typography>
+                    <Typography variant="body1" fontWeight={600} sx={{ color: "#10B981" }}>
+                      {new Date(order.deliveredAt).toLocaleString()}
+                    </Typography>
+                  </Box>
+                )}
+
+                {order.cancelledAt && (
+                  <Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ color: "#767676", mb: 0.5 }}>
+                      Cancelled At
+                    </Typography>
+                    <Typography variant="body1" fontWeight={600} sx={{ color: "#EB1700" }}>
+                      {new Date(order.cancelledAt).toLocaleString()}
+                    </Typography>
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-      </Grid>
-    </Container>
+      </Container>
+    </Box>
   );
 }

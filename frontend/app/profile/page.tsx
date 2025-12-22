@@ -221,34 +221,40 @@ export default function ProfilePage() {
 
   return (
     <Box sx={{
-      background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+      background: "#FFFFFF",
       minHeight: "calc(100vh - 64px)",
-      py: 6,
+      py: 4,
     }}>
       <Container sx={{ py: 2 }}>
         <Box
           sx={{
             mb: 4,
-            p: 3,
-            borderRadius: 3,
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            color: "white",
+            py: 3,
+            px: 4,
+            borderRadius: 2,
+            background: "#FAFAFA",
+            border: "1px solid #E8E8E8",
             display: "flex",
             alignItems: "center",
             gap: 2,
-            boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
           }}
         >
-          <Person sx={{ fontSize: 40 }} />
-          <Typography variant="h3" fontWeight={900}>
-            👤 My Profile
+          <Person sx={{ fontSize: 36, color: "#EB1700" }} />
+          <Typography variant="h3" fontWeight={700} sx={{ color: "#191919", letterSpacing: "-0.5px" }}>
+            My Profile
           </Typography>
         </Box>
 
         <Grid container spacing={3}>
           {/* Profile Summary Card */}
           <Grid item xs={12} md={4}>
-            <Card>
+            <Card
+              elevation={0}
+              sx={{
+                borderRadius: 2,
+                border: "1px solid #E8E8E8",
+              }}
+            >
               <CardContent sx={{ textAlign: "center", py: 4 }}>
                 <Avatar
                   sx={{
@@ -256,7 +262,7 @@ export default function ProfilePage() {
                     height: 100,
                     mx: "auto",
                     mb: 2,
-                    bgcolor: "primary.main",
+                    bgcolor: "#EB1700",
                     fontSize: "2.5rem",
                   }}
                 >
@@ -269,7 +275,7 @@ export default function ProfilePage() {
                   {user.email}
                 </Typography>
                 {user.isAdmin && (
-                  <Chip label="Admin" color="primary" size="small" sx={{ mt: 1 }} />
+                  <Chip label="Admin" sx={{ mt: 1, bgcolor: "#EB1700", color: "white" }} size="small" />
                 )}
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="body2" color="text.secondary">
@@ -279,7 +285,15 @@ export default function ProfilePage() {
                   variant="outlined"
                   color="error"
                   fullWidth
-                  sx={{ mt: 3 }}
+                  sx={{
+                    mt: 3,
+                    borderColor: "#E8E8E8",
+                    color: "#EB1700",
+                    "&:hover": {
+                      borderColor: "#EB1700",
+                      backgroundColor: "#FFF5F5",
+                    },
+                  }}
                   onClick={handleLogout}
                 >
                   Logout
@@ -324,11 +338,12 @@ export default function ProfilePage() {
           {/* Profile Details & Orders */}
           <Grid item xs={12} md={8}>
             <Card
-              elevation={4}
+              elevation={0}
               sx={{
-                borderRadius: 3,
+                borderRadius: 2,
                 overflow: "hidden",
                 background: "white",
+                border: "1px solid #E8E8E8",
               }}
             >
               <Tabs
@@ -337,17 +352,17 @@ export default function ProfilePage() {
                 sx={{
                   borderBottom: 1,
                   borderColor: "divider",
-                  bgcolor: "rgba(102, 126, 234, 0.05)",
+                  bgcolor: "#FAFAFA",
                   "& .MuiTab-root": {
                     fontWeight: 600,
                     textTransform: "none",
                     fontSize: "1rem",
                   },
                   "& .Mui-selected": {
-                    color: "#667eea !important",
+                    color: "#EB1700 !important",
                   },
                   "& .MuiTabs-indicator": {
-                    backgroundColor: "#667eea",
+                    backgroundColor: "#EB1700",
                     height: 3,
                   },
                 }}
@@ -476,6 +491,18 @@ export default function ProfilePage() {
                           variant="contained"
                           onClick={handleChangePassword}
                           fullWidth
+                          sx={{
+                            background: "#EB1700",
+                            boxShadow: "none",
+                            textTransform: "none",
+                            fontWeight: 600,
+                            py: 1.3,
+                            borderRadius: 2,
+                            "&:hover": {
+                              background: "#C91400",
+                              boxShadow: "0 2px 8px rgba(235, 23, 0, 0.3)",
+                            },
+                          }}
                         >
                           Change Password
                         </Button>

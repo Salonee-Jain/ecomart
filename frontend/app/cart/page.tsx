@@ -22,10 +22,15 @@ import {
   DialogActions,
   DialogContentText,
 } from "@mui/material";
-import { Add, Remove, Delete, ShoppingCart, ArrowBack } from "@mui/icons-material";
+import { Add, Remove, Delete, ShoppingCart } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { getToken, isAuthenticated } from "@/lib/auth";
+import LoadingState from "@/components/LoadingState";
+import EmptyState from "@/components/EmptyState";
+import PageContainer from "@/components/PageContainer";
+import BackButton from "@/components/BackButton";
+import PageHeader from "@/components/PageHeader";
 
 interface CartItem {
   _id?: string;
@@ -187,12 +192,7 @@ export default function CartPage() {
   };
 
   if (loading) {
-    return (
-      <Container sx={{ py: 8, textAlign: "center" }}>
-        <CircularProgress />
-        <Typography sx={{ mt: 2 }}>Loading cart...</Typography>
-      </Container>
-    );
+    return <LoadingState message="Loading cart..." />;
   }
 
   if (error) {
@@ -205,87 +205,61 @@ export default function CartPage() {
 
   if (cartItems.length === 0) {
     return (
-      <Container sx={{ py: 8, textAlign: "center" }}>
-        <Typography variant="h4" gutterBottom>
-          Your Cart is Empty
-        </Typography>
-        <Typography color="text.secondary" sx={{ mb: 3 }}>
-          Add some products to get started!
-        </Typography>
-        <Button variant="contained" onClick={() => router.push("/products")}>
-          Shop Now
-        </Button>
-      </Container>
+      <EmptyState
+        icon={<ShoppingCart sx={{ fontSize: 80, color: "#767676" }} />}
+        title="Your Cart is Empty"
+        message="Add some products to get started!"
+        actionLabel="Shop Now"
+        onAction={() => router.push("/products")}
+      />
     );
   }
 
   return (
-    <Box sx={{
-      background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-      minHeight: "calc(100vh - 64px)",
-      py: 6,
-    }}>
+    <PageContainer>
       <Container sx={{ py: 2 }}>
-        <Button
-          startIcon={<ArrowBack />}
+        <BackButton
+          label="Continue Shopping"
           onClick={() => router.push("/products")}
-          sx={{
-            mb: 3,
-            fontWeight: 600,
-            borderRadius: 2,
-          }}
-        >
-          Continue Shopping
-        </Button>
+        />
 
-        <Box
-          sx={{
-            mb: 4,
-            p: 3,
-            borderRadius: 3,
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            color: "white",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: 2,
-            boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
-          }}
-        >
-          <Box display="flex" alignItems="center" gap={2}>
-            <ShoppingCart sx={{ fontSize: 40 }} />
-            <Typography variant="h3" fontWeight={900}>
-              🛒 Shopping Cart
-            </Typography>
-            <Chip
-              label={`${cartItems.length} ${cartItems.length === 1 ? 'item' : 'items'}`}
-              sx={{
-                bgcolor: "rgba(255, 255, 255, 0.2)",
-                color: "white",
-                fontWeight: 700,
-              }}
-              size="medium"
-            />
-          </Box>
-          {cartItems.length > 0 && (
-            <Button
-              variant="contained"
-              onClick={clearCart}
-              startIcon={<Delete />}
-              sx={{
-                bgcolor: "rgba(255, 255, 255, 0.2)",
-                "&:hover": {
-                  bgcolor: "rgba(255, 255, 255, 0.3)",
-                },
-                fontWeight: 600,
-                borderRadius: 2,
-              }}
-            >
-              Clear Cart
-            </Button>
-          )}
-        </Box>
+        <PageHeader
+          icon={<ShoppingCart sx={{ fontSize: 36, color: "#EB1700" }} />}
+          title="Shopping Cart"
+          action={
+            <Box display="flex" alignItems="center" gap={2}>
+              <Chip
+                label={`${cartItems.length} ${cartItems.length === 1 ? 'item' : 'items'}`}
+                sx={{
+                  bgcolor: "#EB1700",
+                  color: "white",
+                  fontWeight: 600,
+                }}
+                size="medium"
+              />
+              {cartItems.length > 0 && (
+                <Button
+                  variant="outlined"
+                  onClick={clearCart}
+                  startIcon={<Delete />}
+                  sx={{
+                    borderColor: "#E8E8E8",
+                    color: "#191919",
+                    "&:hover": {
+                      borderColor: "#EB1700",
+                      backgroundColor: "#FFF5F5",
+                      color: "#EB1700",
+                    },
+                    fontWeight: 600,
+                    borderRadius: 2,
+                  }}
+                >
+                  Clear Cart
+                </Button>
+              )}
+            </Box>
+          }
+        />
 
         {error && (
           <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>
@@ -298,32 +272,19 @@ export default function CartPage() {
             {cartItems.map((item, index) => (
               <Card
                 key={item.product}
-                elevation={3}
+                elevation={0}
                 sx={{
                   mb: 2,
                   opacity: updating === item.product ? 0.6 : 1,
-                  transition: 'all 0.3s ease',
-                  borderRadius: 3,
+                  transition: 'all 0.2s ease',
+                  borderRadius: 2,
                   overflow: "hidden",
                   background: "white",
+                  border: "1px solid #E8E8E8",
                   '&:hover': {
-                    boxShadow: "0 8px 25px rgba(0,0,0,0.12)",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                     transform: "translateY(-2px)",
-                  },
-                  animation: `fadeIn 0.4s ease ${index * 0.08}s backwards`,
-                  '@keyframes fadeIn': {
-                    from: { opacity: 0, transform: 'translateY(20px)' },
-                    to: { opacity: 1, transform: 'translateY(0)' },
-                  },
-                  position: "relative",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: "3px",
-                    background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
+                    borderColor: "#D0D0D0",
                   },
                 }}
               >
@@ -415,13 +376,14 @@ export default function CartPage() {
 
           <Grid item xs={12} md={4}>
             <Card
-              elevation={4}
+              elevation={0}
               sx={{
                 position: 'sticky',
                 top: 80,
-                borderRadius: 3,
+                borderRadius: 2,
                 background: "white",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                border: "1px solid #E8E8E8",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
               }}
             >
               <CardContent>
@@ -474,7 +436,16 @@ export default function CartPage() {
                   sx={{
                     mb: 2,
                     py: 1.5,
-                    fontSize: '1.1rem',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    borderRadius: 2,
+                    background: "#EB1700",
+                    boxShadow: "none",
+                    textTransform: "none",
+                    "&:hover": {
+                      background: "#C91400",
+                      boxShadow: "0 2px 8px rgba(235, 23, 0, 0.3)",
+                    },
                   }}
                 >
                   Proceed to Checkout
@@ -528,6 +499,6 @@ export default function CartPage() {
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         />
       </Container>
-    </Box>
+    </PageContainer>
   );
 }

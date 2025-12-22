@@ -46,7 +46,7 @@ export default function AddToCartButton({ productId, disabled = false }: AddToCa
         disabled={loading || disabled || success}
         startIcon={
           loading ? (
-            <CircularProgress size={20} sx={{ color: "white" }} />
+            <CircularProgress size={18} sx={{ color: "white" }} />
           ) : success ? (
             <CheckCircle />
           ) : (
@@ -54,29 +54,25 @@ export default function AddToCartButton({ productId, disabled = false }: AddToCa
           )
         }
         sx={{
-          py: 1.5,
-          fontWeight: 700,
+          py: 1.3,
+          fontWeight: 600,
           textTransform: "none",
-          fontSize: "1rem",
+          fontSize: "0.95rem",
           borderRadius: 2,
-          background: success
-            ? "linear-gradient(135deg, #4caf50 0%, #45a049 100%)"
-            : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          background: success ? "#10B981" : "#EB1700",
+          boxShadow: "none",
+          transition: "all 0.2s ease",
           "&:hover": {
-            background: success
-              ? "linear-gradient(135deg, #45a049 0%, #3d8b40 100%)"
-              : "linear-gradient(135deg, #5568d3 0%, #6a4190 100%)",
-            transform: "translateY(-2px)",
-            boxShadow: "0 6px 20px rgba(102, 126, 234, 0.4)",
+            background: success ? "#059669" : "#C91400",
+            boxShadow: success
+              ? "0 2px 8px rgba(16, 185, 129, 0.3)"
+              : "0 2px 8px rgba(235, 23, 0, 0.3)",
           },
           "&:active": {
-            transform: "translateY(0)",
+            transform: "scale(0.98)",
           },
           "&:disabled": {
-            background: success
-              ? "linear-gradient(135deg, #4caf50 0%, #45a049 100%)"
-              : "#ccc",
+            background: success ? "#10B981" : "#E0E0E0",
             color: "white",
             opacity: success ? 1 : 0.6,
           },

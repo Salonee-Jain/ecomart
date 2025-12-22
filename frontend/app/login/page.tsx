@@ -70,59 +70,59 @@ export default function LoginPage() {
   return (
     <Box sx={{
       minHeight: "100vh",
-      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+      background: "#FFFFFF",
       display: "flex",
       alignItems: "center",
       py: 4,
     }}>
       <Container maxWidth="sm">
         <Card
-          elevation={10}
+          elevation={0}
           sx={{
-            borderRadius: 4,
+            borderRadius: 3,
             overflow: "hidden",
-            background: "rgba(255, 255, 255, 0.98)",
-            backdropFilter: "blur(10px)",
-            animation: "fadeIn 0.5s ease",
-            "@keyframes fadeIn": {
-              from: { opacity: 0, transform: "translateY(20px)" },
-              to: { opacity: 1, transform: "translateY(0)" },
-            },
+            background: "white",
+            border: "1px solid #E8E8E8",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
           }}
         >
           <CardContent sx={{ p: 5 }}>
             <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
               <Avatar
                 sx={{
-                  width: 70,
-                  height: 70,
+                  width: 60,
+                  height: 60,
                   mb: 2,
-                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  background: "#EB1700",
                 }}
               >
-                <LockOutlined sx={{ fontSize: 35 }} />
+                <LockOutlined sx={{ fontSize: 30 }} />
               </Avatar>
               <Typography
                 variant="h3"
-                fontWeight={900}
+                fontWeight={700}
                 gutterBottom
                 textAlign="center"
                 sx={{
-                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
+                  color: "#191919",
+                  letterSpacing: "-0.5px",
                 }}
               >
-                🔐 Login
+                Sign in
               </Typography>
-              <Typography variant="body2" color="text.secondary" textAlign="center">
-                Welcome back! Please login to your account
+              <Typography variant="body1" color="text.secondary" textAlign="center">
+                Welcome back to EcoMart
               </Typography>
             </Box>
 
             {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
+              <Alert
+                severity="error"
+                sx={{
+                  mb: 2,
+                  borderRadius: 2,
+                }}
+              >
                 {error}
               </Alert>
             )}
@@ -130,7 +130,7 @@ export default function LoginPage() {
             <Box component="form" onSubmit={handleSubmit}>
               <TextField
                 fullWidth
-                label="📧 Email"
+                label="Email"
                 name="email"
                 type="email"
                 value={formData.email}
@@ -141,17 +141,20 @@ export default function LoginPage() {
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
                     "&:hover fieldset": {
-                      borderColor: "#667eea",
+                      borderColor: "#EB1700",
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "#667eea",
+                      borderColor: "#EB1700",
                     },
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: "#EB1700",
                   },
                 }}
               />
               <TextField
                 fullWidth
-                label="🔒 Password"
+                label="Password"
                 name="password"
                 type="password"
                 value={formData.password}
@@ -162,11 +165,14 @@ export default function LoginPage() {
                   "& .MuiOutlinedInput-root": {
                     borderRadius: 2,
                     "&:hover fieldset": {
-                      borderColor: "#667eea",
+                      borderColor: "#EB1700",
                     },
                     "&.Mui-focused fieldset": {
-                      borderColor: "#667eea",
+                      borderColor: "#EB1700",
                     },
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: "#EB1700",
                   },
                 }}
               />
@@ -182,30 +188,42 @@ export default function LoginPage() {
                   mb: 2,
                   py: 1.5,
                   borderRadius: 2,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontSize: "1rem",
-                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  background: "#EB1700",
+                  boxShadow: "none",
+                  textTransform: "none",
                   "&:hover": {
-                    background: "linear-gradient(135deg, #5568d3 0%, #6a4190 100%)",
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 6px 20px rgba(102, 126, 234, 0.4)",
+                    background: "#C91400",
+                    boxShadow: "0 2px 8px rgba(235, 23, 0, 0.3)",
                   },
-                  transition: "all 0.3s ease",
+                  transition: "all 0.2s ease",
                 }}
               >
-                {loading ? "Logging in..." : "Login"}
+                {loading ? "Signing in..." : "Sign in"}
               </Button>
 
-              <Typography variant="body2" textAlign="center">
+              <Typography variant="body2" textAlign="center" color="text.secondary">
                 Don't have an account?{" "}
-                <MuiLink component={Link} href="/register" underline="hover">
-                  Sign Up
+                <MuiLink
+                  component={Link}
+                  href="/register"
+                  underline="hover"
+                  sx={{
+                    color: "#EB1700",
+                    fontWeight: 600,
+                    "&:hover": {
+                      color: "#C91400",
+                    },
+                  }}
+                >
+                  Sign up
                 </MuiLink>
               </Typography>
             </Box>
           </CardContent>
         </Card>
       </Container>
-      </Box>
-    );
-  }
+    </Box>
+  );
+}

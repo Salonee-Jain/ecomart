@@ -116,30 +116,41 @@ export default function OrdersPage() {
 
   if (orders.length === 0) {
     return (
-      <Container sx={{ py: 8, textAlign: "center" }}>
-        <ShoppingBag sx={{ fontSize: 80, color: "text.secondary", mb: 2 }} />
-        <Typography variant="h4" gutterBottom>
-          No Orders Yet
-        </Typography>
-        <Typography color="text.secondary" paragraph>
-          You haven't placed any orders yet.
-        </Typography>
-        <Button
-          variant="contained"
-          size="large"
-          onClick={() => router.push("/products")}
-        >
-          Start Shopping
-        </Button>
-      </Container>
+      <Box sx={{ background: "#FFFFFF", minHeight: "calc(100vh - 64px)", py: 8 }}>
+        <Container sx={{ textAlign: "center" }}>
+          <ShoppingBag sx={{ fontSize: 80, color: "#767676", mb: 2 }} />
+          <Typography variant="h4" gutterBottom sx={{ color: "#191919", fontWeight: 700 }}>
+            No Orders Yet
+          </Typography>
+          <Typography color="text.secondary" paragraph>
+            You haven't placed any orders yet.
+          </Typography>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => router.push("/products")}
+            sx={{
+              background: "#EB1700",
+              boxShadow: "none",
+              textTransform: "none",
+              "&:hover": {
+                background: "#C91400",
+                boxShadow: "0 2px 8px rgba(235, 23, 0, 0.3)",
+              },
+            }}
+          >
+            Start Shopping
+          </Button>
+        </Container>
+      </Box>
     );
   }
 
   return (
     <Box sx={{
-      background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+      background: "#FFFFFF",
       minHeight: "calc(100vh - 64px)",
-      py: 6,
+      py: 4,
     }}>
       <Container sx={{ py: 2 }}>
         <Button
@@ -149,6 +160,11 @@ export default function OrdersPage() {
             mb: 3,
             fontWeight: 600,
             borderRadius: 2,
+            color: "#191919",
+            "&:hover": {
+              backgroundColor: "#F8F9FA",
+              color: "#EB1700",
+            },
           }}
         >
           Back to Profile
@@ -157,51 +173,38 @@ export default function OrdersPage() {
         <Box
           sx={{
             mb: 4,
-            p: 3,
-            borderRadius: 3,
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            color: "white",
+            py: 3,
+            px: 4,
+            borderRadius: 2,
+            background: "#FAFAFA",
+            border: "1px solid #E8E8E8",
             display: "flex",
             alignItems: "center",
             gap: 2,
-            boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
           }}
         >
-          <ShoppingBag sx={{ fontSize: 40 }} />
-          <Typography variant="h3" fontWeight={900}>
-            📝 My Orders
+          <ShoppingBag sx={{ fontSize: 36, color: "#EB1700" }} />
+          <Typography variant="h3" fontWeight={700} sx={{ color: "#191919", letterSpacing: "-0.5px" }}>
+            My Orders
           </Typography>
         </Box>
 
-        <Grid container spacing={3}>
+        <Grid container spacing={4}>
           {orders.map((order, index) => (
             <Grid item xs={12} key={order._id}>
               <Card
-                elevation={3}
+                elevation={0}
                 sx={{
-                  borderRadius: 3,
+                  borderRadius: 2,
                   overflow: "hidden",
                   background: "white",
-                  position: "relative",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: "3px",
-                    background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
-                  },
+                  border: "1px solid #E8E8E8",
                   "&:hover": {
-                    boxShadow: "0 8px 25px rgba(0,0,0,0.12)",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                     transform: "translateY(-2px)",
+                    borderColor: "#D0D0D0",
                   },
-                  transition: "all 0.3s ease",
-                  animation: `fadeIn 0.4s ease ${index * 0.1}s backwards`,
-                  "@keyframes fadeIn": {
-                    from: { opacity: 0, transform: "translateY(20px)" },
-                    to: { opacity: 1, transform: "translateY(0)" },
-                  },
+                  transition: "all 0.2s ease",
                 }}
               >
                 <CardContent sx={{ p: 3 }}>
@@ -266,8 +269,8 @@ export default function OrdersPage() {
                           sx={{
                             p: 2,
                             borderRadius: 2,
-                            background: "linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%)",
-                            border: "1px solid rgba(102, 126, 234, 0.2)",
+                            background: "#FFF5F5",
+                            border: "1px solid #FFE0E0",
                             width: "100%",
                           }}
                         >
@@ -276,12 +279,9 @@ export default function OrdersPage() {
                           </Typography>
                           <Typography
                             variant="h5"
-                            fontWeight="bold"
+                            fontWeight={700}
                             sx={{
-                              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                              backgroundClip: "text",
-                              WebkitBackgroundClip: "text",
-                              WebkitTextFillColor: "transparent",
+                              color: "#EB1700",
                             }}
                           >
                             ${order.totalPrice.toFixed(2)}
@@ -295,12 +295,13 @@ export default function OrdersPage() {
                           fullWidth
                           sx={{
                             borderRadius: 2,
-                            borderColor: "#667eea",
-                            color: "#667eea",
+                            borderColor: "#E8E8E8",
+                            color: "#EB1700",
                             fontWeight: 600,
+                            textTransform: "none",
                             "&:hover": {
-                              borderColor: "#764ba2",
-                              background: "rgba(102, 126, 234, 0.08)",
+                              borderColor: "#EB1700",
+                              background: "#FFF5F5",
                             },
                           }}
                         >

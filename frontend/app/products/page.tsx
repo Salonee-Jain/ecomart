@@ -7,7 +7,6 @@ import {
   Grid,
   Card,
   CardContent,
-  CardMedia,
   Button,
   Box,
   TextField,
@@ -18,7 +17,7 @@ import {
 } from "@mui/material";
 import { ShoppingBag } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
-import AddToCartButton from "@/components/AddToCartButton";
+import ProductCard from "@/components/ProductCard";
 
 interface Product {
   _id: string;
@@ -138,49 +137,65 @@ export default function ProductsPage() {
 
   return (
     <Box sx={{
-      background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+      background: "#FFFFFF",
       minHeight: "calc(100vh - 64px)",
-      py: 6,
+      py: 4,
     }}>
       <Container sx={{ py: 2 }}>
         <Box
           sx={{
             mb: 4,
-            p: 3,
-            borderRadius: 3,
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            color: "white",
+            py: 3,
+            px: 4,
+            borderRadius: 2,
+            background: "#FAFAFA",
+            border: "1px solid #E8E8E8",
             display: "flex",
             alignItems: "center",
             gap: 2,
-            boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
           }}
         >
-          <ShoppingBag sx={{ fontSize: 40 }} />
-          <Typography variant="h3" fontWeight={900}>
-            🛍️ All Products
+          <ShoppingBag sx={{ fontSize: 36, color: "#EB1700" }} />
+          <Typography
+            variant="h3"
+            fontWeight={700}
+            sx={{
+              color: "#191919",
+              letterSpacing: "-0.5px",
+            }}
+          >
+            All Products
           </Typography>
         </Box>
 
         {/* Filters */}
-        <Card elevation={3} sx={{
+        <Card elevation={0} sx={{
           mb: 4,
-          borderRadius: 3,
-          background: "rgba(255, 255, 255, 0.95)",
-          backdropFilter: "blur(10px)",
+          borderRadius: 2,
+          background: "white",
+          border: "1px solid #E8E8E8",
         }}>
-          <CardContent sx={{ p: 3 }}>
+          <CardContent sx={{ p: 3 }} >
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   fullWidth
-                  label="🔍 Search Products"
+                  label="Search Products"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 2,
+                      "&:hover fieldset": {
+                        borderColor: "#EB1700",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#EB1700",
+                      },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": {
+                      color: "#EB1700",
                     },
                   }}
                 />
@@ -192,6 +207,20 @@ export default function ProductsPage() {
                   label="Category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      "&:hover fieldset": {
+                        borderColor: "#EB1700",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#EB1700",
+                      },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": {
+                      color: "#EB1700",
+                    },
+                  }}
                 >
                   <MenuItem value="">All Categories</MenuItem>
                   {categories.map((cat) => (
@@ -208,6 +237,20 @@ export default function ProductsPage() {
                   type="number"
                   value={minPrice}
                   onChange={(e) => setMinPrice(e.target.value)}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      "&:hover fieldset": {
+                        borderColor: "#EB1700",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#EB1700",
+                      },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": {
+                      color: "#EB1700",
+                    },
+                  }}
                 />
               </Grid>
               <Grid item xs={6} sm={3} md={2}>
@@ -217,6 +260,20 @@ export default function ProductsPage() {
                   type="number"
                   value={maxPrice}
                   onChange={(e) => setMaxPrice(e.target.value)}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      "&:hover fieldset": {
+                        borderColor: "#EB1700",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#EB1700",
+                      },
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": {
+                      color: "#EB1700",
+                    },
+                  }}
                 />
               </Grid>
               <Grid item xs={6} sm={6} md={1.5}>
@@ -228,7 +285,13 @@ export default function ProductsPage() {
                     borderRadius: 2,
                     fontWeight: 600,
                     textTransform: "none",
-                    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    background: "#EB1700",
+                    boxShadow: "none",
+                    py: 1.8,
+                    "&:hover": {
+                      background: "#C91400",
+                      boxShadow: "0 2px 8px rgba(235, 23, 0, 0.3)",
+                    },
                   }}
                 >
                   Search
@@ -243,6 +306,14 @@ export default function ProductsPage() {
                     borderRadius: 2,
                     fontWeight: 600,
                     textTransform: "none",
+                    borderColor: "#E8E8E8",
+                    color: "#191919",
+                    py: 1.8,
+                    "&:hover": {
+                      borderColor: "#EB1700",
+                      backgroundColor: "#FFF5F5",
+                      color: "#EB1700",
+                    },
                   }}
                 >
                   Reset
@@ -259,114 +330,17 @@ export default function ProductsPage() {
         )}
 
         {/* Products Grid */}
-        <Grid container spacing={3}>
+        <Grid container spacing={2} sx={{ display: "flex" }} justifyContent="center">
           {products.map((product, index) => (
             <Grid
               item
               xs={12}
               sm={6}
               md={4}
-              lg={3}
+              lg={4}
               key={product._id}
-              sx={{
-                animation: `fadeIn 0.5s ease ${index * 0.05}s backwards`,
-                "@keyframes fadeIn": {
-                  from: { opacity: 0, transform: "translateY(20px)" },
-                  to: { opacity: 1, transform: "translateY(0)" },
-                },
-              }}
             >
-              <Card
-                elevation={3}
-                sx={{
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  cursor: "pointer",
-                  borderRadius: 3,
-                  overflow: "hidden",
-                  background: "white",
-                  transition: "all 0.3s ease",
-                  position: "relative",
-                  "&:hover": {
-                    boxShadow: "0 15px 35px rgba(0,0,0,0.2)",
-                    transform: "translateY(-5px)",
-                  },
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: "3px",
-                    background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
-                  },
-                }}
-                onClick={() => router.push(`/products/${product._id}`)}
-              >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={product.image}
-                  alt={product.name}
-                  sx={{
-                    objectFit: "cover",
-                    transition: "transform 0.3s ease",
-                    "&:hover": {
-                      transform: "scale(1.05)",
-                    },
-                  }}
-                />
-                <CardContent sx={{ flexGrow: 1, p: 2.5 }}>
-                  <Typography
-                    variant="h6"
-                    gutterBottom
-                    noWrap
-                    fontWeight={700}
-                    sx={{ color: "#2d3748" }}
-                  >
-                    {product.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      mb: 2,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                    }}
-                  >
-                    {product.description}
-                  </Typography>
-                  <Typography
-                    variant="h5"
-                    fontWeight={900}
-                    mb={2}
-                    sx={{
-                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                      backgroundClip: "text",
-                      WebkitBackgroundClip: "text",
-                      WebkitTextFillColor: "transparent",
-                    }}
-                  >
-                    ${product.price.toFixed(2)}
-                  </Typography>
-                  <Box onClick={(e) => e.stopPropagation()}>
-                    <AddToCartButton
-                      productId={product._id}
-                      disabled={product.stock === 0}
-                    />
-                  </Box>
-                  {product.stock === 0 && (
-                    <Typography variant="caption" color="error" display="block" mt={1}>
-                      Out of Stock
-                    </Typography>
-                  )}
-                </CardContent>
-              </Card>
+              <ProductCard product={product} showDescription={true} />
             </Grid>
           ))}
         </Grid>

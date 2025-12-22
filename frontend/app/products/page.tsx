@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect, useRef } from "react";
 import {
   Container,
@@ -141,7 +140,7 @@ export default function ProductsPage() {
       minHeight: "calc(100vh - 64px)",
       py: 4,
     }}>
-      <Container sx={{ py: 2 }}>
+      <Container maxWidth="xl" sx={{ py: 2 }}>
         <Box
           sx={{
             mb: 4,
@@ -330,12 +329,12 @@ export default function ProductsPage() {
         )}
 
         {/* Products Grid */}
-        <Grid container spacing={2} sx={{ display: "flex" }} justifyContent="center">
+        <Grid container spacing={3}>
           {products.map((product, index) => (
             <Grid
               item
               xs={12}
-              sm={6}
+              sm={12}
               md={4}
               lg={4}
               key={product._id}

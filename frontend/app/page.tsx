@@ -61,7 +61,7 @@ export default function HomePage() {
       background: "#FFFFFF",
       minHeight: "calc(100vh - 64px)",
     }}>
-      <Container sx={{ py: 5 }}>
+      <Container maxWidth="xl" sx={{ py: 5 }}>
         {/* Hero Section */}
         <Box
           sx={{
@@ -176,13 +176,14 @@ export default function HomePage() {
             No products available at the moment.
           </Alert>
         ) : (
-          <Grid container spacing={3} justifyContent="center">
+          <Grid container spacing={3}>
             {products.map((p: Product, index: number) => (
               <Grid
                 item
                 xs={12}
-                sm={6}
+                sm={12}
                 md={4}
+                lg={4}
                 key={p._id}
               >
                 <ProductCard product={p} />

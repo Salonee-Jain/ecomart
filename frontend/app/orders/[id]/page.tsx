@@ -150,12 +150,28 @@ export default function OrderDetailPage() {
     }
   };
 
-  const getStatusColor = () => {
-    if (!order) return "default";
-    if (order.isCancelled) return "error";
-    if (order.isDelivered) return "success";
-    if (order.isPaid) return "info";
-    return "warning";
+  const getStatusStyle = () => {
+    if (!order) return {};
+    if (order.isCancelled) return {
+      bgcolor: "#FEE2E2",
+      color: "#DC2626",
+      border: "1px solid #FCA5A5"
+    };
+    if (order.isDelivered) return {
+      bgcolor: "#D1FAE5",
+      color: "#059669",
+      border: "1px solid #6EE7B7"
+    };
+    if (order.isPaid) return {
+      bgcolor: "#DBEAFE",
+      color: "#2563EB",
+      border: "1px solid #93C5FD"
+    };
+    return {
+      bgcolor: "#FEF3C7",
+      color: "#D97706",
+      border: "1px solid #FCD34D"
+    };
   };
 
   const getStatusText = () => {
@@ -242,14 +258,14 @@ export default function OrderDetailPage() {
           </Box>
           <Chip
             label={getStatusText()}
-            color={getStatusColor()}
             size="medium"
             icon={
-              order.isCancelled ? <Cancel /> :
-                order.isDelivered ? <CheckCircle /> :
-                  order.isPaid ? <LocalShipping /> : <Payment />
+              order.isCancelled ? <Cancel sx={{ fontSize: 20 }} /> :
+                order.isDelivered ? <CheckCircle sx={{ fontSize: 20 }} /> :
+                  order.isPaid ? <LocalShipping sx={{ fontSize: 20 }} /> : <Payment sx={{ fontSize: 20 }} />
             }
             sx={{
+              ...getStatusStyle(),
               fontWeight: 600,
               px: 2,
               py: 2.5,

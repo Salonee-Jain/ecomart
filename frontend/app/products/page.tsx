@@ -176,7 +176,7 @@ export default function ProductsPage() {
         }}>
           <CardContent sx={{ p: 3 }} >
             <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={6} md={3}>
+              <Grid size={{xs: 12, sm: 6, md: 3}}>
                 <TextField
                   fullWidth
                   label="Search Products"
@@ -199,7 +199,7 @@ export default function ProductsPage() {
                   }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={2}>
+              <Grid size={{xs: 12, sm: 6, md: 2}}>
                 <TextField
                   fullWidth
                   select
@@ -229,7 +229,7 @@ export default function ProductsPage() {
                   ))}
                 </TextField>
               </Grid>
-              <Grid item xs={6} sm={3} md={2}>
+              <Grid size={{xs: 6, sm: 3, md: 2}}>
                 <TextField
                   fullWidth
                   label="Min Price"
@@ -252,7 +252,7 @@ export default function ProductsPage() {
                   }}
                 />
               </Grid>
-              <Grid item xs={6} sm={3} md={2}>
+              <Grid size={{xs: 6, sm: 3, md: 2}}>
                 <TextField
                   fullWidth
                   label="Max Price"
@@ -275,7 +275,7 @@ export default function ProductsPage() {
                   }}
                 />
               </Grid>
-              <Grid item xs={6} sm={6} md={1.5}>
+              <Grid size={{xs: 6, sm: 6, md: 1.5}}>
                 <Button
                   fullWidth
                   variant="contained"
@@ -296,7 +296,7 @@ export default function ProductsPage() {
                   Search
                 </Button>
               </Grid>
-              <Grid item xs={6} sm={6} md={1.5}>
+              <Grid size={{xs: 6, sm: 6, md: 1.5}}>
                 <Button
                   fullWidth
                   variant="outlined"
@@ -332,11 +332,7 @@ export default function ProductsPage() {
         <Grid container spacing={3}>
           {products.map((product, index) => (
             <Grid
-              item
-              xs={12}
-              sm={12}
-              md={4}
-              lg={4}
+              size={{xs: 12, sm: 12, md: 4, lg: 4}}
               key={product._id}
             >
               <ProductCard product={product} showDescription={true} />

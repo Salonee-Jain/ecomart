@@ -84,6 +84,7 @@ export default function HomePage() {
               color: "#191919",
               letterSpacing: "-1px",
               mb: 2,
+              textAlign: "center", 
             }}
           >
             Everything you need, delivered
@@ -106,6 +107,7 @@ export default function HomePage() {
             variant="contained"
             size="large"
             sx={{
+              mx: "200px",
               bgcolor: "#EB1700",
               color: "white",
               borderRadius: 3,
@@ -179,11 +181,7 @@ export default function HomePage() {
           <Grid container spacing={3}>
             {products.map((p: Product, index: number) => (
               <Grid
-                item
-                xs={12}
-                sm={12}
-                md={4}
-                lg={4}
+                size={{xs: 12, sm: 12, md: 4, lg: 4}}
                 key={p._id}
               >
                 <ProductCard product={p} />

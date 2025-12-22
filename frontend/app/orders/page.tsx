@@ -76,11 +76,27 @@ export default function OrdersPage() {
     }
   };
 
-  const getStatusColor = (order: Order) => {
-    if (order.isCancelled) return "error";
-    if (order.isDelivered) return "success";
-    if (order.isPaid) return "info";
-    return "warning";
+  const getStatusStyle = (order: Order) => {
+    if (order.isCancelled) return {
+      bgcolor: "#FEE2E2",
+      color: "#DC2626",
+      border: "1px solid #FCA5A5"
+    };
+    if (order.isDelivered) return {
+      bgcolor: "#D1FAE5",
+      color: "#059669",
+      border: "1px solid #6EE7B7"
+    };
+    if (order.isPaid) return {
+      bgcolor: "#DBEAFE",
+      color: "#2563EB",
+      border: "1px solid #93C5FD"
+    };
+    return {
+      bgcolor: "#FEF3C7",
+      color: "#D97706",
+      border: "1px solid #FCD34D"
+    };
   };
 
   const getStatusText = (order: Order) => {
@@ -91,10 +107,10 @@ export default function OrdersPage() {
   };
 
   const getStatusIcon = (order: Order) => {
-    if (order.isCancelled) return <Cancel />;
-    if (order.isDelivered) return <CheckCircle />;
-    if (order.isPaid) return <LocalShipping />;
-    return <ShoppingBag />;
+    if (order.isCancelled) return <Cancel sx={{ fontSize: 18 }} />;
+    if (order.isDelivered) return <CheckCircle sx={{ fontSize: 18 }} />;
+    if (order.isPaid) return <LocalShipping sx={{ fontSize: 18 }} />;
+    return <ShoppingBag sx={{ fontSize: 18 }} />;
   };
 
   if (loading) {
@@ -191,7 +207,7 @@ export default function OrdersPage() {
 
         <Grid container spacing={4}>
           {orders.map((order, index) => (
-            <Grid item xs={12} key={order._id}>
+            <Grid size={{xs: 12}} key={order._id}>
               <Card
                 elevation={0}
                 sx={{
@@ -209,7 +225,7 @@ export default function OrdersPage() {
               >
                 <CardContent sx={{ p: 3 }}>
                   <Grid container spacing={3} alignItems="stretch">
-                    <Grid item xs={12} sm={8}>
+                    <Grid size={{xs: 12, sm: 8}}>
                       <Box display="flex" flexDirection="column" height="100%">
                         <Box display="flex" alignItems="center" gap={1} mb={2}>
                           <Typography variant="h6" fontWeight="bold">
@@ -218,8 +234,12 @@ export default function OrdersPage() {
                           <Chip
                             icon={getStatusIcon(order)}
                             label={getStatusText(order)}
-                            color={getStatusColor(order)}
                             size="small"
+                            sx={{
+                              ...getStatusStyle(order),
+                              fontWeight: 600,
+                              fontSize: "0.75rem",
+                            }}
                           />
                         </Box>
 
@@ -235,7 +255,6 @@ export default function OrdersPage() {
                           💳 Payment: {order.paymentMethod.toUpperCase()}
                         </Typography>
 
-                        <Divider sx={{ my: 2 }} />
 
                         <Box flexGrow={1}>
                           <Typography variant="subtitle2" fontWeight="600" gutterBottom>
@@ -255,7 +274,7 @@ export default function OrdersPage() {
                       </Box>
                     </Grid>
 
-                    <Grid item xs={12} sm={4}>
+                    <Grid size={{xs: 12, sm: 4}}>
                       <Box
                         display="flex"
                         flexDirection="column"
@@ -269,8 +288,6 @@ export default function OrdersPage() {
                           sx={{
                             p: 2,
                             borderRadius: 2,
-                            background: "#FFF5F5",
-                            border: "1px solid #FFE0E0",
                             width: "100%",
                           }}
                         >
@@ -282,6 +299,7 @@ export default function OrdersPage() {
                             fontWeight={700}
                             sx={{
                               color: "#EB1700",
+                             
                             }}
                           >
                             ${order.totalPrice.toFixed(2)}
@@ -293,7 +311,9 @@ export default function OrdersPage() {
                           startIcon={<Visibility />}
                           onClick={() => router.push(`/orders/${order._id}`)}
                           fullWidth
+                
                           sx={{
+                            height: "40%",
                             borderRadius: 2,
                             borderColor: "#E8E8E8",
                             color: "#EB1700",

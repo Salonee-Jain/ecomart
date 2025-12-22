@@ -93,24 +93,14 @@ export default function CartPage() {
         setUpdating(null);
       }
     } else if (type === 'all') {
-      setLoading(true);
-      try {
-        const deletePromises = cartItems.map(item =>
-          fetch(`http://localhost:5000/api/cart/${item.product}`, {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${getToken()}`,
-            },
-          })
-        );
+      setError("");
 
-        await Promise.all(deletePromises);
-        await fetchCart();
+      try {
+        await clearCart();
         setSuccessMessage("Cart cleared");
+        setTimeout(() => setSuccessMessage(""), 2000);
       } catch (err: any) {
         setError(err.message);
-      } finally {
-        setLoading(false);
       }
     }
   };
@@ -133,14 +123,6 @@ export default function CartPage() {
 
   if (loading) {
     return <LoadingState message="Loading cart..." />;
-  }
-
-  if (error) {
-    return (
-      <Container sx={{ py: 8 }}>
-        <Alert severity="error">{error}</Alert>
-      </Container>
-    );
   }
 
   if (cartItems.length === 0) {
@@ -180,7 +162,7 @@ export default function CartPage() {
               {cartItems.length > 0 && (
                 <Button
                   variant="outlined"
-                  onClick={clearCart}
+                  onClick={handleClearCart}
                   startIcon={<Delete />}
                   sx={{
                     borderColor: "#E8E8E8",
@@ -261,7 +243,7 @@ export default function CartPage() {
                         <IconButton
                           size="small"
                           onClick={() =>
-                            updateQuantity(item.product, item.quantity - 1)
+                            handleUpdateQuantity(item.product, item.quantity - 1)
                           }
                           disabled={
                             item.quantity <= 1 || updating === item.product
@@ -280,7 +262,7 @@ export default function CartPage() {
                         <IconButton
                           size="small"
                           onClick={() =>
-                            updateQuantity(item.product, item.quantity + 1)
+                            handleUpdateQuantity(item.product, item.quantity + 1)
                           }
                           disabled={updating === item.product}
                           color="primary"
@@ -301,7 +283,7 @@ export default function CartPage() {
                     <Grid item xs={2} sm={2} md={1}>
                       <IconButton
                         color="error"
-                        onClick={() => removeItem(item.product)}
+                        onClick={() => handleRemoveItem(item.product)}
                         disabled={updating === item.product}
                         size="small"
                       >

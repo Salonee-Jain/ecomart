@@ -246,11 +246,11 @@ export default function CheckoutPage() {
 
   return (
     <Box sx={{
-      background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+      background: "#FFFFFF",
       minHeight: "calc(100vh - 64px)",
-      py: 6,
+      py: 4,
     }}>
-      <Container sx={{ py: 2 }}>
+      <Container maxWidth="xl" sx={{ py: 2 }}>
         <Button
           startIcon={<ArrowBack />}
           onClick={() => router.push("/cart")}
@@ -258,6 +258,11 @@ export default function CheckoutPage() {
             mb: 3,
             fontWeight: 600,
             borderRadius: 2,
+            color: "#191919",
+            "&:hover": {
+              backgroundColor: "#F8F9FA",
+              color: "#EB1700",
+            },
           }}
         >
           Back to Cart
@@ -266,19 +271,19 @@ export default function CheckoutPage() {
         <Box
           sx={{
             mb: 4,
-            p: 3,
-            borderRadius: 3,
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            color: "white",
+            py: 3,
+            px: 4,
+            borderRadius: 2,
+            background: "#FAFAFA",
+            border: "1px solid #E8E8E8",
             display: "flex",
             alignItems: "center",
             gap: 2,
-            boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
           }}
         >
-          <CheckCircle sx={{ fontSize: 40 }} />
-          <Typography variant="h3" fontWeight={900}>
-            🛍️ Checkout
+          <CheckCircle sx={{ fontSize: 36, color: "#EB1700" }} />
+          <Typography variant="h3" fontWeight={700} sx={{ color: "#191919", letterSpacing: "-0.5px" }}>
+            Checkout
           </Typography>
         </Box>
 
@@ -288,13 +293,19 @@ export default function CheckoutPage() {
             mb: 4,
             bgcolor: "white",
             p: 3,
-            borderRadius: 3,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+            borderRadius: 2,
+            border: "1px solid #E8E8E8",
             "& .MuiStepLabel-root .Mui-completed": {
-              color: "#667eea",
+              color: "#EB1700",
             },
             "& .MuiStepLabel-root .Mui-active": {
-              color: "#667eea",
+              color: "#EB1700",
+            },
+            "& .MuiStepIcon-root.Mui-completed": {
+              color: "#EB1700",
+            },
+            "& .MuiStepIcon-root.Mui-active": {
+              color: "#EB1700",
             },
           }}
         >
@@ -315,32 +326,23 @@ export default function CheckoutPage() {
           <Grid item xs={12} md={8}>
             {activeStep === 0 && (
               <Card
-                elevation={3}
+                elevation={0}
                 sx={{
-                  borderRadius: 3,
-                  overflow: "hidden",
-                  position: "relative",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: "3px",
-                    background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
-                  },
+                  borderRadius: 2,
+                  border: "1px solid #E8E8E8",
+                  background: "white",
                 }}
               >
-                <CardContent>
+                <CardContent sx={{ p: 3 }}>
                   <Box display="flex" alignItems="center" gap={1} mb={3}>
-                    <LocalShipping color="primary" />
-                    <Typography variant="h5" fontWeight={700}>
+                    <LocalShipping sx={{ color: "#EB1700", fontSize: 28 }} />
+                    <Typography variant="h5" fontWeight={700} sx={{ color: "#191919" }}>
                       Shipping Information
                     </Typography>
                   </Box>
 
                   <Grid container spacing={2}>
-                    <Grid item xs={12}>
+                    <Grid size={{xs: 12}}>
                       <TextField
                         fullWidth
                         label="Email"
@@ -349,6 +351,20 @@ export default function CheckoutPage() {
                         value={shippingInfo.email}
                         onChange={handleInputChange}
                         required
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 2,
+                            "&:hover fieldset": {
+                              borderColor: "#EB1700",
+                            },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "#EB1700",
+                            },
+                          },
+                          "& .MuiInputLabel-root.Mui-focused": {
+                            color: "#EB1700",
+                          },
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -543,10 +559,13 @@ export default function CheckoutPage() {
                   sx={{
                     borderRadius: 2,
                     px: 4,
-                    fontWeight: 700,
-                    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    fontWeight: 600,
+                    textTransform: "none",
+                    background: "#EB1700",
+                    boxShadow: "none",
                     "&:hover": {
-                      background: "linear-gradient(135deg, #5568d3 0%, #6a4190 100%)",
+                      background: "#C91400",
+                      boxShadow: "0 4px 12px rgba(235, 23, 0, 0.3)",
                     },
                   }}
                 >
@@ -561,32 +580,39 @@ export default function CheckoutPage() {
                   sx={{
                     borderRadius: 2,
                     px: 4,
-                    fontWeight: 700,
-                    background: "linear-gradient(135deg, #4caf50 0%, #45a049 100%)",
+                    fontWeight: 600,
+                    textTransform: "none",
+                    background: "#EB1700",
+                    boxShadow: "none",
                     "&:hover": {
-                      background: "linear-gradient(135deg, #45a049 0%, #3d8b40 100%)",
+                      background: "#C91400",
+                      boxShadow: "0 4px 12px rgba(235, 23, 0, 0.3)",
+                    },
+                    "&:disabled": {
+                      background: "#E8E8E8",
+                      color: "#767676",
                     },
                   }}
                 >
-                  {processing ? "Processing..." : "🎉 Place Order"}
+                  {processing ? "Processing..." : "Place Order"}
                 </Button>
               )}
             </Box>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid size={{xs: 12, md: 4}}>
             <Card
-              elevation={4}
+              elevation={0}
               sx={{
                 position: 'sticky',
                 top: 80,
-                borderRadius: 3,
+                borderRadius: 2,
                 background: "white",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+                border: "1px solid #E8E8E8",
               }}
             >
-              <CardContent>
-                <Typography variant="h5" fontWeight={700} mb={2}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography variant="h5" fontWeight={700} mb={2} sx={{ color: "#191919" }}>
                   Order Summary
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
@@ -611,10 +637,10 @@ export default function CheckoutPage() {
                 <Divider sx={{ my: 2 }} />
 
                 <Box display="flex" justifyContent="space-between" mb={2}>
-                  <Typography variant="h6" fontWeight="bold">
+                  <Typography variant="h6" fontWeight="bold" sx={{ color: "#191919" }}>
                     Total:
                   </Typography>
-                  <Typography variant="h5" fontWeight="bold" color="primary">
+                  <Typography variant="h5" fontWeight="bold" sx={{ color: "#EB1700" }}>
                     ${calculateTotal().toFixed(2)}
                   </Typography>
                 </Box>

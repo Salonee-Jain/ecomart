@@ -116,6 +116,17 @@ export default function ProductDetailPage() {
       return;
     }
 
+    // Validate stock availability
+    if (!product || product.stock < 1) {
+      setError("Product is out of stock");
+      return;
+    }
+
+    if (quantity > product.stock) {
+      setError(`Only ${product.stock} items available in stock`);
+      return;
+    }
+
     setAddingToCart(true);
     setError("");
 
@@ -235,7 +246,7 @@ export default function ProductDetailPage() {
 
         <Grid container spacing={4}>
           {/* Product Image */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Card
               elevation={0}
               sx={{
@@ -262,7 +273,7 @@ export default function ProductDetailPage() {
           </Grid>
 
           {/* Product Info */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Box>
               {/* Category & Brand */}
               <Box mb={2} display="flex" gap={1}>
@@ -354,8 +365,8 @@ export default function ProductDetailPage() {
                       label={`${product.stock} in stock`}
                       size="small"
                       sx={{
-                        bgcolor: "#E8F5E9",
-                        color: "#2E7D32",
+                        bgcolor: product.stock <= 5 ? "#FFF3E0" : "#E8F5E9",
+                        color: product.stock <= 5 ? "#E65100" : "#2E7D32",
                         fontWeight: 600,
                       }}
                     />
@@ -371,6 +382,11 @@ export default function ProductDetailPage() {
                     />
                   )}
                 </Box>
+                {product.stock > 0 && product.stock <= 5 && (
+                  <Alert severity="warning" sx={{ mb: 1.5, py: 0.5 }}>
+                    Only {product.stock} items left - Order soon!
+                  </Alert>
+                )}
                 <Typography variant="body2" color="#767676">
                   SKU: {product.sku}
                 </Typography>
@@ -543,7 +559,7 @@ export default function ProductDetailPage() {
           {product.reviews && product.reviews.length > 0 ? (
             <Grid container spacing={3}>
               {product.reviews.map((review, index) => (
-                <Grid item xs={12} key={index}>
+                <Grid size={{ xs: 12 }} key={index}>
                   <Card
                     elevation={0}
                     sx={{

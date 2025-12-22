@@ -31,6 +31,8 @@ import {
 } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { getToken, isAuthenticated } from "@/lib/auth";
+import { validateEmail, validateRequired, validateZipCode } from "@/lib/validation";
+import { calculatePricing, validateDiscountCode, formatPrice } from "@/lib/pricing";
 
 interface CartItem {
   product: string;
@@ -60,6 +62,10 @@ export default function CheckoutPage() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("card");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [discountCode, setDiscountCode] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState("");
+  const [discountMessage, setDiscountMessage] = useState("");
 
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     email: "",
@@ -101,35 +107,81 @@ export default function CheckoutPage() {
     }
   };
 
-  const calculateSubtotal = () => {
-    return cartItems.reduce((total, item) => {
-      return total + (item.price || 0) * (item.quantity || 0);
-    }, 0);
-  };
-
-  const calculateTax = () => calculateSubtotal() * 0.1;
-  const calculateTotal = () => calculateSubtotal() + calculateTax();
+  const pricing = calculatePricing(
+    cartItems.map(item => ({ price: item.price, quantity: item.quantity })),
+    shippingInfo.country,
+    appliedDiscount
+  );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setShippingInfo({
       ...shippingInfo,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
+
+    // Real-time validation
+    let error = "";
+    if (name === "email") {
+      const validation = validateEmail(value);
+      error = validation.error || "";
+    } else if (name === "zipCode") {
+      const validation = validateZipCode(value, shippingInfo.country);
+      error = validation.error || "";
+    } else {
+      const validation = validateRequired(value, name.charAt(0).toUpperCase() + name.slice(1));
+      error = validation.error || "";
+    }
+
+    setFieldErrors(prev => ({
+      ...prev,
+      [name]: error
+    }));
+  };
+
+  const handleApplyDiscount = () => {
+    const validation = validateDiscountCode(discountCode);
+    setDiscountMessage(validation.message);
+    
+    if (validation.valid) {
+      setAppliedDiscount(discountCode.toUpperCase());
+    } else {
+      setAppliedDiscount("");
+    }
+
+    // Clear message after 3 seconds
+    setTimeout(() => setDiscountMessage(""), 3000);
   };
 
   const handleNext = () => {
     if (activeStep === 0) {
-      // Validate shipping info
-      const required = ["email", "address", "city", "state", "zipCode"];
-      const missing = required.filter(field => !shippingInfo[field as keyof ShippingInfo]);
+      // Validate all shipping fields
+      const errors: Record<string, string> = {};
 
-      if (missing.length > 0) {
-        setError("Please fill in all required fields");
+      const emailValidation = validateEmail(shippingInfo.email);
+      if (!emailValidation.isValid) errors.email = emailValidation.error || "";
+
+      const addressValidation = validateRequired(shippingInfo.address, "Address");
+      if (!addressValidation.isValid) errors.address = addressValidation.error || "";
+
+      const cityValidation = validateRequired(shippingInfo.city, "City");
+      if (!cityValidation.isValid) errors.city = cityValidation.error || "";
+
+      const stateValidation = validateRequired(shippingInfo.state, "State");
+      if (!stateValidation.isValid) errors.state = stateValidation.error || "";
+
+      const zipValidation = validateZipCode(shippingInfo.zipCode, shippingInfo.country);
+      if (!zipValidation.isValid) errors.zipCode = zipValidation.error || "";
+
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        setError("Please correct the errors in the form");
         return;
       }
     }
 
     setError("");
+    setFieldErrors({});
     setActiveStep((prev) => prev + 1);
   };
 
@@ -323,7 +375,7 @@ export default function CheckoutPage() {
         )}
 
         <Grid container spacing={4}>
-          <Grid item xs={12} md={8}>
+          <Grid size={{xs: 12, md: 8}}>
             {activeStep === 0 && (
               <Card
                 elevation={0}
@@ -351,6 +403,8 @@ export default function CheckoutPage() {
                         value={shippingInfo.email}
                         onChange={handleInputChange}
                         required
+                        error={!!fieldErrors.email}
+                        helperText={fieldErrors.email}
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             borderRadius: 2,
@@ -367,7 +421,7 @@ export default function CheckoutPage() {
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid size={{xs: 12}}>
                       <TextField
                         fullWidth
                         label="Address"
@@ -375,9 +429,25 @@ export default function CheckoutPage() {
                         value={shippingInfo.address}
                         onChange={handleInputChange}
                         required
+                        error={!!fieldErrors.address}
+                        helperText={fieldErrors.address}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 2,
+                            "&:hover fieldset": {
+                              borderColor: "#EB1700",
+                            },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "#EB1700",
+                            },
+                          },
+                          "& .MuiInputLabel-root.Mui-focused": {
+                            color: "#EB1700",
+                          },
+                        }}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{xs: 12, sm: 6}}>
                       <TextField
                         fullWidth
                         label="City"
@@ -385,9 +455,25 @@ export default function CheckoutPage() {
                         value={shippingInfo.city}
                         onChange={handleInputChange}
                         required
+                        error={!!fieldErrors.city}
+                        helperText={fieldErrors.city}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 2,
+                            "&:hover fieldset": {
+                              borderColor: "#EB1700",
+                            },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "#EB1700",
+                            },
+                          },
+                          "& .MuiInputLabel-root.Mui-focused": {
+                            color: "#EB1700",
+                          },
+                        }}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{xs: 12, sm: 6}}>
                       <TextField
                         fullWidth
                         label="State/Province"
@@ -395,9 +481,25 @@ export default function CheckoutPage() {
                         value={shippingInfo.state}
                         onChange={handleInputChange}
                         required
+                        error={!!fieldErrors.state}
+                        helperText={fieldErrors.state}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 2,
+                            "&:hover fieldset": {
+                              borderColor: "#EB1700",
+                            },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "#EB1700",
+                            },
+                          },
+                          "& .MuiInputLabel-root.Mui-focused": {
+                            color: "#EB1700",
+                          },
+                        }}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{xs: 12, sm: 6}}>
                       <TextField
                         fullWidth
                         label="ZIP/Postal Code"
@@ -405,9 +507,25 @@ export default function CheckoutPage() {
                         value={shippingInfo.zipCode}
                         onChange={handleInputChange}
                         required
+                        error={!!fieldErrors.zipCode}
+                        helperText={fieldErrors.zipCode}
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 2,
+                            "&:hover fieldset": {
+                              borderColor: "#EB1700",
+                            },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "#EB1700",
+                            },
+                          },
+                          "& .MuiInputLabel-root.Mui-focused": {
+                            color: "#EB1700",
+                          },
+                        }}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid size={{xs: 12, sm: 6}}>
                       <TextField
                         fullWidth
                         label="Country"
@@ -415,6 +533,20 @@ export default function CheckoutPage() {
                         value={shippingInfo.country}
                         onChange={handleInputChange}
                         required
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: 2,
+                            "&:hover fieldset": {
+                              borderColor: "#EB1700",
+                            },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "#EB1700",
+                            },
+                          },
+                          "& .MuiInputLabel-root.Mui-focused": {
+                            color: "#EB1700",
+                          },
+                        }}
                       />
                     </Grid>
                   </Grid>
@@ -424,26 +556,17 @@ export default function CheckoutPage() {
 
             {activeStep === 1 && (
               <Card
-                elevation={3}
+                elevation={0}
                 sx={{
-                  borderRadius: 3,
-                  overflow: "hidden",
-                  position: "relative",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: "3px",
-                    background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
-                  },
+                  borderRadius: 2,
+                  border: "1px solid #E8E8E8",
+                  background: "white",
                 }}
               >
                 <CardContent sx={{ p: 3 }}>
                   <Box display="flex" alignItems="center" gap={1} mb={3}>
-                    <Payment color="primary" />
-                    <Typography variant="h5" fontWeight={700}>
+                    <Payment sx={{ color: "#EB1700", fontSize: 28 }} />
+                    <Typography variant="h5" fontWeight={700} sx={{ color: "#191919" }}>
                       Payment Method
                     </Typography>
                   </Box>
@@ -455,17 +578,17 @@ export default function CheckoutPage() {
                     >
                       <FormControlLabel
                         value="card"
-                        control={<Radio />}
+                        control={<Radio sx={{ color: "#EB1700", "&.Mui-checked": { color: "#EB1700" } }} />}
                         label="Credit/Debit Card"
                       />
                       <FormControlLabel
                         value="paypal"
-                        control={<Radio />}
+                        control={<Radio sx={{ color: "#EB1700", "&.Mui-checked": { color: "#EB1700" } }} />}
                         label="PayPal"
                       />
                       <FormControlLabel
                         value="cod"
-                        control={<Radio />}
+                        control={<Radio sx={{ color: "#EB1700", "&.Mui-checked": { color: "#EB1700" } }} />}
                         label="Cash on Delivery"
                       />
                     </RadioGroup>
@@ -480,26 +603,17 @@ export default function CheckoutPage() {
 
             {activeStep === 2 && (
               <Card
-                elevation={3}
+                elevation={0}
                 sx={{
-                  borderRadius: 3,
-                  overflow: "hidden",
-                  position: "relative",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: "3px",
-                    background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
-                  },
+                  borderRadius: 2,
+                  border: "1px solid #E8E8E8",
+                  background: "white",
                 }}
               >
                 <CardContent sx={{ p: 3 }}>
                   <Box display="flex" alignItems="center" gap={1} mb={3}>
-                    <CheckCircle color="success" />
-                    <Typography variant="h5" fontWeight={700}>
+                    <CheckCircle sx={{ color: "#10B981", fontSize: 28 }} />
+                    <Typography variant="h5" fontWeight={700} sx={{ color: "#191919" }}>
                       Review Your Order
                     </Typography>
                   </Box>
@@ -617,20 +731,96 @@ export default function CheckoutPage() {
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
 
+                {/* Discount Code Input */}
+                <Box mb={3}>
+                  <Typography variant="body2" fontWeight={600} mb={1}>
+                    Discount Code
+                  </Typography>
+                  <Box display="flex" gap={1}>
+                    <TextField
+                      size="small"
+                      placeholder="Enter code"
+                      value={discountCode}
+                      onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                      disabled={!!appliedDiscount}
+                      sx={{
+                        flex: 1,
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: 1.5,
+                          "&:hover fieldset": {
+                            borderColor: "#EB1700",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "#EB1700",
+                          },
+                        },
+                      }}
+                    />
+                    <Button
+                      variant="contained"
+                      onClick={handleApplyDiscount}
+                      disabled={!discountCode || !!appliedDiscount}
+                      sx={{
+                        bgcolor: "#EB1700",
+                        "&:hover": { bgcolor: "#C91400" },
+                        textTransform: "none",
+                        px: 2,
+                      }}
+                    >
+                      {appliedDiscount ? "Applied" : "Apply"}
+                    </Button>
+                  </Box>
+                  {discountMessage && (
+                    <Alert 
+                      severity={appliedDiscount ? "success" : "error"} 
+                      sx={{ mt: 1, py: 0.5 }}
+                    >
+                      {discountMessage}
+                    </Alert>
+                  )}
+                  {appliedDiscount && (
+                    <Chip
+                      label={appliedDiscount}
+                      onDelete={() => {
+                        setAppliedDiscount("");
+                        setDiscountCode("");
+                      }}
+                      size="small"
+                      sx={{ mt: 1, bgcolor: "#FFF5F5", color: "#EB1700" }}
+                    />
+                  )}
+                </Box>
+
+                <Divider sx={{ mb: 2 }} />
+
                 <Box display="flex" justifyContent="space-between" mb={1}>
                   <Typography>Subtotal:</Typography>
                   <Typography fontWeight="medium">
-                    ${calculateSubtotal().toFixed(2)}
+                    ${pricing.subtotal.toFixed(2)}
                   </Typography>
                 </Box>
+                {pricing.discount > 0 && (
+                  <Box display="flex" justifyContent="space-between" mb={1}>
+                    <Typography color="success.main">Discount:</Typography>
+                    <Typography fontWeight="medium" color="success.main">
+                      -${pricing.discount.toFixed(2)}
+                    </Typography>
+                  </Box>
+                )}
                 <Box display="flex" justifyContent="space-between" mb={1}>
                   <Typography>Shipping:</Typography>
-                  <Chip label="FREE" size="small" color="success" />
+                  {pricing.shipping === 0 ? (
+                    <Chip label="FREE" size="small" color="success" />
+                  ) : (
+                    <Typography fontWeight="medium">
+                      ${pricing.shipping.toFixed(2)}
+                    </Typography>
+                  )}
                 </Box>
                 <Box display="flex" justifyContent="space-between" mb={2}>
                   <Typography>Tax (10%):</Typography>
                   <Typography fontWeight="medium">
-                    ${calculateTax().toFixed(2)}
+                    ${pricing.tax.toFixed(2)}
                   </Typography>
                 </Box>
 
@@ -641,7 +831,7 @@ export default function CheckoutPage() {
                     Total:
                   </Typography>
                   <Typography variant="h5" fontWeight="bold" sx={{ color: "#EB1700" }}>
-                    ${calculateTotal().toFixed(2)}
+                    ${pricing.total.toFixed(2)}
                   </Typography>
                 </Box>
 

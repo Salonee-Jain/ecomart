@@ -3,85 +3,52 @@
 import { useState, useEffect } from "react";
 import { Button, CircularProgress, Box, IconButton, Typography } from "@mui/material";
 import { ShoppingCartOutlined, CheckCircle, Add, Remove } from "@mui/icons-material";
-import { apiFetch } from "@/lib/api";
+import { useCart } from "@/contexts/CartContext";
+import { useRouter } from "next/navigation";
+import { isAuthenticated } from "@/lib/auth";
 
 interface AddToCartButtonProps {
   productId: string;
   disabled?: boolean;
   variant?: "contained" | "outlined";
   size?: "small" | "medium" | "large";
+  productData?: {
+    name: string;
+    sku: string;
+    image: string;
+    price: number;
+    stock?: number;
+  };
 }
 
 export default function AddToCartButton({ 
   productId, 
   disabled = false,
   variant = "contained",
-  size = "medium"
+  size = "medium",
+  productData
 }: AddToCartButtonProps) {
+  const router = useRouter();
+  const { addToCart, updateQuantity, isInCart, getItemQuantity, error: cartError } = useCart();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [inCart, setInCart] = useState(false);
-  const [quantity, setQuantity] = useState(0);
-
-  // Check if item is in cart on mount and when navigating back
-  useEffect(() => {
-    checkCartStatus();
-    
-    // Also check when window gains focus (user navigates back)
-    const handleFocus = () => {
-      checkCartStatus();
-    };
-    
-    window.addEventListener('focus', handleFocus);
-    
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-    };
-  }, [productId]);
-
-  const checkCartStatus = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setInCart(false);
-        setQuantity(0);
-        return;
-      }
-
-      const cart = await apiFetch("/cart", "GET", undefined, token);
-      const cartItem = cart.items?.find((item: any) => item.product._id === productId);
-      
-      if (cartItem) {
-        setInCart(true);
-        setQuantity(cartItem.quantity);
-      } else {
-        setInCart(false);
-        setQuantity(0);
-      }
-    } catch (err) {
-      console.error("Failed to check cart status:", err);
-      setInCart(false);
-      setQuantity(0);
-    }
-  };
+  const quantity = getItemQuantity(productId);
+  const inCart = isInCart(productId);
 
   const handleAdd = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    if (!isAuthenticated()) {
+      router.push("/login");
+      return;
+    }
+
     setLoading(true);
     setSuccess(false);
 
     try {
-      const token = localStorage.getItem("token");
-
-      await apiFetch("/cart", "POST", {
-        productId,
-        quantity: 1
-      }, token || "");
-
-      setInCart(true);
-      setQuantity(1);
+      await addToCart(productId, 1, productData);
       setSuccess(true);
-
       setTimeout(() => setSuccess(false), 2000);
     } catch (err: any) {
       console.error("Failed to add to cart:", err.message);
@@ -90,30 +57,16 @@ export default function AddToCartButton({
     }
   };
 
-  const updateQuantity = async (e: React.MouseEvent, newQuantity: number) => {
+  const handleUpdateQuantity = async (e: React.MouseEvent, newQuantity: number) => {
     e.stopPropagation();
     
     if (newQuantity < 1) return;
     
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-
-      // Update cart by posting new quantity
-      const response = await apiFetch("/cart", "POST", {
-        productId,
-        quantity: newQuantity
-      }, token || "");
-
-      // Update local state after successful API call
-      setQuantity(newQuantity);
-      
-      // Optionally refresh cart status to ensure sync
-      await checkCartStatus();
+      await updateQuantity(productId, newQuantity);
     } catch (err: any) {
       console.error("Failed to update quantity:", err.message);
-      // Revert to previous quantity on error
-      await checkCartStatus();
     } finally {
       setLoading(false);
     }
@@ -146,7 +99,7 @@ export default function AddToCartButton({
       >
         <IconButton
           size="small"
-          onClick={(e) => updateQuantity(e, quantity - 1)}
+          onClick={(e) => handleUpdateQuantity(e, quantity - 1)}
           disabled={loading || quantity <= 1}
           sx={{
             color: "#EB1700",
@@ -170,7 +123,7 @@ export default function AddToCartButton({
         
         <IconButton
           size="small"
-          onClick={(e) => updateQuantity(e, quantity + 1)}
+          onClick={(e) => handleUpdateQuantity(e, quantity + 1)}
           disabled={loading}
           sx={{
             color: "#EB1700",

@@ -27,6 +27,7 @@ import {
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { isAuthenticated, logout, getToken } from "@/lib/auth";
+import { useCart } from "@/contexts/CartContext";
 
 interface User {
   name: string;
@@ -39,7 +40,7 @@ export default function Navbar() {
   const [authenticated, setAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [cartCount, setCartCount] = useState(0);
+  const { itemCount } = useCart();
   const [wishlistCount, setWishlistCount] = useState(0);
 
   useEffect(() => {
@@ -48,7 +49,6 @@ export default function Navbar() {
       setAuthenticated(isAuth);
       if (isAuth) {
         fetchUserProfile();
-        fetchCartCount();
         fetchWishlistCount();
       }
     };
@@ -73,23 +73,6 @@ export default function Navbar() {
       }
     } catch (err) {
       console.error("Failed to fetch profile:", err);
-    }
-  };
-
-  const fetchCartCount = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/cart", {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCartCount(data.items?.length || 0);
-      }
-    } catch (err) {
-      console.error("Failed to fetch cart:", err);
     }
   };
 
@@ -123,7 +106,6 @@ export default function Navbar() {
     logout();
     setAuthenticated(false);
     setUser(null);
-    setCartCount(0);
     setWishlistCount(0);
     router.push("/login");
   };
@@ -200,7 +182,6 @@ export default function Navbar() {
               <IconButton
                 component={Link}
                 href="/cart"
-                onClick={fetchCartCount}
                 sx={{
                   color: "#191919",
                   "&:hover": {
@@ -210,7 +191,7 @@ export default function Navbar() {
                 }}
               >
                 <Badge
-                  badgeContent={cartCount}
+                  badgeContent={itemCount}
                   sx={{
                     "& .MuiBadge-badge": {
                       backgroundColor: "#EB1700",

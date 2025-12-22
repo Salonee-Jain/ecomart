@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isAuthenticated, getToken } from "@/lib/auth";
-import { CircularProgress, Container, Typography } from "@mui/material";
+import { CircularProgress, Container, Typography, Alert, Box } from "@mui/material";
 
 interface AdminRouteProps {
     children: React.ReactNode;
@@ -13,6 +13,7 @@ export default function AdminRoute({ children }: AdminRouteProps) {
     const router = useRouter();
     const [isVerifying, setIsVerifying] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         const checkAdminAccess = async () => {
@@ -29,13 +30,18 @@ export default function AdminRoute({ children }: AdminRouteProps) {
                 });
 
                 if (!response.ok) {
+                    // Token is invalid, redirect to admin login
                     router.push("/admin-login");
                     return;
                 }
 
                 const user = await response.json();
                 if (!user.isAdmin) {
-                    router.push("/admin-login");
+                    // User is logged in but not an admin, redirect to home with error
+                    setError("Access denied. Admin privileges required.");
+                    setTimeout(() => {
+                        router.push("/");
+                    }, 2000);
                 } else {
                     setIsAdmin(true);
                 }
@@ -54,8 +60,24 @@ export default function AdminRoute({ children }: AdminRouteProps) {
     if (isVerifying) {
         return (
             <Container sx={{ py: 8, textAlign: "center" }}>
-                <CircularProgress />
+                <CircularProgress sx={{ color: "#EB1700" }} />
                 <Typography sx={{ mt: 2 }}>Verifying access...</Typography>
+            </Container>
+        );
+    }
+
+    // Show error message if not admin
+    if (error) {
+        return (
+            <Container sx={{ py: 8, textAlign: "center" }}>
+                <Box sx={{ maxWidth: 600, mx: "auto" }}>
+                    <Alert severity="error" sx={{ mb: 3 }}>
+                        {error}
+                    </Alert>
+                    <Typography variant="body2" color="text.secondary">
+                        Redirecting to home page...
+                    </Typography>
+                </Box>
             </Container>
         );
     }

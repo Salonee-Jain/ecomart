@@ -1,5 +1,4 @@
 import ClientProviders from "@/components/ClientProviders";
-import "@/styles/globals.css";
 
 export const metadata = {
   title: "EcoMart",

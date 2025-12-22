@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Container,
   Typography,
@@ -25,27 +25,17 @@ import {
 import { Add, Remove, Delete, ShoppingCart } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { getToken, isAuthenticated } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/auth";
 import LoadingState from "@/components/LoadingState";
 import EmptyState from "@/components/EmptyState";
 import PageContainer from "@/components/PageContainer";
 import BackButton from "@/components/BackButton";
 import PageHeader from "@/components/PageHeader";
-
-interface CartItem {
-  _id?: string;
-  product: string; // This is the product ID
-  name: string;
-  sku: string;
-  image: string;
-  price: number;
-  quantity: number;
-}
+import { useCart } from "@/contexts/CartContext";
 
 export default function CartPage() {
   const router = useRouter();
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { items: cartItems, loading, updateQuantity, removeItem, clearCart } = useCart();
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
@@ -55,75 +45,33 @@ export default function CartPage() {
     type: 'item' | 'all';
   }>({ open: false, productId: null, type: 'item' });
 
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      router.push("/login");
-      return;
-    }
-    fetchCart();
-  }, [router]);
+  if (!isAuthenticated()) {
+    router.push("/login");
+    return null;
+  }
 
-  const fetchCart = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/cart", {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
-
-      if (!response.ok) throw new Error("Failed to fetch cart");
-
-      const data = await response.json();
-      setCartItems(data.items || []);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateQuantity = async (productId: string, quantity: number) => {
+  const handleUpdateQuantity = async (productId: string, quantity: number) => {
     if (quantity < 1) return;
 
     setUpdating(productId);
     setError("");
 
     try {
-      const response = await fetch(`http://localhost:5000/api/cart/${productId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ quantity }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update quantity");
-      }
-
-      const data = await response.json();
-      console.log("Update response:", data); // Debug log
-
-      // Set items from the updated cart
-      setCartItems(data.items || []);
+      await updateQuantity(productId, quantity);
       setSuccessMessage("Cart updated");
+      setTimeout(() => setSuccessMessage(""), 2000);
     } catch (err: any) {
-      console.error("Update error:", err); // Debug log
       setError(err.message);
-      // Fetch fresh data on error
-      await fetchCart();
     } finally {
       setUpdating(null);
     }
   };
 
-  const removeItem = async (productId: string) => {
+  const handleRemoveItem = async (productId: string) => {
     setDeleteDialog({ open: true, productId, type: 'item' });
   };
 
-  const clearCart = async () => {
+  const handleClearCart = async () => {
     setDeleteDialog({ open: true, productId: null, type: 'all' });
   };
 
@@ -136,17 +84,9 @@ export default function CartPage() {
       setError("");
 
       try {
-        const response = await fetch(`http://localhost:5000/api/cart/${productId}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        });
-
-        if (!response.ok) throw new Error("Failed to remove item");
-
-        await fetchCart();
+        await removeItem(productId);
         setSuccessMessage("Item removed from cart");
+        setTimeout(() => setSuccessMessage(""), 2000);
       } catch (err: any) {
         setError(err.message);
       } finally {

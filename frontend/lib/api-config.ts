@@ -45,6 +45,26 @@ export const API_ENDPOINTS = {
     DATABASE_REFACTOR: `${API_BASE_URL}/database/refactor`,
     DATABASE_CLEAR: `${API_BASE_URL}/database/clear-all`,
     DATABASE_SEED: `${API_BASE_URL}/database/seed`,
+
+    // Admin - Analytics
+    ORDER_ANALYTICS: `${API_BASE_URL}/orders/analytics`,
+    PRODUCT_ANALYTICS: `${API_BASE_URL}/products/analytics`,
+    
+    // Admin - Users
+    USERS: `${API_BASE_URL}/users`,
+    USER_BY_ID: (id: string) => `${API_BASE_URL}/users/${id}`,
+    USER_ROLE: (userId: string) => `${API_BASE_URL}/users/${userId}/role`,
+    
+    // Admin - Products
+    BULK_DELETE_PRODUCTS: `${API_BASE_URL}/products/bulk-delete`,
+    
+    // Admin - Orders
+    DELIVER_ORDER: (id: string) => `${API_BASE_URL}/orders/${id}/deliver`,
+    
+    // Admin - Payment
+    ALL_PAYMENTS: `${API_BASE_URL}/payment/all`,
+    CONFIRM_PAYMENT: (paymentIntentId: string) => `${API_BASE_URL}/payment/confirm/${paymentIntentId}`,
+    MARK_PAYMENT_SUCCEEDED: (paymentId: string) => `${API_BASE_URL}/payment/${paymentId}/mark-succeeded`,
 };
 
 export default API_BASE_URL;

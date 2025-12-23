@@ -11,16 +11,7 @@ async function bootstrap() {
   });
 
   // Enable CORS
-   app.enableCors({
-    origin: [
-      'https://ecomart.dev',
-      'https://www.ecomart.dev',
-      'https://ecomart-4q1s.vercel.app',
-    ],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  });
+   app.enableCors();
 
   // Global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());

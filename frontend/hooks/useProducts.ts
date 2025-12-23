@@ -15,9 +15,10 @@ const useProducts = (options?: UseProductsOptions) => {
   useEffect(() => {
     setLoading(true);
     setError("");
+    
     getProducts()
-      .then((p) => {
-        let products = p.products || [];
+      .then((response) => {
+        let products = response.products || [];
         // Apply limit if specified
         if (options?.limit && options.limit > 0) {
           products = products.slice(0, options.limit);

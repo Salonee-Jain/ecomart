@@ -36,7 +36,6 @@ export const API_ENDPOINTS = {
 
     // Payment
     CREATE_PAYMENT_INTENT: `${API_BASE_URL}/payment/create-intent`,
-    VERIFY_SESSION: (sessionId: string) => `${API_BASE_URL}/payments/verify-session/${sessionId}`,
 
     // Wishlist
     WISHLIST: `${API_BASE_URL}/wishlist`,

@@ -19,7 +19,6 @@ export class CartService {
       cart = await this.cartModel.create({ user: userId, items: [] });
     }
 
-    console.log('[CartService] getMyCart - returning cart with items:', cart.items.length);
     return cart;
   }
 
@@ -95,32 +94,71 @@ export class CartService {
   }
 
   async removeFromCart(userId: string, productId: string) {
-    const cart = await this.cartModel.findOne({ user: userId });
-    if (!cart) {
-      throw new NotFoundException('Cart not found');
+    // Retry logic to handle version conflicts
+    const maxRetries = 3;
+    let lastError: any;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const cart = await this.cartModel.findOne({ user: userId });
+        if (!cart) {
+          throw new NotFoundException('Cart not found');
+        }
+
+        cart.items = cart.items.filter((item) => item.product.toString() !== productId);
+        await cart.save();
+        return cart;
+      } catch (error) {
+        lastError = error;
+
+        // If it's a version error, retry
+        if (error.name === 'VersionError' || error.message?.includes('version')) {
+          await new Promise(resolve => setTimeout(resolve, 50 * (attempt + 1)));
+          continue;
+        }
+
+        // If it's not a version error, throw immediately
+        throw error;
+      }
     }
 
-    cart.items = cart.items.filter((item) => item.product.toString() !== productId);
-    await cart.save();
-    return cart;
+    // If all retries failed, throw the last error
+    throw lastError;
   }
 
   async clearCart(userId: string) {
-    const cart = await this.cartModel.findOne({ user: userId });
-    if (!cart) {
-      throw new NotFoundException('Cart not found');
+    // Retry logic to handle version conflicts
+    const maxRetries = 3;
+    let lastError: any;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const cart = await this.cartModel.findOne({ user: userId });
+        if (!cart) {
+          throw new NotFoundException('Cart not found');
+        }
+
+        cart.items = [];
+        await cart.save();
+
+        return { message: 'Cart cleared' };
+      } catch (error) {
+        lastError = error;
+
+        // If it's a version error, retry
+        if (error.name === 'VersionError' || error.message?.includes('version')) {
+          // Wait a bit before retrying
+          await new Promise(resolve => setTimeout(resolve, 50 * (attempt + 1)));
+          continue;
+        }
+
+        // If it's not a version error, throw immediately
+        throw error;
+      }
     }
 
-    console.log('[CartService] clearCart - before clear, items:', cart.items.length);
-    cart.items = [];
-    await cart.save();
-    console.log('[CartService] clearCart - after save, items:', cart.items.length);
-
-    // Verify it was actually saved
-    const verifyCart = await this.cartModel.findOne({ user: userId });
-    console.log('[CartService] clearCart - verified from DB, items:', verifyCart?.items.length);
-
-    return { message: 'Cart cleared' };
+    // If all retries failed, throw the last error
+    throw lastError;
   }
 
   async mergeCart(userId: string, mergeCartDto: MergeCartDto) {

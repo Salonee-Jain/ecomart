@@ -191,7 +191,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const clearCart = async () => {
+  const clearCart = useCallback(async () => {
     console.log('[CartContext] clearCart called, current items:', items.length);
     // Optimistic update
     const previousItems = [...items];
@@ -216,7 +216,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setItems(previousItems);
       throw err;
     }
-  };
+  }, [items, refreshCart]);
 
   const isInCart = (productId: string) => {
     return items.some((item) => item.product === productId);

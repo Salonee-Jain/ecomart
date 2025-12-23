@@ -34,6 +34,7 @@ import { useRouter } from "next/navigation";
 import { getToken, isAuthenticated } from "@/lib/auth";
 import { validateEmail, validateRequired, validateZipCode } from "@/lib/validation";
 import { calculatePricing, validateDiscountCode, formatPrice } from "@/lib/pricing";
+import { useCart } from "@/contexts/CartContext";
 
 interface CartItem {
   product: string;
@@ -57,6 +58,7 @@ const steps = ["Shipping Information", "Payment", "Review & Place Order"];
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { clearCart } = useCart();
   const [activeStep, setActiveStep] = useState(0);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -143,7 +145,7 @@ export default function CheckoutPage() {
   const handleApplyDiscount = () => {
     const validation = validateDiscountCode(discountCode);
     setDiscountMessage(validation.message);
-    
+
     if (validation.valid) {
       setAppliedDiscount(discountCode.toUpperCase());
     } else {
@@ -227,8 +229,13 @@ export default function CheckoutPage() {
 
       const order = await response.json();
 
-      // Clear cart after successful order
-      await clearCart();
+      // Clear cart after successful order using CartContext
+      try {
+        await clearCart();
+      } catch (err) {
+        console.error("Failed to clear cart:", err);
+        // Don't fail the order if cart clearing fails
+      }
 
       // If payment method is card, redirect to Stripe checkout
       if (paymentMethod === "card") {
@@ -267,24 +274,6 @@ export default function CheckoutPage() {
     } catch (err: any) {
       setError(`Order created but payment failed: ${err.message}`);
       setProcessing(false);
-    }
-  };
-
-  const clearCart = async () => {
-    try {
-      const deletePromises = cartItems.map(item =>
-        fetch(API_ENDPOINTS.CART_ITEM(item.product), {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        })
-      );
-
-      await Promise.all(deletePromises);
-    } catch (err) {
-      console.error("Failed to clear cart:", err);
-      // Don't throw error - order was successful, cart clearing is secondary
     }
   };
 
@@ -376,7 +365,7 @@ export default function CheckoutPage() {
         )}
 
         <Grid container spacing={4}>
-          <Grid size={{xs: 12, md: 8}}>
+          <Grid size={{ xs: 12, md: 8 }}>
             {activeStep === 0 && (
               <Card
                 elevation={0}
@@ -395,7 +384,7 @@ export default function CheckoutPage() {
                   </Box>
 
                   <Grid container spacing={2}>
-                    <Grid size={{xs: 12}}>
+                    <Grid size={{ xs: 12 }}>
                       <TextField
                         fullWidth
                         label="Email"
@@ -422,7 +411,7 @@ export default function CheckoutPage() {
                         }}
                       />
                     </Grid>
-                    <Grid size={{xs: 12}}>
+                    <Grid size={{ xs: 12 }}>
                       <TextField
                         fullWidth
                         label="Address"
@@ -448,7 +437,7 @@ export default function CheckoutPage() {
                         }}
                       />
                     </Grid>
-                    <Grid size={{xs: 12, sm: 6}}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField
                         fullWidth
                         label="City"
@@ -474,7 +463,7 @@ export default function CheckoutPage() {
                         }}
                       />
                     </Grid>
-                    <Grid size={{xs: 12, sm: 6}}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField
                         fullWidth
                         label="State/Province"
@@ -500,7 +489,7 @@ export default function CheckoutPage() {
                         }}
                       />
                     </Grid>
-                    <Grid size={{xs: 12, sm: 6}}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField
                         fullWidth
                         label="ZIP/Postal Code"
@@ -526,7 +515,7 @@ export default function CheckoutPage() {
                         }}
                       />
                     </Grid>
-                    <Grid size={{xs: 12, sm: 6}}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField
                         fullWidth
                         label="Country"
@@ -715,7 +704,7 @@ export default function CheckoutPage() {
             </Box>
           </Grid>
 
-          <Grid size={{xs: 12, md: 4}}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Card
               elevation={0}
               sx={{
@@ -772,8 +761,8 @@ export default function CheckoutPage() {
                     </Button>
                   </Box>
                   {discountMessage && (
-                    <Alert 
-                      severity={appliedDiscount ? "success" : "error"} 
+                    <Alert
+                      severity={appliedDiscount ? "success" : "error"}
                       sx={{ mt: 1, py: 0.5 }}
                     >
                       {discountMessage}

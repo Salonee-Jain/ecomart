@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { API_ENDPOINTS } from "@/lib/api-config";
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Container,
@@ -13,54 +12,11 @@ import {
   Button,
 } from "@mui/material";
 import { CheckCircle } from "@mui/icons-material";
-import { getToken } from "@/lib/auth";
 
 function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [loading, setLoading] = useState(true);
-  const [orderId, setOrderId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const sessionId = searchParams.get("session_id");
-
-    if (sessionId) {
-      verifyPayment(sessionId);
-    } else {
-      setLoading(false);
-    }
-  }, [searchParams]);
-
-  const verifyPayment = async (sessionId: string) => {
-    try {
-      const response = await fetch(
-        API_ENDPOINTS.VERIFY_SESSION(sessionId),
-        {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setOrderId(data.orderId);
-      }
-    } catch (err) {
-      console.error("Payment verification failed:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <Container sx={{ py: 8, textAlign: "center" }}>
-        <CircularProgress />
-        <Typography sx={{ mt: 2 }}>Verifying payment...</Typography>
-      </Container>
-    );
-  }
+  const orderId = searchParams.get("orderId");
 
   return (
     <Container maxWidth="sm" sx={{ py: 8 }}>

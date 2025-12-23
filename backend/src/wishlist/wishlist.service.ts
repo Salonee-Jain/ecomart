@@ -35,10 +35,6 @@ export class WishlistService {
                 .exec();
         }
 
-        console.log('[WishlistService] getWishlist - products count:', wishlist.products?.length);
-        console.log('[WishlistService] getWishlist - first product type:', typeof wishlist.products?.[0]);
-        console.log('[WishlistService] getWishlist - first product sample:', JSON.stringify(wishlist.products?.[0]).substring(0, 200));
-
         return wishlist;
     }
 

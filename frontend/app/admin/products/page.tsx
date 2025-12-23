@@ -104,17 +104,20 @@ export default function AdminProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const data = await getProducts();
-      setProducts(data.products);
-      setFilteredProducts(data.products);
+      // Fetch ALL products for admin (no pagination)
+      const data = await getProducts({ limit: 1000 });
+      const productsArray = data.products || [];
+
+      setProducts(productsArray);
+      setFilteredProducts(productsArray);
 
       // Calculate stats
-      const totalValue = data.products.reduce((sum: number, p: Product) => sum + p.price * p.stock, 0);
-      const lowStock = data.filter((p: Product) => p.stock < 10).length;
-      const uniqueCategories = new Set(data.map((p: Product) => p.category)).size;
+      const totalValue = productsArray.reduce((sum: number, p: Product) => sum + p.price * p.stock, 0);
+      const lowStock = productsArray.filter((p: Product) => p.stock < 10).length;
+      const uniqueCategories = new Set(productsArray.map((p: Product) => p.category)).size;
 
       setStats({
-        totalProducts: data.length,
+        totalProducts: productsArray.length,
         totalValue,
         lowStock,
         categories: uniqueCategories,

@@ -9,7 +9,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 @Controller('cart')
 @UseGuards(JwtAuthGuard)
 export class CartController {
-  constructor(private readonly cartService: CartService) {}
+  constructor(private readonly cartService: CartService) { }
 
   @Get()
   @ApiOperation({ summary: 'Get my cart' })
@@ -41,20 +41,20 @@ export class CartController {
     return this.cartService.updateCartItem(req.user._id, productId, updateCartItemDto);
   }
 
+  @Delete('clear')
+  @ApiOperation({ summary: 'Clear entire cart' })
+  @ApiResponse({ status: 200, description: 'Cart cleared successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async clearCart(@Request() req) {
+    return this.cartService.clearCart(req.user._id);
+  }
+
   @Delete(':productId')
   @ApiOperation({ summary: 'Remove item from cart' })
   @ApiResponse({ status: 200, description: 'Item removed from cart successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async removeFromCart(@Request() req, @Param('productId') productId: string) {
     return this.cartService.removeFromCart(req.user._id, productId);
-  }
-
-  @Delete()
-  @ApiOperation({ summary: 'Clear entire cart' })
-  @ApiResponse({ status: 200, description: 'Cart cleared successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async clearCart(@Request() req) {
-    return this.cartService.clearCart(req.user._id);
   }
 
   @Post('merge')

@@ -19,6 +19,7 @@ export class CartService {
       cart = await this.cartModel.create({ user: userId, items: [] });
     }
 
+    console.log('[CartService] getMyCart - returning cart with items:', cart.items.length);
     return cart;
   }
 
@@ -110,8 +111,15 @@ export class CartService {
       throw new NotFoundException('Cart not found');
     }
 
+    console.log('[CartService] clearCart - before clear, items:', cart.items.length);
     cart.items = [];
     await cart.save();
+    console.log('[CartService] clearCart - after save, items:', cart.items.length);
+
+    // Verify it was actually saved
+    const verifyCart = await this.cartModel.findOne({ user: userId });
+    console.log('[CartService] clearCart - verified from DB, items:', verifyCart?.items.length);
+
     return { message: 'Cart cleared' };
   }
 

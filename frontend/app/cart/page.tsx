@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Container,
   Typography,
@@ -45,10 +45,11 @@ export default function CartPage() {
     type: 'item' | 'all';
   }>({ open: false, productId: null, type: 'item' });
 
-  if (!isAuthenticated()) {
-    router.push("/login");
-    return null;
-  }
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push("/login");
+    }
+  }, [router]);
 
   const handleUpdateQuantity = async (productId: string, quantity: number) => {
     if (quantity < 1) return;
@@ -151,7 +152,7 @@ export default function CartPage() {
           action={
             <Box display="flex" alignItems="center" gap={2}>
               <Chip
-                label={`${cartItems.length} ${cartItems.length === 1 ? 'item' : 'items'}`}
+                label={`${cartItems.length} ${cartItems.length === 1 ? 'item' : 'items'} `}
                 sx={{
                   bgcolor: "#EB1700",
                   color: "white",
@@ -394,7 +395,7 @@ export default function CartPage() {
           <DialogContent>
             <DialogContentText>
               {deleteDialog.type === 'all'
-                ? `Are you sure you want to remove all ${cartItems.length} items from your cart? This action cannot be undone.`
+                ? `Are you sure you want to remove all ${cartItems.length} items from your cart ? This action cannot be undone.`
                 : 'Are you sure you want to remove this item from your cart?'}
             </DialogContentText>
           </DialogContent>

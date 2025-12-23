@@ -40,6 +40,7 @@ import { getProfile } from "@/services/auth.service";
 import LoadingState from "@/components/LoadingState";
 import BackButton from "@/components/BackButton";
 import PageContainer from "@/components/PageContainer";
+import { useCart } from "@/contexts/CartContext";
 
 interface Review {
   user: string;
@@ -64,9 +65,11 @@ interface Product {
   reviews?: Review[];
 }
 
+
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { addToCart: addToCartContext, getItemQuantity, isInCart } = useCart();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -86,6 +89,14 @@ export default function ProductDetailPage() {
       fetchUserId();
     }
   }, [params.id]);
+
+  // Update quantity when product loads or cart changes
+  useEffect(() => {
+    if (product) {
+      const cartQuantity = getItemQuantity(product._id);
+      setQuantity(cartQuantity > 0 ? cartQuantity : 1);
+    }
+  }, [product, getItemQuantity]);
 
   const fetchUserId = async () => {
     try {
@@ -132,27 +143,19 @@ export default function ProductDetailPage() {
     setError("");
 
     try {
-      const response = await fetch(API_ENDPOINTS.CART, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({
-          productId: product?._id,
-          quantity,
-        }),
+      // Use CartContext's addToCart which automatically refreshes the cart
+      await addToCartContext(product._id, quantity, {
+        name: product.name,
+        sku: product.sku,
+        image: product.image,
+        price: product.price,
+        stock: product.stock,
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || "Failed to add to cart");
-      }
 
       setSuccessMessage("Added to cart!");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Failed to add to cart");
     } finally {
       setAddingToCart(false);
     }

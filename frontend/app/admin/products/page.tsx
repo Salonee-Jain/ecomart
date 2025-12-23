@@ -46,7 +46,6 @@ import {
 import { getProducts, getCategories } from "@/services/product.service";
 import { deleteProduct } from "@/services/admin.service";
 
-
 interface Product {
   _id: string;
   name: string;
@@ -104,20 +103,17 @@ export default function AdminProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      // Fetch ALL products for admin (no pagination)
-      const data = await getProducts({ limit: 1000 });
-      const productsArray = data.products || [];
-
-      setProducts(productsArray);
-      setFilteredProducts(productsArray);
+      const data = await getProducts();
+      setProducts(data);
+      setFilteredProducts(data);
 
       // Calculate stats
-      const totalValue = productsArray.reduce((sum: number, p: Product) => sum + p.price * p.stock, 0);
-      const lowStock = productsArray.filter((p: Product) => p.stock < 10).length;
-      const uniqueCategories = new Set(productsArray.map((p: Product) => p.category)).size;
+      const totalValue = data.reduce((sum: number, p: Product) => sum + p.price * p.stock, 0);
+      const lowStock = data.filter((p: Product) => p.stock < 10).length;
+      const uniqueCategories = new Set(data.map((p: Product) => p.category)).size;
 
       setStats({
-        totalProducts: productsArray.length,
+        totalProducts: data.length,
         totalValue,
         lowStock,
         categories: uniqueCategories,
@@ -159,8 +155,8 @@ export default function AdminProductsPage() {
   };
 
   // Use fetched categories, fallback to unique categories from products if needed
-  const displayCategories = categories.length > 0
-    ? categories
+  const displayCategories = categories.length > 0 
+    ? categories 
     : [...new Set(products.map((p) => p.category))];
 
   if (loading) {
@@ -304,7 +300,7 @@ export default function AdminProductsPage() {
           </Box>
 
           {/* Table */}
-          <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, overflowX: "auto" }}>
+          <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
             <Table>
               <TableHead sx={{ bgcolor: "#f5f5f5" }}>
                 <TableRow>

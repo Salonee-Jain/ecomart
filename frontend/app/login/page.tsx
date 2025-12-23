@@ -15,7 +15,6 @@ import {
   Avatar,
 } from "@mui/material";
 import { LockOutlined } from "@mui/icons-material";
-import { API_ENDPOINTS } from "@/lib/api-config";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { saveToken, isAuthenticated } from "@/lib/auth";

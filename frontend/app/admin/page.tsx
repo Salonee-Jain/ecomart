@@ -26,7 +26,8 @@ import {
     Inventory,
     People,
 } from "@mui/icons-material";
-import { getAnalytics, getAllOrders } from "@/services/admin.service";
+import { getAnalytics, getAllOrders, getAllPayments, getAllUsers } from "@/services/admin.service";
+import { getProducts } from "@/services/product.service";
 import { useAdminData } from "@/contexts/AdminDataContext";
 
 interface Stats {
@@ -64,16 +65,30 @@ export default function AdminDashboard() {
 
     const fetchDashboardData = async () => {
         try {
-            const [analytics, orders] = await Promise.all([
-                getAnalytics(),
+            const [orders, payments, products, users] = await Promise.all([
                 getAllOrders(),
+                getAllPayments(),
+                getProducts(),
+                getAllUsers(),
             ]);
 
+            // Calculate revenue from payments (same logic as payment page)
+            const paymentsData = payments.payments || [];
+            const totalRevenue = paymentsData
+                .filter((p: any) => p.status === "succeeded")
+                .reduce((sum: number, p: any) => sum + p.amount, 0);
+
+            // Get products array
+            const productsData = products.products || [];
+
+            // Get users array
+            const usersData = users.users || [];
+
             setStats({
-                totalRevenue: analytics.orders.totalRevenue || 0,
-                totalOrders: analytics.orders.totalOrders || 0,
-                totalProducts: analytics.products.totalProducts || 0,
-                totalUsers: analytics.users.length || 0,
+                totalRevenue: totalRevenue || 0,
+                totalOrders: orders.length || 0,
+                totalProducts: productsData.length || 0,
+                totalUsers: usersData.length || 0,
             });
 
             // Get last 5 orders

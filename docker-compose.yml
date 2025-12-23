@@ -15,7 +15,7 @@ services:
     image: mongo:7
     container_name: ecomart-mongo
     ports:
-      - "27017:27017"   # optional (for local debugging)
+      - "27017:27017" # optional (for local debugging)
     volumes:
       - mongo_data:/data/db
     networks:
@@ -23,6 +23,8 @@ services:
 
   backend-api:
     build: ./backend
+    env_file:
+      - .env.backend
     container_name: ecomart-backend
     command: npm run start:prod
     ports:
@@ -35,6 +37,8 @@ services:
 
   email-worker:
     build: ./backend
+    env_file:
+      - .env.backend
     container_name: ecomart-email-worker
     command: npm run worker:prod
     depends_on:

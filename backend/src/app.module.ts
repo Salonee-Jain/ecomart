@@ -16,7 +16,6 @@ import { DatabaseModule } from './database/database.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '../.env',
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

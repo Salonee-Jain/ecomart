@@ -22,6 +22,7 @@ services:
       - ./backend/.env.production
     environment:
       - NODE_ENV=production
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
     container_name: ecomart-backend
     command: npm run start:prod
     ports:
@@ -31,7 +32,6 @@ services:
         condition: service_healthy
     networks:
       - ecomart-net
-  
 
   email-worker:
     build: ./backend
@@ -39,6 +39,7 @@ services:
       - ./backend/.env.production
     environment:
       - NODE_ENV=production
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
     container_name: ecomart-email-worker
     command: npm run worker:prod
     depends_on:

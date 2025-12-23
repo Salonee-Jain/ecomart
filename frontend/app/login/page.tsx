@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "@/lib/api-config";
 import {
   Container,
   Box,
@@ -14,6 +15,7 @@ import {
   Avatar,
 } from "@mui/material";
 import { LockOutlined } from "@mui/icons-material";
+import { API_ENDPOINTS } from "@/lib/api-config";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { saveToken, isAuthenticated } from "@/lib/auth";
@@ -44,7 +46,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(API_ENDPOINTS.LOGIN, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

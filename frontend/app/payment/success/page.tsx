@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { API_ENDPOINTS } from "@/lib/api-config";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Container,
@@ -33,7 +34,7 @@ export default function PaymentSuccessPage() {
   const verifyPayment = async (sessionId: string) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/payments/verify-session/${sessionId}`,
+        API_ENDPOINTS.VERIFY_SESSION(sessionId),
         {
           headers: {
             Authorization: `Bearer ${getToken()}`,

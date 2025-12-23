@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isAuthenticated, getToken } from "@/lib/auth";
 import { CircularProgress, Container, Typography, Alert, Box } from "@mui/material";
+import { API_ENDPOINTS } from "@/lib/api-config";
 
 interface AdminRouteProps {
     children: React.ReactNode;
@@ -23,7 +24,7 @@ export default function AdminRoute({ children }: AdminRouteProps) {
             }
 
             try {
-                const response = await fetch("http://localhost:5000/api/auth/profile", {
+                const response = await fetch(API_ENDPOINTS.PROFILE, {
                     headers: {
                         Authorization: `Bearer ${getToken()}`,
                     },

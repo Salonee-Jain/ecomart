@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { isAuthenticated, logout, getToken } from "@/lib/auth";
 import { useCart } from "@/contexts/CartContext";
+import { API_ENDPOINTS } from "@/lib/api-config";
 
 interface User {
   name: string;
@@ -59,7 +60,7 @@ export default function Navbar() {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/auth/profile", {
+      const response = await fetch(API_ENDPOINTS.PROFILE, {
         headers: {
           Authorization: `Bearer ${getToken()}`,
         },
@@ -76,7 +77,7 @@ export default function Navbar() {
 
   const fetchWishlistCount = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/wishlist", {
+      const response = await fetch(API_ENDPOINTS.WISHLIST, {
         headers: {
           Authorization: `Bearer ${getToken()}`,
         },

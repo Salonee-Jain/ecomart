@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "@/lib/api-config";
 import { useParams, useRouter } from "next/navigation";
 import {
   Container,
@@ -85,7 +86,7 @@ export default function OrderDetailPage() {
 
   const fetchOrder = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${params.id}`, {
+      const response = await fetch(API_ENDPOINTS.ORDER_BY_ID(params.id), {
         headers: {
           Authorization: `Bearer ${getToken()}`,
         },
@@ -107,7 +108,7 @@ export default function OrderDetailPage() {
 
     setProcessing(true);
     try {
-      const response = await fetch("http://localhost:5000/api/payment/create-intent", {
+      const response = await fetch(API_ENDPOINTS.CREATE_PAYMENT_INTENT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -133,7 +134,7 @@ export default function OrderDetailPage() {
 
     setProcessing(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${order._id}/cancel`, {
+      const response = await fetch(API_ENDPOINTS.CANCEL_ORDER(order._id), {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${getToken()}`,

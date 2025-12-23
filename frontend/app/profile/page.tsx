@@ -28,6 +28,7 @@ import {
   Cancel,
 } from "@mui/icons-material";
 import { getToken, isAuthenticated, logout } from "@/lib/auth";
+import { API_ENDPOINTS } from "@/lib/api-config";
 
 interface User {
   _id: string;
@@ -73,7 +74,7 @@ export default function ProfilePage() {
 
   const fetchUserProfile = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/auth/profile", {
+      const response = await fetch(API_ENDPOINTS.PROFILE, {
         headers: {
           Authorization: `Bearer ${getToken()}`,
         },
@@ -99,7 +100,7 @@ export default function ProfilePage() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/orders/my", {
+      const response = await fetch(API_ENDPOINTS.MY_ORDERS, {
         headers: {
           Authorization: `Bearer ${getToken()}`,
         },
@@ -126,7 +127,7 @@ export default function ProfilePage() {
     setSuccess("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/profile", {
+      const response = await fetch(API_ENDPOINTS.PROFILE, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -168,7 +169,7 @@ export default function ProfilePage() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/profile", {
+      const response = await fetch(API_ENDPOINTS.PROFILE, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

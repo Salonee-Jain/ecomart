@@ -15,6 +15,7 @@ import {
   Pagination,
 } from "@mui/material";
 import { ShoppingBag } from "@mui/icons-material";
+import { API_ENDPOINTS } from "@/lib/api-config";
 import { useRouter } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 
@@ -69,7 +70,7 @@ export default function ProductsPage() {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/products/categories");
+      const response = await fetch(API_ENDPOINTS.CATEGORIES);
 
       if (!response.ok) throw new Error("Failed to fetch categories");
 
@@ -94,7 +95,7 @@ export default function ProductsPage() {
         ...(maxPrice && { maxPrice }),
       });
 
-      const response = await fetch(`http://localhost:5000/api/products?${params}`);
+      const response = await fetch(`${API_ENDPOINTS.PRODUCTS}?${params}`);
 
       if (!response.ok) throw new Error("Failed to fetch products");
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "@/lib/api-config";
 import {
   Container,
   Typography,
@@ -86,7 +87,7 @@ export default function CheckoutPage() {
 
   const fetchCart = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/cart", {
+      const response = await fetch(API_ENDPOINTS.CART, {
         headers: {
           Authorization: `Bearer ${getToken()}`,
         },
@@ -194,7 +195,7 @@ export default function CheckoutPage() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/orders", {
+      const response = await fetch(API_ENDPOINTS.ORDERS, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -244,7 +245,7 @@ export default function CheckoutPage() {
 
   const handleStripePayment = async (order: any) => {
     try {
-      const response = await fetch("http://localhost:5000/api/payment/create-intent", {
+      const response = await fetch(API_ENDPOINTS.CREATE_PAYMENT_INTENT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -272,7 +273,7 @@ export default function CheckoutPage() {
   const clearCart = async () => {
     try {
       const deletePromises = cartItems.map(item =>
-        fetch(`http://localhost:5000/api/cart/${item.product}`, {
+        fetch(API_ENDPOINTS.CART_ITEM(item.product), {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${getToken()}`,

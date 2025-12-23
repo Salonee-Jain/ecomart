@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "@/lib/api-config";
 import {
     Box,
     Typography,
@@ -36,6 +37,7 @@ import {
 } from "@mui/icons-material";
 import { getAllPayments, confirmPayment, markPaymentSucceeded } from "@/services/admin.service";
 import { useAdminData } from "@/contexts/AdminDataContext";
+
 
 interface Payment {
     _id: string;
@@ -132,7 +134,7 @@ export default function AdminPaymentsPage() {
         setSuccess("");
 
         try {
-            const response = await fetch(`http://localhost:5000/api/orders/${orderId}/pay`, {
+            const response = await fetch(API_ENDPOINTS.PAY_ORDER(orderId), {
                 method: "PUT",
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -189,7 +191,7 @@ export default function AdminPaymentsPage() {
             // If no payment intent, create one first
             if (!paymentIntentId) {
                 setSuccess("Creating payment intent...");
-                const response = await fetch("http://localhost:5000/api/payment/create-intent", {
+                const response = await fetch(API_ENDPOINTS.CREATE_PAYMENT_INTENT, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

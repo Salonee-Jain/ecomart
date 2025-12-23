@@ -34,6 +34,7 @@ import {
   Share,
 } from "@mui/icons-material";
 import { getToken, isAuthenticated } from "@/lib/auth";
+import { API_ENDPOINTS } from "@/lib/api-config";
 import { createReview, updateReview, deleteReview } from "@/services/review.service";
 import { getProfile } from "@/services/auth.service";
 import LoadingState from "@/components/LoadingState";
@@ -97,7 +98,7 @@ export default function ProductDetailPage() {
 
   const fetchProduct = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${params.id}`);
+      const response = await fetch(API_ENDPOINTS.PRODUCT_BY_ID(params.id));
 
       if (!response.ok) throw new Error("Product not found");
 
@@ -131,7 +132,7 @@ export default function ProductDetailPage() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/cart", {
+      const response = await fetch(API_ENDPOINTS.CART, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

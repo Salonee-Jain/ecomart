@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { API_ENDPOINTS } from "@/lib/api-config";
 import { getToken, isAuthenticated } from "@/lib/auth";
 
 interface CartItem {
@@ -44,7 +45,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/cart", {
+      const response = await fetch(API_ENDPOINTS.CART, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
 
@@ -94,7 +95,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/cart", {
+      const response = await fetch(API_ENDPOINTS.CART, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -131,7 +132,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     ));
 
     try {
-      const response = await fetch(`http://localhost:5000/api/cart/${productId}`, {
+      const response = await fetch(API_ENDPOINTS.CART_ITEM(productId), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -160,7 +161,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems(items.filter((item) => item.product !== productId));
 
     try {
-      const response = await fetch(`http://localhost:5000/api/cart/${productId}`, {
+      const response = await fetch(API_ENDPOINTS.CART_ITEM(productId), {
         method: "DELETE",
         headers: { Authorization: `Bearer ${getToken()}` },
       });
@@ -182,7 +183,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems([]);
 
     try {
-      const response = await fetch("http://localhost:5000/api/cart/clear", {
+      const response = await fetch(API_ENDPOINTS.CART_CLEAR, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${getToken()}` },
       });

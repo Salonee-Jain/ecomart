@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { API_ENDPOINTS } from "@/lib/api-config";
 import {
     Box,
     Typography,
@@ -63,7 +64,7 @@ export default function DatabaseManagementPage() {
     const fetchStats = async () => {
         try {
             setLoading(true);
-            const response = await fetch("http://localhost:5000/api/database/stats", {
+            const response = await fetch(API_ENDPOINTS.DATABASE_STATS, {
                 headers: {
                     Authorization: `Bearer ${getToken()}`,
                 },
@@ -86,7 +87,7 @@ export default function DatabaseManagementPage() {
             setError("");
             setSuccess("");
 
-            const response = await fetch("http://localhost:5000/api/database/refactor", {
+            const response = await fetch(API_ENDPOINTS.DATABASE_REFACTOR, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${getToken()}`,
@@ -113,7 +114,7 @@ export default function DatabaseManagementPage() {
             setError("");
             setSuccess("");
 
-            const response = await fetch("http://localhost:5000/api/database/clear-all", {
+            const response = await fetch(API_ENDPOINTS.DATABASE_CLEAR, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${getToken()}`,
@@ -140,7 +141,7 @@ export default function DatabaseManagementPage() {
             setError("");
             setSuccess("");
 
-            const response = await fetch("http://localhost:5000/api/database/seed", {
+            const response = await fetch(API_ENDPOINTS.DATABASE_SEED, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${getToken()}`,

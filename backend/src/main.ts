@@ -66,3 +66,9 @@ async function bootstrap() {
 }
 
 bootstrap();
+
+// Graceful shutdown handlers
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM received. Shutting down gracefully...');
+  process.exit(0);
+});

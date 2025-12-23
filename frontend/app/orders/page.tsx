@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { API_ENDPOINTS } from "@/lib/api-config";
 import { useRouter } from "next/navigation";
 import {
   Container,
@@ -59,7 +60,7 @@ export default function OrdersPage() {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/orders/my", {
+      const response = await fetch(API_ENDPOINTS.MY_ORDERS, {
         headers: {
           Authorization: `Bearer ${getToken()}`,
         },

@@ -213,7 +213,7 @@ export default function AdminDashboard() {
                                                 </Typography>
                                             </TableCell>
                                             <TableCell>{order.user?.name || "Unknown"}</TableCell>
-                                            <TableCell fontWeight={600}>
+                                            <TableCell sx={{ fontWeight: 600 }}>
                                                 ${order.totalPrice.toFixed(2)}
                                             </TableCell>
                                             <TableCell>

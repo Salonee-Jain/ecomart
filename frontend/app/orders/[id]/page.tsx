@@ -85,6 +85,7 @@ export default function OrderDetailPage() {
   }, [params.id, router]);
 
   const fetchOrder = async () => {
+    if (!params.id) return;
     try {
       const response = await fetch(API_ENDPOINTS.ORDER_BY_ID(params.id), {
         headers: {

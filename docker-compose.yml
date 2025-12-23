@@ -10,6 +10,11 @@ services:
       RABBITMQ_DEFAULT_PASS: admin
     networks:
       - ecomart-net
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mongo:
     image: mongo:7
@@ -20,30 +25,39 @@ services:
       - mongo_data:/data/db
     networks:
       - ecomart-net
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend-api:
     build: ./backend
     env_file:
-      - ./backend/.env
+      - ./.env
     container_name: ecomart-backend
     command: npm run start:prod
     ports:
       - "5000:5000"
     depends_on:
-      - rabbitmq
-      - mongo
+      rabbitmq:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
     networks:
       - ecomart-net
 
   email-worker:
     build: ./backend
     env_file:
-      - ./backend/.env
+      - ./.env
     container_name: ecomart-email-worker
     command: npm run worker:prod
     depends_on:
-      - rabbitmq
-      - mongo
+      rabbitmq:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
     networks:
       - ecomart-net
 

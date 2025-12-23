@@ -1,9 +1,12 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as amqplib from 'amqplib';
 
 @Injectable()
 export class RabbitmqService implements OnModuleInit {
   private channel: amqplib.Channel;
+
+  constructor(private configService: ConfigService) { }
 
   async onModuleInit() {
     await this.connect();
@@ -11,7 +14,8 @@ export class RabbitmqService implements OnModuleInit {
 
   async connect() {
     try {
-      const connection = await amqplib.connect('amqp://admin:admin@localhost:5672');
+      const rabbitmqUrl = this.configService.get<string>('RABBITMQ_URL') || 'amqp://admin:admin@localhost:5672';
+      const connection = await amqplib.connect(rabbitmqUrl);
       this.channel = await connection.createChannel();
       await this.channel.assertQueue('emailQueue');
 

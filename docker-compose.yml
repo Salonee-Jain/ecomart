@@ -16,21 +16,6 @@ services:
       timeout: 5s
       retries: 5
 
-  mongo:
-    image: mongo:7
-    container_name: ecomart-mongo
-    ports:
-      - "27017:27017" # optional (for local debugging)
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - ecomart-net
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   backend-api:
     build: ./backend
     env_file:
@@ -43,8 +28,6 @@ services:
       - "5000:5000"
     depends_on:
       rabbitmq:
-        condition: service_healthy
-      mongo:
         condition: service_healthy
     networks:
       - ecomart-net
@@ -60,14 +43,9 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      mongo:
-        condition: service_healthy
     networks:
       - ecomart-net
 
 networks:
   ecomart-net:
     driver: bridge
-
-volumes:
-  mongo_data:

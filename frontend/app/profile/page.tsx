@@ -248,7 +248,7 @@ export default function ProfilePage() {
 
         <Grid container spacing={3}>
           {/* Profile Summary Card */}
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Card
               elevation={0}
               sx={{
@@ -337,7 +337,7 @@ export default function ProfilePage() {
           </Grid>
 
           {/* Profile Details & Orders */}
-          <Grid item xs={12} md={8}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <Card
               elevation={0}
               sx={{
@@ -429,7 +429,7 @@ export default function ProfilePage() {
                     </Box>
 
                     <Grid container spacing={2}>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <TextField
                           fullWidth
                           label="Name"
@@ -442,7 +442,7 @@ export default function ProfilePage() {
                           }}
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <TextField
                           fullWidth
                           label="Email"
@@ -467,7 +467,7 @@ export default function ProfilePage() {
                       Change Password
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <TextField
                           fullWidth
                           label="New Password"
@@ -477,7 +477,7 @@ export default function ProfilePage() {
                           onChange={handleInputChange}
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <TextField
                           fullWidth
                           label="Confirm New Password"
@@ -487,7 +487,7 @@ export default function ProfilePage() {
                           onChange={handleInputChange}
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid size={{ xs: 12 }}>
                         <Button
                           variant="contained"
                           onClick={handleChangePassword}

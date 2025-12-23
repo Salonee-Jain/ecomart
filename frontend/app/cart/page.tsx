@@ -191,7 +191,7 @@ export default function CartPage() {
         )}
 
         <Grid container spacing={4}>
-          <Grid item xs={12} md={8}>
+          <Grid size={{ xs: 12, md: 8 }}>
             {cartItems.map((item, index) => (
               <Card
                 key={item.product}
@@ -213,7 +213,7 @@ export default function CartPage() {
               >
                 <CardContent>
                   <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={3} sm={2} md={1.5}>
+                  <Grid size={{ xs: 3, sm: 2, md: 1.5 }}>
                       <Box
                         component="img"
                         src={item.image}
@@ -228,7 +228,7 @@ export default function CartPage() {
                         }}
                       />
                     </Grid>
-                    <Grid item xs={9} sm={10} md={4.5}>
+                    <Grid size={{ xs: 9, sm: 10, md: 4.5 }}>
                       <Typography variant="h6" gutterBottom noWrap>
                         {item.name}
                       </Typography>
@@ -239,7 +239,7 @@ export default function CartPage() {
                         SKU: {item.sku}
                       </Typography>
                     </Grid>
-                    <Grid item xs={7} sm={6} md={3}>
+                    <Grid size={{ xs: 7, sm: 6, md: 3 }}>
                       <Box display="flex" alignItems="center" justifyContent="center" gap={1}>
                         <IconButton
                           size="small"
@@ -276,12 +276,12 @@ export default function CartPage() {
                         </IconButton>
                       </Box>
                     </Grid>
-                    <Grid item xs={3} sm={4} md={2}>
+                    <Grid size={{ xs: 3, sm: 4, md: 2 }}>
                       <Typography variant="h6" fontWeight="bold" textAlign="right">
                         ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}
                       </Typography>
                     </Grid>
-                    <Grid item xs={2} sm={2} md={1}>
+                    <Grid size={{ xs: 2, sm: 2, md: 1 }}>
                       <IconButton
                         color="error"
                         onClick={() => handleRemoveItem(item.product)}
@@ -297,7 +297,7 @@ export default function CartPage() {
             ))}
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Card
               elevation={0}
               sx={{

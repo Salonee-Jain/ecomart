@@ -214,7 +214,7 @@ export default function DatabaseManagementPage() {
 
                     {stats ? (
                         <Grid container spacing={2}>
-                            <Grid item xs={12} sm={6} md={4}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                                 <Card sx={{ bgcolor: "#e3f2fd", p: 2 }}>
                                     <Typography variant="body2" color="text.secondary">
                                         Total Users
@@ -228,7 +228,7 @@ export default function DatabaseManagementPage() {
                                     </Box>
                                 </Card>
                             </Grid>
-                            <Grid item xs={12} sm={6} md={4}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                                 <Card sx={{ bgcolor: "#fff3e0", p: 2 }}>
                                     <Typography variant="body2" color="text.secondary">
                                         Products
@@ -238,7 +238,7 @@ export default function DatabaseManagementPage() {
                                     </Typography>
                                 </Card>
                             </Grid>
-                            <Grid item xs={12} sm={6} md={4}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                                 <Card sx={{ bgcolor: "#e8f5e9", p: 2 }}>
                                     <Typography variant="body2" color="text.secondary">
                                         Orders
@@ -248,7 +248,7 @@ export default function DatabaseManagementPage() {
                                     </Typography>
                                 </Card>
                             </Grid>
-                            <Grid item xs={12} sm={6} md={4}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                                 <Card sx={{ bgcolor: "#f3e5f5", p: 2 }}>
                                     <Typography variant="body2" color="text.secondary">
                                         Carts
@@ -258,7 +258,7 @@ export default function DatabaseManagementPage() {
                                     </Typography>
                                 </Card>
                             </Grid>
-                            <Grid item xs={12} sm={6} md={4}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                                 <Card sx={{ bgcolor: "#fce4ec", p: 2 }}>
                                     <Typography variant="body2" color="text.secondary">
                                         Payments
@@ -268,7 +268,7 @@ export default function DatabaseManagementPage() {
                                     </Typography>
                                 </Card>
                             </Grid>
-                            <Grid item xs={12} sm={6} md={4}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                                 <Card sx={{ bgcolor: "#e0f2f1", p: 2 }}>
                                     <Typography variant="body2" color="text.secondary">
                                         Total Documents
@@ -297,7 +297,7 @@ export default function DatabaseManagementPage() {
                     </Typography>
 
                     <Grid container spacing={3}>
-                        <Grid item xs={12} md={6}>
+                        <Grid size={{ xs: 12, md: 6 }}>
                             <Card sx={{ border: "2px solid #4caf50", p: 3 }}>
                                 <Box display="flex" alignItems="center" gap={1} mb={2}>
                                     <CheckCircle sx={{ color: "#4caf50", fontSize: 32 }} />
@@ -331,7 +331,7 @@ export default function DatabaseManagementPage() {
                             </Card>
                         </Grid>
 
-                        <Grid item xs={12} md={6}>
+                        <Grid size={{ xs: 12, md: 6 }}>
                             <Card sx={{ border: "2px solid #2196f3", p: 3 }}>
                                 <Box display="flex" alignItems="center" gap={1} mb={2}>
                                     <DataObject sx={{ color: "#2196f3", fontSize: 32 }} />
@@ -365,7 +365,7 @@ export default function DatabaseManagementPage() {
                             </Card>
                         </Grid>
 
-                        <Grid item xs={12} md={6}>
+                        <Grid size={{ xs: 12, md: 6 }}>
                             <Card sx={{ border: "2px solid #ff9800", p: 3 }}>
                                 <Box display="flex" alignItems="center" gap={1} mb={2}>
                                     <Delete sx={{ color: "#ff9800", fontSize: 32 }} />
@@ -398,7 +398,7 @@ export default function DatabaseManagementPage() {
                             </Card>
                         </Grid>
 
-                        <Grid item xs={12} md={6}>
+                        <Grid size={{ xs: 12, md: 6 }}>
                             <Card sx={{ border: "2px solid #9e9e9e", p: 3, opacity: 0.6 }}>
                                 <Box display="flex" alignItems="center" gap={1} mb={2}>
                                     <Storage sx={{ color: "#9e9e9e", fontSize: 32 }} />

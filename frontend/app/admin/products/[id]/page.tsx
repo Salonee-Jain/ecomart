@@ -119,7 +119,7 @@ export default function EditProductPage() {
                 <CardContent>
                     <form onSubmit={handleSubmit}>
                         <Grid container spacing={3}>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <TextField
                                     fullWidth
                                     required
@@ -129,7 +129,7 @@ export default function EditProductPage() {
                                     onChange={handleChange}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <TextField
                                     fullWidth
                                     required
@@ -139,7 +139,7 @@ export default function EditProductPage() {
                                     onChange={handleChange}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <TextField
                                     fullWidth
                                     required
@@ -151,7 +151,7 @@ export default function EditProductPage() {
                                     onChange={handleChange}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <TextField
                                     fullWidth
                                     required
@@ -163,7 +163,7 @@ export default function EditProductPage() {
                                     onChange={handleChange}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <TextField
                                     fullWidth
                                     required
@@ -173,7 +173,7 @@ export default function EditProductPage() {
                                     onChange={handleChange}
                                 />
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid size={{ xs: 12, md: 6 }}>
                                 <TextField
                                     fullWidth
                                     label="Brand"
@@ -182,7 +182,7 @@ export default function EditProductPage() {
                                     onChange={handleChange}
                                 />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 <TextField
                                     fullWidth
                                     required
@@ -194,7 +194,7 @@ export default function EditProductPage() {
                                     onChange={handleChange}
                                 />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 <TextField
                                     fullWidth
                                     required
@@ -204,7 +204,7 @@ export default function EditProductPage() {
                                     onChange={handleChange}
                                 />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid size={{ xs: 12 }}>
                                 <Box display="flex" gap={2} justifyContent="flex-end">
                                     <Button
                                         variant="outlined"

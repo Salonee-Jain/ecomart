@@ -142,7 +142,7 @@ export default function AdminDashboard() {
             {/* Stats Cards */}
             <Grid container spacing={3} mb={4}>
                 {statCards.map((card, index) => (
-                    <Grid item xs={12} sm={6} md={3} key={index}>
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                         <Card>
                             <CardContent>
                                 <Box display="flex" justifyContent="space-between" alignItems="start">

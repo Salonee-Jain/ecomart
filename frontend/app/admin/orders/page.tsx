@@ -192,7 +192,7 @@ export default function AdminOrdersPage() {
             {/* Stats Cards */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
                 {statsCards.map((stat, index) => (
-                    <Grid item xs={12} sm={6} md={3} key={index}>
+                    <Grid size={{ xs: 12, sm: 6, md: 3 }} key={index}>
                         <Card
                             elevation={2}
                             sx={{

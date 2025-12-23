@@ -60,9 +60,14 @@ export default function Navbar() {
 
   const fetchUserProfile = async () => {
     try {
+      const token = getToken();
+      if (!token) {
+        return;
+      }
+
       const response = await fetch(API_ENDPOINTS.PROFILE, {
         headers: {
-          Authorization: `Bearer ${getToken()}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -71,7 +76,8 @@ export default function Navbar() {
         setUser(data);
       }
     } catch (err) {
-      console.error("Failed to fetch profile:", err);
+      // Silently fail - user profile is not critical for navigation
+      console.debug("Failed to fetch profile:", err);
     }
   };
 

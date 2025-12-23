@@ -34,7 +34,9 @@ services:
   backend-api:
     build: ./backend
     env_file:
-      - ./.env
+      - ./backend/.env.production
+    environment:
+      - NODE_ENV=production
     container_name: ecomart-backend
     command: npm run start:prod
     ports:
@@ -50,7 +52,9 @@ services:
   email-worker:
     build: ./backend
     env_file:
-      - ./.env
+      - ./backend/.env.production
+    environment:
+      - NODE_ENV=production
     container_name: ecomart-email-worker
     command: npm run worker:prod
     depends_on:

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { API_ENDPOINTS } from "@/lib/api-config";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -15,7 +15,7 @@ import {
 import { CheckCircle } from "@mui/icons-material";
 import { getToken } from "@/lib/auth";
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -23,7 +23,7 @@ export default function PaymentSuccessPage() {
 
   useEffect(() => {
     const sessionId = searchParams.get("session_id");
-    
+
     if (sessionId) {
       verifyPayment(sessionId);
     } else {
@@ -67,11 +67,11 @@ export default function PaymentSuccessPage() {
       <Card>
         <CardContent sx={{ textAlign: "center", py: 6 }}>
           <CheckCircle sx={{ fontSize: 80, color: "success.main", mb: 2 }} />
-          
+
           <Typography variant="h4" fontWeight={700} gutterBottom>
             Payment Successful!
           </Typography>
-          
+
           <Typography variant="body1" color="text.secondary" paragraph>
             Thank you for your order. Your payment has been processed successfully.
           </Typography>
@@ -99,5 +99,18 @@ export default function PaymentSuccessPage() {
         </CardContent>
       </Card>
     </Container>
+  );
+}
+
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={
+      <Container sx={{ py: 8, textAlign: "center" }}>
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }}>Loading...</Typography>
+      </Container>
+    }>
+      <PaymentSuccessContent />
+    </Suspense>
   );
 }

@@ -112,8 +112,10 @@ export default function ProductDetailPage() {
   };
 
   const fetchProduct = async () => {
+    if (!params.id) return;
+    const productId = Array.isArray(params.id) ? params.id[0] : params.id;
     try {
-      const response = await fetch(API_ENDPOINTS.PRODUCT_BY_ID(params.id));
+      const response = await fetch(API_ENDPOINTS.PRODUCT_BY_ID(productId));
 
       if (!response.ok) throw new Error("Product not found");
 
@@ -243,8 +245,8 @@ export default function ProductDetailPage() {
     try {
       await toggleWishlist(product._id);
       setSuccessMessage(
-        isInWishlist(product._id) 
-          ? "Removed from wishlist!" 
+        isInWishlist(product._id)
+          ? "Removed from wishlist!"
           : "Added to wishlist!"
       );
       setTimeout(() => setSuccessMessage(""), 3000);

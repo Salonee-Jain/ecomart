@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Container,
@@ -72,7 +72,7 @@ function CheckoutForm({ orderId }: { orderId: string }) {
   return (
     <form onSubmit={handleSubmit}>
       <PaymentElement />
-      
+
       {error && (
         <Alert severity="error" sx={{ mt: 2 }}>
           {error}
@@ -93,7 +93,7 @@ function CheckoutForm({ orderId }: { orderId: string }) {
   );
 }
 
-export default function PaymentPage() {
+function PaymentPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const clientSecret = searchParams.get("clientSecret");
@@ -146,5 +146,18 @@ export default function PaymentPage() {
         </CardContent>
       </Card>
     </Container>
+  );
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense fallback={
+      <Container sx={{ py: 8, textAlign: "center" }}>
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }}>Loading payment...</Typography>
+      </Container>
+    }>
+      <PaymentPageContent />
+    </Suspense>
   );
 }

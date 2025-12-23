@@ -86,8 +86,9 @@ export default function OrderDetailPage() {
 
   const fetchOrder = async () => {
     if (!params.id) return;
+    const orderId = Array.isArray(params.id) ? params.id[0] : params.id;
     try {
-      const response = await fetch(API_ENDPOINTS.ORDER_BY_ID(params.id), {
+      const response = await fetch(API_ENDPOINTS.ORDER_BY_ID(orderId), {
         headers: {
           Authorization: `Bearer ${getToken()}`,
         },

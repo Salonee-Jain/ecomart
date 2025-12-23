@@ -11,10 +11,11 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/main.js",
     "dev": "nest start --watch",
     "worker": "ts-node src/worker.ts",
-    "worker:dev": "nodemon --watch src --exec ts-node src/worker.ts"
+    "worker:dev": "nodemon --watch src --exec ts-node src/worker.ts",
+    "worker:prod": "node dist/worker.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",

@@ -1,18 +1,51 @@
-version: "3.8"
-
 services:
   rabbitmq:
     image: rabbitmq:3.12-management
     container_name: ecomart-rabbitmq
     ports:
-      - "5672:5672"     # AMQP (backend connects)
-      - "15672:15672"   # UI Dashboard
+      - "5672:5672"
+      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: admin
       RABBITMQ_DEFAULT_PASS: admin
     networks:
       - ecomart-net
 
+  mongo:
+    image: mongo:7
+    container_name: ecomart-mongo
+    ports:
+      - "27017:27017"   # optional (for local debugging)
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - ecomart-net
+
+  backend-api:
+    build: ./backend
+    container_name: ecomart-backend
+    command: npm run start:prod
+    ports:
+      - "5000:5000"
+    depends_on:
+      - rabbitmq
+      - mongo
+    networks:
+      - ecomart-net
+
+  email-worker:
+    build: ./backend
+    container_name: ecomart-email-worker
+    command: npm run worker:prod
+    depends_on:
+      - rabbitmq
+      - mongo
+    networks:
+      - ecomart-net
+
 networks:
   ecomart-net:
     driver: bridge
+
+volumes:
+  mongo_data:

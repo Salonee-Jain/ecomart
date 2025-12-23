@@ -31,15 +31,7 @@ services:
         condition: service_healthy
     networks:
       - ecomart-net
-  frontend:
-    build: ./frontend
-    container_name: ecomart-frontend
-    env_file:
-      - ./frontend/.env.production
-    ports:
-      - "3000:3000"
-    networks:
-      - ecomart-net
+  
 
   email-worker:
     build: ./backend

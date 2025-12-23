@@ -72,15 +72,16 @@ export default function AdminUsersPage() {
     const fetchUsers = async () => {
         try {
             const data = await getAllUsers();
-            setUsers(data.users);
-            setFilteredUsers(data.users);
+            const usersList = data.users || [];
+            setUsers(usersList);
+            setFilteredUsers(usersList);
 
-            const admins = data.users.filter((u: User) => u.isAdmin).length;
+            const admins = usersList.filter((u: User) => u.isAdmin).length;
 
             setStats({
-                totalUsers: data.users.length,
-                adminUsers: admins,
-                regularUsers: data.length - admins,
+                totalUsers: usersList.length || 0,
+                adminUsers: admins || 0,
+                regularUsers: (usersList.length - admins) || 0,
             });
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to load users");

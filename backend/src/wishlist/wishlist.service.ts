@@ -14,14 +14,30 @@ export class WishlistService {
     async getWishlist(userId: string) {
         let wishlist = await this.wishlistModel
             .findOne({ user: userId })
-            .populate('products');
+            .populate({
+                path: 'products',
+                model: this.productModel
+            })
+            .exec();
 
         if (!wishlist) {
             wishlist = await this.wishlistModel.create({
                 user: userId,
                 products: [],
             });
+            // Populate the newly created wishlist
+            wishlist = await this.wishlistModel
+                .findById(wishlist._id)
+                .populate({
+                    path: 'products',
+                    model: this.productModel
+                })
+                .exec();
         }
+
+        console.log('[WishlistService] getWishlist - products count:', wishlist.products?.length);
+        console.log('[WishlistService] getWishlist - first product type:', typeof wishlist.products?.[0]);
+        console.log('[WishlistService] getWishlist - first product sample:', JSON.stringify(wishlist.products?.[0]).substring(0, 200));
 
         return wishlist;
     }
@@ -57,7 +73,8 @@ export class WishlistService {
         const wishlist = await this.wishlistModel.findOne({ user: userId });
 
         if (!wishlist) {
-            throw new NotFoundException('Wishlist not found');
+            // Create empty wishlist if not found
+            return this.getWishlist(userId);
         }
 
         wishlist.products = wishlist.products.filter(
@@ -72,7 +89,12 @@ export class WishlistService {
         const wishlist = await this.wishlistModel.findOne({ user: userId });
 
         if (!wishlist) {
-            throw new NotFoundException('Wishlist not found');
+            // Create an empty wishlist if it doesn't exist
+            await this.wishlistModel.create({
+                user: userId,
+                products: [],
+            });
+            return { message: 'Wishlist cleared' };
         }
 
         wishlist.products = [];

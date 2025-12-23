@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { isAuthenticated, logout, getToken } from "@/lib/auth";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 import { API_ENDPOINTS } from "@/lib/api-config";
 
 interface User {
@@ -40,7 +41,7 @@ export default function Navbar() {
   const [user, setUser] = useState<User | null>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { itemCount } = useCart();
-  const [wishlistCount, setWishlistCount] = useState(0);
+  const { wishlistCount, refreshWishlist } = useWishlist();
 
   useEffect(() => {
     const checkAuth = () => {
@@ -48,7 +49,6 @@ export default function Navbar() {
       setAuthenticated(isAuth);
       if (isAuth) {
         fetchUserProfile();
-        fetchWishlistCount();
       }
     };
 
@@ -75,23 +75,6 @@ export default function Navbar() {
     }
   };
 
-  const fetchWishlistCount = async () => {
-    try {
-      const response = await fetch(API_ENDPOINTS.WISHLIST, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setWishlistCount(data.products?.length || 0);
-      }
-    } catch (err) {
-      console.error("Failed to fetch wishlist:", err);
-    }
-  };
-
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -105,7 +88,6 @@ export default function Navbar() {
     logout();
     setAuthenticated(false);
     setUser(null);
-    setWishlistCount(0);
     router.push("/login");
   };
 
@@ -205,7 +187,7 @@ export default function Navbar() {
               <IconButton
                 component={Link}
                 href="/wishlist"
-                onClick={fetchWishlistCount}
+                onClick={refreshWishlist}
                 sx={{
                   color: "#191919",
                   "&:hover": {

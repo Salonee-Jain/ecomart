@@ -31,6 +31,7 @@ import {
   Edit,
   Delete,
   FavoriteBorder,
+  Favorite,
   Share,
 } from "@mui/icons-material";
 import { getToken, isAuthenticated } from "@/lib/auth";
@@ -41,6 +42,7 @@ import LoadingState from "@/components/LoadingState";
 import BackButton from "@/components/BackButton";
 import PageContainer from "@/components/PageContainer";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 
 interface Review {
   user: string;
@@ -70,6 +72,7 @@ export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { addToCart: addToCartContext, getItemQuantity, isInCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -80,6 +83,7 @@ export default function ProductDetailPage() {
   const [editingReview, setEditingReview] = useState<number | null>(null);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
   const [userId, setUserId] = useState<string | null>(null);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -223,6 +227,31 @@ export default function ProductDetailPage() {
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to delete review");
+    }
+  };
+
+  const handleWishlistToggle = async () => {
+    if (!isAuthenticated()) {
+      router.push("/login");
+      return;
+    }
+
+    if (!product) return;
+
+    setWishlistLoading(true);
+    setError("");
+    try {
+      await toggleWishlist(product._id);
+      setSuccessMessage(
+        isInWishlist(product._id) 
+          ? "Removed from wishlist!" 
+          : "Added to wishlist!"
+      );
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err: any) {
+      setError(err.message || "Failed to update wishlist");
+    } finally {
+      setWishlistLoading(false);
     }
   };
 
@@ -453,33 +482,56 @@ export default function ProductDetailPage() {
                   </Box>
 
                   {/* Add to Cart Button */}
-                  <Button
-                    variant="contained"
-                    size="large"
-                    fullWidth
-                    startIcon={<ShoppingCart />}
-                    onClick={handleAddToCart}
-                    disabled={addingToCart}
-                    sx={{
-                      py: 1.8,
-                      fontSize: "1rem",
-                      fontWeight: 600,
-                      textTransform: "none",
-                      borderRadius: 2,
-                      background: "#EB1700",
-                      boxShadow: "none",
-                      "&:hover": {
-                        background: "#C91400",
-                        boxShadow: "0 4px 12px rgba(235, 23, 0, 0.25)",
-                      },
-                      "&:disabled": {
-                        background: "#F0F0F0",
-                        color: "#D0D0D0",
-                      },
-                    }}
-                  >
-                    {addingToCart ? "Adding..." : "Add to Cart"}
-                  </Button>
+                  <Box display="flex" gap={2} mb={2}>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      fullWidth
+                      startIcon={<ShoppingCart />}
+                      onClick={handleAddToCart}
+                      disabled={addingToCart}
+                      sx={{
+                        py: 1.8,
+                        fontSize: "1rem",
+                        fontWeight: 600,
+                        textTransform: "none",
+                        borderRadius: 2,
+                        background: "#EB1700",
+                        boxShadow: "none",
+                        "&:hover": {
+                          background: "#C91400",
+                          boxShadow: "0 4px 12px rgba(235, 23, 0, 0.25)",
+                        },
+                        "&:disabled": {
+                          background: "#F0F0F0",
+                          color: "#D0D0D0",
+                        },
+                      }}
+                    >
+                      {addingToCart ? "Adding..." : "Add to Cart"}
+                    </Button>
+
+                    <IconButton
+                      onClick={handleWishlistToggle}
+                      disabled={wishlistLoading}
+                      sx={{
+                        border: "2px solid #E8E8E8",
+                        borderRadius: 2,
+                        width: 56,
+                        height: 56,
+                        "&:hover": {
+                          borderColor: "#EB1700",
+                          backgroundColor: "#FFF5F5",
+                        },
+                      }}
+                    >
+                      {product && isInWishlist(product._id) ? (
+                        <Favorite sx={{ color: "#EB1700", fontSize: 28 }} />
+                      ) : (
+                        <FavoriteBorder sx={{ color: "#767676", fontSize: 28 }} />
+                      )}
+                    </IconButton>
+                  </Box>
                 </>
               )}
 

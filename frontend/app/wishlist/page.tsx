@@ -21,9 +21,9 @@ import {
     ShoppingCart,
     FavoriteBorder,
 } from "@mui/icons-material";
-import { getToken, isAuthenticated } from "@/lib/auth";
-import { getWishlist, removeFromWishlist, clearWishlist } from "@/services/wishlist.service";
-import { addToCart } from "@/services/cart.service";
+import { isAuthenticated } from "@/lib/auth";
+import { useWishlist } from "@/contexts/WishlistContext";
+import { useCart } from "@/contexts/CartContext";
 
 interface Product {
     _id: string;
@@ -41,8 +41,14 @@ interface Wishlist {
 
 export default function WishlistPage() {
     const router = useRouter();
-    const [wishlist, setWishlist] = useState<Wishlist | null>(null);
-    const [loading, setLoading] = useState(true);
+    const { 
+        wishlistItems, 
+        loading, 
+        error: wishlistError,
+        removeFromWishlist, 
+        clearWishlist 
+    } = useWishlist();
+    const { addToCart: addToCartContext } = useCart();
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
 
@@ -51,29 +57,16 @@ export default function WishlistPage() {
             router.push("/login");
             return;
         }
-        fetchWishlist();
     }, [router]);
-
-    const fetchWishlist = async () => {
-        try {
-            const data = await getWishlist();
-            setWishlist(data);
-        } catch (err: any) {
-            setError(err.response?.data?.message || "Failed to load wishlist");
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleRemoveFromWishlist = async (productId: string) => {
         setError("");
         try {
             await removeFromWishlist(productId);
             setSuccessMessage("Removed from wishlist!");
-            fetchWishlist();
             setTimeout(() => setSuccessMessage(""), 3000);
         } catch (err: any) {
-            setError(err.response?.data?.message || "Failed to remove item");
+            setError("Failed to remove item");
         }
     };
 
@@ -84,21 +77,26 @@ export default function WishlistPage() {
         try {
             await clearWishlist();
             setSuccessMessage("Wishlist cleared!");
-            fetchWishlist();
             setTimeout(() => setSuccessMessage(""), 3000);
         } catch (err: any) {
-            setError(err.response?.data?.message || "Failed to clear wishlist");
+            setError("Failed to clear wishlist");
         }
     };
 
-    const handleAddToCart = async (productId: string) => {
+    const handleAddToCart = async (product: Product) => {
         setError("");
         try {
-            await addToCart({ productId, quantity: 1 });
+            await addToCartContext(product._id, 1, {
+                name: product.name,
+                image: product.image,
+                price: product.price,
+                stock: product.stock,
+                sku: product._id, // Using _id as sku fallback
+            });
             setSuccessMessage("Added to cart!");
             setTimeout(() => setSuccessMessage(""), 3000);
         } catch (err: any) {
-            setError(err.response?.data?.message || "Failed to add to cart");
+            setError("Failed to add to cart");
         }
     };
 
@@ -139,7 +137,7 @@ export default function WishlistPage() {
                             My Wishlist
                         </Typography>
                     </Box>
-                    {wishlist && wishlist.products.length > 0 && (
+                    {wishlistItems.length > 0 && (
                         <Button
                             variant="outlined"
                             onClick={handleClearWishlist}
@@ -172,9 +170,9 @@ export default function WishlistPage() {
                     </Alert>
                 )}
 
-                {wishlist && wishlist.products.length > 0 ? (
+                {wishlistItems.length > 0 ? (
                     <Grid container spacing={3}>
-                        {wishlist.products.map((product) => (
+                        {wishlistItems.map((product) => (
                             <Grid item xs={12} sm={6} md={4} lg={3} key={product._id}>
                                 <Card
                                     elevation={0}
@@ -223,7 +221,7 @@ export default function WishlistPage() {
                                             {product.category}
                                         </Typography>
                                         <Typography variant="h6" fontWeight={700} sx={{ color: "#EB1700", mb: 1 }}>
-                                            ${product.price.toFixed(2)}
+                                            ${product.price ? product.price.toFixed(2) : '0.00'}
                                         </Typography>
                                         <Typography variant="body2" color={product.stock > 0 ? "success.main" : "error.main"}>
                                             {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
@@ -234,7 +232,7 @@ export default function WishlistPage() {
                                             fullWidth
                                             variant="contained"
                                             startIcon={<ShoppingCart />}
-                                            onClick={() => handleAddToCart(product._id)}
+                                            onClick={() => handleAddToCart(product)}
                                             disabled={product.stock === 0}
                                             sx={{
                                                 background: "#EB1700",

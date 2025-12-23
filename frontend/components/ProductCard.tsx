@@ -1,15 +1,20 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import {
   Card,
   CardContent,
   CardMedia,
   Typography,
   Box,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import { Favorite, FavoriteBorder } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import AddToCartButton from "./AddToCartButton";
+import { useWishlist } from "@/contexts/WishlistContext";
+import { isAuthenticated } from "@/lib/auth";
 
 interface ProductCardProps {
   product: {
@@ -28,6 +33,8 @@ function ProductCard({
   showDescription = false
 }: ProductCardProps) {
   const router = useRouter();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   // Memoize click handler to prevent unnecessary re-renders
   const handleCardClick = useCallback(() => {
@@ -38,6 +45,26 @@ function ProductCard({
   const handleButtonClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
   }, []);
+
+  const handleWishlistToggle = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!isAuthenticated()) {
+      router.push("/login");
+      return;
+    }
+
+    setWishlistLoading(true);
+    try {
+      await toggleWishlist(product._id);
+    } catch (error) {
+      console.error("Failed to toggle wishlist:", error);
+    } finally {
+      setWishlistLoading(false);
+    }
+  }, [product._id, toggleWishlist, router]);
+
+  const inWishlist = isInWishlist(product._id);
 
   return (
     <Card
@@ -54,6 +81,7 @@ function ProductCard({
         border: "1px solid #E8E8E8",
         transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
         willChange: "transform, box-shadow", // Optimize for animations
+        position: "relative",
         "&:hover": {
           boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
           transform: "translateY(-4px)",
@@ -65,18 +93,44 @@ function ProductCard({
       }}
       onClick={handleCardClick}
     >
-      <CardMedia
-        component="img"
-        height="180"
-        image={product.image}
-        alt={product.name}
-        loading="lazy" // Lazy load images for better performance
-        sx={{
-          objectFit: "contain",
-          backgroundColor: "#f0f0f0",
-        // Placeholder color while loading
-        }}
-      />
+      <Box sx={{ position: "relative" }}>
+        <CardMedia
+          component="img"
+          height="180"
+          image={product.image}
+          alt={product.name}
+          loading="lazy" // Lazy load images for better performance
+          sx={{
+            objectFit: "contain",
+            backgroundColor: "#f0f0f0",
+          // Placeholder color while loading
+          }}
+        />
+        <IconButton
+          onClick={handleWishlistToggle}
+          disabled={wishlistLoading}
+          sx={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            backdropFilter: "blur(4px)",
+            "&:hover": {
+              backgroundColor: "rgba(255, 255, 255, 1)",
+              transform: "scale(1.1)",
+            },
+            transition: "all 0.2s ease",
+          }}
+        >
+          <Tooltip title={inWishlist ? "Remove from wishlist" : "Add to wishlist"}>
+            {inWishlist ? (
+              <Favorite sx={{ color: "#EB1700", fontSize: 22 }} />
+            ) : (
+              <FavoriteBorder sx={{ color: "#767676", fontSize: 22 }} />
+            )}
+          </Tooltip>
+        </IconButton>
+      </Box>
       <CardContent
         sx={{
           flexGrow: 1,

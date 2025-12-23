@@ -103,7 +103,8 @@ export default function AdminProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const data = await getProducts();
+      const response = await getProducts();
+      const data = response.products || [];
       setProducts(data);
       setFilteredProducts(data);
 

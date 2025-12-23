@@ -201,7 +201,7 @@ export class ProductService {
       throw new NotFoundException('Product not found');
     }
 
-    if (!product.reviews[reviewIndex] || (product.reviews[reviewIndex] as any).user.toString() !== userId) {
+    if (!product.reviews[reviewIndex] || (product.reviews[reviewIndex] as any).user.toString() !== userId.toString()) {
       throw new BadRequestException('Review not found or unauthorized');
     }
 
@@ -225,7 +225,7 @@ export class ProductService {
     }
 
     const review = product.reviews[reviewIndex] as any;
-    if (review.user.toString() !== userId && !isAdmin) {
+    if (review.user.toString() !== userId.toString() && !isAdmin) {
       throw new BadRequestException('Unauthorized to delete this review');
     }
 

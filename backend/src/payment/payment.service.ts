@@ -28,7 +28,7 @@ export class PaymentService {
     }
 
     // User can only pay for their own order
-    if (!isAdmin && order.user.toString() !== userId) {
+    if (!isAdmin && order.user.toString() !== userId.toString()) {
       throw new ForbiddenException('Not authorized');
     }
     const paymentIntent = await this.stripe.paymentIntents.create({
@@ -76,7 +76,7 @@ export class PaymentService {
     }
 
     // Only allow user or admin to view payment
-    if (!isAdmin && payment.user._id.toString() !== userId) {
+    if (!isAdmin && payment.user._id.toString() !== userId.toString()) {
       throw new ForbiddenException('Not authorized');
     }
 

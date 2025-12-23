@@ -37,6 +37,7 @@ import {
 } from "@mui/icons-material";
 import { getAllPayments, confirmPayment, markPaymentSucceeded } from "@/services/admin.service";
 import { useAdminData } from "@/contexts/AdminDataContext";
+import { getToken } from "@/lib/auth";
 
 
 interface Payment {
@@ -137,7 +138,7 @@ export default function AdminPaymentsPage() {
             const response = await fetch(API_ENDPOINTS.PAY_ORDER(orderId), {
                 method: "PUT",
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    Authorization: `Bearer ${getToken()}`,
                 },
             });
 
@@ -195,7 +196,7 @@ export default function AdminPaymentsPage() {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        Authorization: `Bearer ${getToken()}`,
                     },
                     body: JSON.stringify({ orderId }),
                 });

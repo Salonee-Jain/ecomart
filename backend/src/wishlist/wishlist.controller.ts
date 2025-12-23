@@ -15,7 +15,7 @@ export class WishlistController {
     @ApiResponse({ status: 200, description: 'Wishlist retrieved successfully' })
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     async getWishlist(@Request() req) {
-        return this.wishlistService.getWishlist(req.user._id);
+        return this.wishlistService.getWishlist(req.user.id);
     }
 
     @Post(':productId')
@@ -25,7 +25,7 @@ export class WishlistController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 404, description: 'Product not found' })
     async addToWishlist(@Request() req, @Param('productId') productId: string) {
-        return this.wishlistService.addToWishlist(req.user._id, productId);
+        return this.wishlistService.addToWishlist(req.user.id, productId);
     }
 
     @Delete(':productId')
@@ -34,7 +34,7 @@ export class WishlistController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 404, description: 'Wishlist or product not found' })
     async removeFromWishlist(@Request() req, @Param('productId') productId: string) {
-        return this.wishlistService.removeFromWishlist(req.user._id, productId);
+        return this.wishlistService.removeFromWishlist(req.user.id, productId);
     }
 
     @Delete()
@@ -43,6 +43,6 @@ export class WishlistController {
     @ApiResponse({ status: 401, description: 'Unauthorized' })
     @ApiResponse({ status: 404, description: 'Wishlist not found' })
     async clearWishlist(@Request() req) {
-        return this.wishlistService.clearWishlist(req.user._id);
+        return this.wishlistService.clearWishlist(req.user.id);
     }
 }

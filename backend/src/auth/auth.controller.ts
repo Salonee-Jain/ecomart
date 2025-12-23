@@ -44,7 +44,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getProfile(@Req() req) {
-    return this.authService.getProfile(req.user._id);
+    return this.authService.getProfile(req.user.id);
   }
 
   @Put('profile')
@@ -55,6 +55,6 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Bad request - validation failed or email already in use' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async updateProfile(@Req() req, @Body() updateProfileDto: UpdateProfileDto) {
-    return this.authService.updateProfile(req.user._id, updateProfileDto);
+    return this.authService.updateProfile(req.user.id, updateProfileDto);
   }
 }

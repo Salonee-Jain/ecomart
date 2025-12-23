@@ -59,7 +59,7 @@ export class EmailController {
       }
 
       // Only allow user or admin to send email
-      if (!req.user.isAdmin && order.user._id.toString() !== req.user._id.toString()) {
+      if (!req.user.isAdmin && order.user._id.toString() !== req.user.id.toString()) {
         throw new ForbiddenException('Not authorized');
       }
 

@@ -107,7 +107,7 @@ export class ProductController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   async createReview(@Request() req, @Param('id') id: string, @Body() createReviewDto: CreateReviewDto) {
-    return this.productService.createReview(id, req.user._id, req.user.name, createReviewDto);
+    return this.productService.createReview(id, req.user.id, req.user.name, createReviewDto);
   }
 
   @Put(':id/reviews/:reviewIndex')
@@ -124,7 +124,7 @@ export class ProductController {
     @Param('reviewIndex') reviewIndex: string,
     @Body() createReviewDto: CreateReviewDto,
   ) {
-    return this.productService.updateReview(id, parseInt(reviewIndex), req.user._id, createReviewDto);
+    return this.productService.updateReview(id, parseInt(reviewIndex), req.user.id, createReviewDto);
   }
 
   @Delete(':id/reviews/:reviewIndex')
@@ -140,7 +140,7 @@ export class ProductController {
     @Param('id') id: string,
     @Param('reviewIndex') reviewIndex: string,
   ) {
-    return this.productService.deleteReview(id, parseInt(reviewIndex), req.user._id, req.user.isAdmin);
+    return this.productService.deleteReview(id, parseInt(reviewIndex), req.user.id, req.user.isAdmin);
   }
 
 

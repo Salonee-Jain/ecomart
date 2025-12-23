@@ -2,16 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { getProfile } from "@/services/auth.service";
+import { getToken, removeToken } from "@/lib/auth";
 
 export const useAuth = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("token")
-        : null;
+    const token = typeof window !== "undefined" ? getToken() : null;
 
     // ✅ No token → user is logged out → DO NOTHING
     if (!token) {
@@ -22,7 +20,7 @@ export const useAuth = () => {
     getProfile()
       .then((response) => setUser(response.data))
       .catch(() => {
-        localStorage.removeItem("token");
+        removeToken();
         setUser(null);
       })
       .finally(() => setLoading(false));

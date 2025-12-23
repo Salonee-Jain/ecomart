@@ -18,7 +18,7 @@ export class OrderController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 400, description: 'Bad request - invalid order data' })
   async createOrder(@Request() req, @Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.createOrder(req.user._id, createOrderDto);
+    return this.orderService.createOrder(req.user.id, createOrderDto);
   }
 
   @Get('my')
@@ -26,7 +26,7 @@ export class OrderController {
   @ApiResponse({ status: 200, description: 'Orders retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getMyOrders(@Request() req) {
-    return this.orderService.getMyOrders(req.user._id);
+    return this.orderService.getMyOrders(req.user.id);
   }
 
   @Get('analytics')
@@ -45,7 +45,7 @@ export class OrderController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Order not found' })
   async getOrderById(@Request() req, @Param('id') id: string) {
-    return this.orderService.getOrderById(req.user._id, id, req.user.isAdmin);
+    return this.orderService.getOrderById(req.user.id, id, req.user.isAdmin);
   }
 
   @Get()
@@ -64,7 +64,7 @@ export class OrderController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Order not found' })
   async markOrderPaid(@Request() req, @Param('id') id: string) {
-    return this.orderService.markOrderPaid(req.user._id, id, req.user.isAdmin);
+    return this.orderService.markOrderPaid(req.user.id, id, req.user.isAdmin);
   }
 
   @Put(':id/cancel')
@@ -73,7 +73,7 @@ export class OrderController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Order not found' })
   async cancelOrder(@Request() req, @Param('id') id: string) {
-    return this.orderService.cancelOrder(req.user._id, id, req.user.isAdmin);
+    return this.orderService.cancelOrder(req.user.id, id, req.user.isAdmin);
   }
 
   @Put(':id/deliver')

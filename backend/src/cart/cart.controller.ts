@@ -16,7 +16,7 @@ export class CartController {
   @ApiResponse({ status: 200, description: 'Cart retrieved successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getMyCart(@Request() req) {
-    return this.cartService.getMyCart(req.user._id);
+    return this.cartService.getMyCart(req.user.id);
   }
 
   @Post()
@@ -25,7 +25,7 @@ export class CartController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Product not found' })
   async addToCart(@Request() req, @Body() addToCartDto: AddToCartDto) {
-    return this.cartService.addToCart(req.user._id, addToCartDto);
+    return this.cartService.addToCart(req.user.id, addToCartDto);
   }
 
   @Put(':productId')
@@ -38,7 +38,7 @@ export class CartController {
     @Param('productId') productId: string,
     @Body() updateCartItemDto: UpdateCartItemDto,
   ) {
-    return this.cartService.updateCartItem(req.user._id, productId, updateCartItemDto);
+    return this.cartService.updateCartItem(req.user.id, productId, updateCartItemDto);
   }
 
   @Delete('clear')
@@ -46,7 +46,7 @@ export class CartController {
   @ApiResponse({ status: 200, description: 'Cart cleared successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async clearCart(@Request() req) {
-    return this.cartService.clearCart(req.user._id);
+    return this.cartService.clearCart(req.user.id);
   }
 
   @Delete(':productId')
@@ -54,7 +54,7 @@ export class CartController {
   @ApiResponse({ status: 200, description: 'Item removed from cart successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async removeFromCart(@Request() req, @Param('productId') productId: string) {
-    return this.cartService.removeFromCart(req.user._id, productId);
+    return this.cartService.removeFromCart(req.user.id, productId);
   }
 
   @Post('merge')
@@ -62,6 +62,6 @@ export class CartController {
   @ApiResponse({ status: 200, description: 'Carts merged successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async mergeCart(@Request() req, @Body() mergeCartDto: MergeCartDto) {
-    return this.cartService.mergeCart(req.user._id, mergeCartDto);
+    return this.cartService.mergeCart(req.user.id, mergeCartDto);
   }
 }

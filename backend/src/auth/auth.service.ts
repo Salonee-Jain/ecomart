@@ -50,7 +50,7 @@ export class AuthService {
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
-      token: this.generateToken(user._id.toString()),
+      token: this.generateToken(user),
     };
   }
 
@@ -67,7 +67,7 @@ export class AuthService {
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
-      token: this.generateToken(user._id.toString()),
+      token: this.generateToken(user),
     };
   }
 
@@ -122,9 +122,14 @@ export class AuthService {
     };
   }
 
-  private generateToken(id: string): string {
+  private generateToken(user: { _id: any; name: string; email: string; isAdmin: boolean }): string {
     return this.jwtService.sign(
-      { id },
+      {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+      },
       {
         secret: this.configService.get<string>('JWT_SECRET'),
         expiresIn: '30d',

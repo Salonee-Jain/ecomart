@@ -90,7 +90,7 @@ export class OrderService {
     }
 
     // Only owner or admin
-    if (!isAdmin && order.user.toString() !== userId) {
+    if (!isAdmin && order.user.toString() !== userId.toString()) {
       throw new ForbiddenException('Not authorized');
     }
 
@@ -188,7 +188,7 @@ export class OrderService {
     }
 
     // Only owner or admin
-    if (!isAdmin && order.user.toString() !== userId) {
+    if (!isAdmin && order.user.toString() !== userId.toString()) {
       throw new ForbiddenException('Not authorized to cancel this order');
     }
 

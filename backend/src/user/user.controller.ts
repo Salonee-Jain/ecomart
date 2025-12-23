@@ -42,7 +42,7 @@ export class UserController {
     @Param('id') id: string,
     @Body() updateUserRoleDto: UpdateUserRoleDto,
   ) {
-    return this.userService.updateUserRole(id, req.user._id, updateUserRoleDto);
+    return this.userService.updateUserRole(id, req.user.id, updateUserRoleDto);
   }
 
   @Delete(':id')
@@ -52,6 +52,6 @@ export class UserController {
   @ApiResponse({ status: 403, description: 'Forbidden - Admin access required or cannot delete self' })
   @ApiResponse({ status: 404, description: 'User not found' })
   async deleteUser(@Request() req, @Param('id') id: string) {
-    return this.userService.deleteUser(id, req.user._id);
+    return this.userService.deleteUser(id, req.user.id);
   }
 }

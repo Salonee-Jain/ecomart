@@ -23,7 +23,7 @@ export class PaymentController {
   @ApiResponse({ status: 404, description: 'Order not found' })
   async createPaymentIntent(@Request() req, @Body() createPaymentIntentDto: CreatePaymentIntentDto) {
     return this.paymentService.createPaymentIntent(
-      req.user._id,
+      req.user.id,
       createPaymentIntentDto,
       req.user.isAdmin,
     );
@@ -47,7 +47,7 @@ export class PaymentController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 404, description: 'Payment not found' })
   async getPaymentById(@Request() req, @Param('id') id: string) {
-    return this.paymentService.getPaymentById(req.user._id, id, req.user.isAdmin);
+    return this.paymentService.getPaymentById(req.user.id, id, req.user.isAdmin);
   }
 
   @Post('confirm/:paymentIntentId')

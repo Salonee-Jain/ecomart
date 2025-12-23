@@ -57,7 +57,7 @@ export class OrderService {
   }
 
   async getMyOrders(userId: string) {
-    return await this.orderModel.find({ user: userId });
+    return await this.orderModel.find({ user: userId }).sort({ createdAt: -1 });
   }
 
   async getOrderById(userId: string, orderId: string, isAdmin: boolean) {
@@ -79,7 +79,7 @@ export class OrderService {
   }
 
   async getAllOrders() {
-    return await this.orderModel.find({}).populate('user', 'name email');
+    return await this.orderModel.find({}).populate('user', 'name email').sort({ createdAt: -1 });
   }
 
   async markOrderPaid(userId: string, orderId: string, isAdmin: boolean) {

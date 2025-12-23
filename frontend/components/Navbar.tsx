@@ -17,8 +17,6 @@ import {
 } from "@mui/material";
 import {
   ShoppingCart,
-  Eco,
-  Person,
   Logout,
   ShoppingBag,
   AccountCircle,

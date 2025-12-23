@@ -37,6 +37,7 @@ import {
 } from "@mui/icons-material";
 import { getAllOrders, markOrderDelivered } from "@/services/admin.service";
 import { useRouter } from "next/navigation";
+import { useAdminData } from "@/contexts/AdminDataContext";
 
 interface Order {
     _id: string;
@@ -51,6 +52,7 @@ interface Order {
 
 export default function AdminOrdersPage() {
     const router = useRouter();
+    const { refreshTrigger, triggerRefresh } = useAdminData();
     const [orders, setOrders] = useState<Order[]>([]);
     const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
@@ -68,7 +70,7 @@ export default function AdminOrdersPage() {
 
     useEffect(() => {
         fetchOrders();
-    }, []);
+    }, [refreshTrigger]); // Re-fetch when refreshTrigger changes
 
     useEffect(() => {
         let filtered = orders;
@@ -127,6 +129,7 @@ export default function AdminOrdersPage() {
             await markOrderDelivered(orderId);
             setSuccess("✅ Order marked as delivered!");
             fetchOrders();
+            triggerRefresh(); // Notify other admin pages
             setTimeout(() => setSuccess(""), 3000);
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to mark as delivered");
@@ -255,7 +258,7 @@ export default function AdminOrdersPage() {
                     </Box>
 
                     {/* Table */}
-                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, overflowX: "auto" }}>
                         <Table>
                             <TableHead sx={{ bgcolor: "#f5f5f5" }}>
                                 <TableRow>

@@ -27,9 +27,11 @@ import {
     Logout,
     ChevronLeft,
     Payment,
+    Storage,
 } from "@mui/icons-material";
 import AdminRoute from "@/components/AdminRoute";
 import { logout } from "@/lib/auth";
+import { AdminDataProvider } from "@/contexts/AdminDataContext";
 
 const drawerWidth = 260;
 
@@ -39,6 +41,7 @@ const menuItems = [
     { text: "Orders", icon: <ShoppingBag />, path: "/admin/orders" },
     { text: "Users", icon: <People />, path: "/admin/users" },
     { text: "Payments", icon: <Payment />, path: "/admin/payments" },
+    { text: "Database", icon: <Storage />, path: "/admin/database" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -133,88 +136,90 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     return (
         <AdminRoute>
-            <Box sx={{ display: "flex" }}>
-                <AppBar
-                    position="fixed"
-                    sx={{
-                        width: { md: `calc(100% - ${drawerWidth}px)` },
-                        ml: { md: `${drawerWidth}px` },
-                        bgcolor: "white",
-                        color: "text.primary",
-                        boxShadow: 1,
-                    }}
-                >
-                    <Toolbar>
-                        <IconButton
-                            color="inherit"
-                            aria-label="open drawer"
-                            edge="start"
-                            onClick={handleDrawerToggle}
-                            sx={{ mr: 2, display: { md: "none" } }}
+            <AdminDataProvider>
+                <Box sx={{ display: "flex" }}>
+                    <AppBar
+                        position="fixed"
+                        sx={{
+                            width: { md: `calc(100% - ${drawerWidth}px)` },
+                            ml: { md: `${drawerWidth}px` },
+                            bgcolor: "white",
+                            color: "text.primary",
+                            boxShadow: 1,
+                        }}
+                    >
+                        <Toolbar>
+                            <IconButton
+                                color="inherit"
+                                aria-label="open drawer"
+                                edge="start"
+                                onClick={handleDrawerToggle}
+                                sx={{ mr: 2, display: { md: "none" } }}
+                            >
+                                <MenuIcon />
+                            </IconButton>
+                            <Typography variant="h6" noWrap component="div" fontWeight={600}>
+                                EcoMart Admin
+                            </Typography>
+                        </Toolbar>
+                    </AppBar>
+
+                    <Box
+                        component="nav"
+                        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+                    >
+                        {/* Mobile drawer */}
+                        <Drawer
+                            variant="temporary"
+                            open={mobileOpen}
+                            onClose={handleDrawerToggle}
+                            ModalProps={{
+                                keepMounted: true, // Better mobile performance
+                            }}
+                            sx={{
+                                display: { xs: "block", md: "none" },
+                                "& .MuiDrawer-paper": {
+                                    boxSizing: "border-box",
+                                    width: drawerWidth,
+                                },
+                            }}
                         >
-                            <MenuIcon />
-                        </IconButton>
-                        <Typography variant="h6" noWrap component="div" fontWeight={600}>
-                            EcoMart Admin
-                        </Typography>
-                    </Toolbar>
-                </AppBar>
+                            {drawer}
+                        </Drawer>
 
-                <Box
-                    component="nav"
-                    sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
-                >
-                    {/* Mobile drawer */}
-                    <Drawer
-                        variant="temporary"
-                        open={mobileOpen}
-                        onClose={handleDrawerToggle}
-                        ModalProps={{
-                            keepMounted: true, // Better mobile performance
-                        }}
+                        {/* Desktop drawer */}
+                        <Drawer
+                            variant="permanent"
+                            sx={{
+                                display: { xs: "none", md: "block" },
+                                "& .MuiDrawer-paper": {
+                                    boxSizing: "border-box",
+                                    width: drawerWidth,
+                                    borderRight: "1px solid",
+                                    borderColor: "divider",
+                                },
+                            }}
+                            open
+                        >
+                            {drawer}
+                        </Drawer>
+                    </Box>
+
+                    <Box
+                        component="main"
                         sx={{
-                            display: { xs: "block", md: "none" },
-                            "& .MuiDrawer-paper": {
-                                boxSizing: "border-box",
-                                width: drawerWidth,
-                            },
+                            flexGrow: 1,
+                            p: 3,
+                            width: { md: `calc(100% - ${drawerWidth}px)` },
+                            minHeight: "100vh",
+                            bgcolor: "#f5f5f5",
                         }}
                     >
-                        {drawer}
-                    </Drawer>
-
-                    {/* Desktop drawer */}
-                    <Drawer
-                        variant="permanent"
-                        sx={{
-                            display: { xs: "none", md: "block" },
-                            "& .MuiDrawer-paper": {
-                                boxSizing: "border-box",
-                                width: drawerWidth,
-                                borderRight: "1px solid",
-                                borderColor: "divider",
-                            },
-                        }}
-                        open
-                    >
-                        {drawer}
-                    </Drawer>
+                        <Toolbar /> {/* Spacer for AppBar */}
+                        {children}
+                    </Box>
                 </Box>
-
-                <Box
-                    component="main"
-                    sx={{
-                        flexGrow: 1,
-                        p: 3,
-                        width: { md: `calc(100% - ${drawerWidth}px)` },
-                        minHeight: "100vh",
-                        bgcolor: "#f5f5f5",
-                    }}
-                >
-                    <Toolbar /> {/* Spacer for AppBar */}
-                    {children}
-                </Box>
-            </Box>
+            </AdminDataProvider>
         </AdminRoute>
     );
 }

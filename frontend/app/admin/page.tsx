@@ -27,6 +27,7 @@ import {
     People,
 } from "@mui/icons-material";
 import { getAnalytics, getAllOrders } from "@/services/admin.service";
+import { useAdminData } from "@/contexts/AdminDataContext";
 
 interface Stats {
     totalRevenue: number;
@@ -46,6 +47,7 @@ interface Order {
 
 export default function AdminDashboard() {
     const router = useRouter();
+    const { refreshTrigger } = useAdminData();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [stats, setStats] = useState<Stats>({
@@ -58,7 +60,7 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         fetchDashboardData();
-    }, []);
+    }, [refreshTrigger]); // Re-fetch when refreshTrigger changes
 
     const fetchDashboardData = async () => {
         try {
@@ -186,7 +188,7 @@ export default function AdminDashboard() {
                     </Box>
 
                     {recentOrders.length > 0 ? (
-                        <TableContainer component={Paper} variant="outlined">
+                        <TableContainer component={Paper} variant="outlined" sx={{ overflowX: "auto" }}>
                             <Table>
                                 <TableHead>
                                     <TableRow>

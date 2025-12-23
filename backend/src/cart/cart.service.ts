@@ -10,7 +10,7 @@ export class CartService {
   constructor(
     @InjectModel(Cart.name) private cartModel: Model<CartDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
-  ) {}
+  ) { }
 
   async getMyCart(userId: string) {
     let cart = await this.cartModel.findOne({ user: userId });
@@ -46,10 +46,11 @@ export class CartService {
     const existingItem = cart.items.find((item) => item.product.toString() === productId);
 
     if (existingItem) {
-      if (quantity > product.stock) {
-        throw new BadRequestException(`Cannot add ${quantity}. Only ${product.stock} left.`);
+      const newQuantity = existingItem.quantity + quantity;
+      if (newQuantity > product.stock) {
+        throw new BadRequestException(`Cannot add ${quantity}. Only ${product.stock - existingItem.quantity} more items available.`);
       }
-      existingItem.quantity = quantity;
+      existingItem.quantity = newQuantity;
     } else {
       cart.items.push({
         product: product._id,
@@ -128,11 +129,11 @@ export class CartService {
 
       const existing = cart.items.find((item) => item.product.toString() === g.productId);
 
-      const qty = Math.min(g.quantity, product.stock);
-
       if (existing) {
-        existing.quantity = qty;
+        const newQty = Math.min(existing.quantity + g.quantity, product.stock);
+        existing.quantity = newQty;
       } else {
+        const qty = Math.min(g.quantity, product.stock);
         cart.items.push({
           product: product._id,
           name: product.name,

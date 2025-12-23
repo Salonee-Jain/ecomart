@@ -156,8 +156,8 @@ export default function AdminProductsPage() {
   };
 
   // Use fetched categories, fallback to unique categories from products if needed
-  const displayCategories = categories.length > 0 
-    ? categories 
+  const displayCategories = categories.length > 0
+    ? categories
     : [...new Set(products.map((p) => p.category))];
 
   if (loading) {
@@ -301,7 +301,7 @@ export default function AdminProductsPage() {
           </Box>
 
           {/* Table */}
-          <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+          <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, overflowX: "auto" }}>
             <Table>
               <TableHead sx={{ bgcolor: "#f5f5f5" }}>
                 <TableRow>

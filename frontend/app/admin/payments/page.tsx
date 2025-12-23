@@ -35,6 +35,7 @@ import {
     Payment as PaymentIcon,
 } from "@mui/icons-material";
 import { getAllPayments, confirmPayment, markPaymentSucceeded } from "@/services/admin.service";
+import { useAdminData } from "@/contexts/AdminDataContext";
 
 interface Payment {
     _id: string;
@@ -62,6 +63,7 @@ interface Payment {
 }
 
 export default function AdminPaymentsPage() {
+    const { refreshTrigger, triggerRefresh } = useAdminData();
     const [payments, setPayments] = useState<Payment[]>([]);
     const [filteredPayments, setFilteredPayments] = useState<Payment[]>([]);
     const [loading, setLoading] = useState(true);
@@ -77,7 +79,7 @@ export default function AdminPaymentsPage() {
 
     useEffect(() => {
         fetchPayments();
-    }, []);
+    }, [refreshTrigger]); // Re-fetch when refreshTrigger changes
 
     useEffect(() => {
         let filtered = payments;
@@ -155,6 +157,7 @@ export default function AdminPaymentsPage() {
             await confirmPayment(paymentIntentId);
             setSuccess("Payment confirmed successfully!");
             fetchPayments();
+            triggerRefresh(); // Notify other admin pages
             setTimeout(() => setSuccess(""), 3000);
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to confirm payment");
@@ -169,6 +172,7 @@ export default function AdminPaymentsPage() {
             await markPaymentSucceeded(paymentId);
             setSuccess("Payment marked as succeeded");
             fetchPayments();
+            triggerRefresh(); // Notify other admin pages
             setTimeout(() => setSuccess(""), 3000);
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to mark payment as succeeded");
@@ -313,9 +317,9 @@ export default function AdminPaymentsPage() {
                                     </InputAdornment>
                                 ),
                             }}
-                            sx={{ flex: 1, minWidth: 300 }}
+                            sx={{ flex: 1, minWidth: { xs: "100%", sm: 250 } }}
                         />
-                        <FormControl sx={{ minWidth: 200 }}>
+                        <FormControl sx={{ minWidth: { xs: "100%", sm: 200 } }}>
                             <InputLabel>Status</InputLabel>
                             <Select
                                 value={statusFilter}
@@ -331,7 +335,7 @@ export default function AdminPaymentsPage() {
                     </Box>
 
                     {/* Table */}
-                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, overflowX: "auto" }}>
                         <Table>
                             <TableHead sx={{ bgcolor: "#f5f5f5" }}>
                                 <TableRow>
@@ -342,6 +346,7 @@ export default function AdminPaymentsPage() {
                                     <TableCell><strong>Amount</strong></TableCell>
                                     <TableCell><strong>Status</strong></TableCell>
                                     <TableCell><strong>Date</strong></TableCell>
+                                    <TableCell align="center"><strong>Mark Succeeded</strong></TableCell>
                                     <TableCell align="right"><strong>Actions</strong></TableCell>
                                 </TableRow>
                             </TableHead>
@@ -418,6 +423,26 @@ export default function AdminPaymentsPage() {
                                                     {new Date(payment.createdAt).toLocaleDateString()}
                                                 </Typography>
                                             </TableCell>
+                                            <TableCell align="center">
+                                                {payment.status !== "succeeded" ? (
+                                                    <Tooltip title="Mark this payment as succeeded">
+                                                        <IconButton
+                                                            size="small"
+                                                            color="success"
+                                                            onClick={() => handleMarkPaymentSucceeded(payment._id)}
+                                                            sx={{
+                                                                bgcolor: "#4caf50",
+                                                                color: "white",
+                                                                "&:hover": { bgcolor: "#388e3c" },
+                                                            }}
+                                                        >
+                                                            <Check fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                ) : (
+                                                    <Chip label="✓ Succeeded" size="small" color="success" variant="outlined" />
+                                                )}
+                                            </TableCell>
                                             <TableCell align="right">
                                                 {payment.order.isDelivered ? (
                                                     <Chip label="✓ Delivered" size="small" color="success" />
@@ -444,7 +469,7 @@ export default function AdminPaymentsPage() {
                                     ))
                                 ) : (
                                     <TableRow>
-                                        <TableCell colSpan={8} align="center" sx={{ py: 8 }}>
+                                        <TableCell colSpan={9} align="center" sx={{ py: 8 }}>
                                             <PaymentIcon sx={{ fontSize: 60, color: "#9e9e9e", mb: 2 }} />
                                             <Typography variant="h6" color="text.secondary">
                                                 {searchQuery || statusFilter ? "No payments found" : "No payments yet"}

@@ -200,7 +200,7 @@ export default function AdminUsersPage() {
                     </Box>
 
                     {/* Table */}
-                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
+                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, overflowX: "auto" }}>
                         <Table>
                             <TableHead sx={{ bgcolor: "#f5f5f5" }}>
                                 <TableRow>

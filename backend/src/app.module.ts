@@ -10,6 +10,7 @@ import { PaymentModule } from './payment/payment.module';
 import { EmailModule } from './email/email.module';
 import { HealthModule } from './health/health.module';
 import { WishlistModule } from './wishlist/wishlist.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
     EmailModule,
     HealthModule,
     WishlistModule,
+    DatabaseModule,
   ],
   controllers: [],
   providers: [],

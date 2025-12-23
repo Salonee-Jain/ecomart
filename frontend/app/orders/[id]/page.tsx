@@ -288,7 +288,7 @@ export default function OrderDetailPage() {
                 <Typography variant="h6" fontWeight={700} mb={2} sx={{ color: "#191919" }}>
                   Order Items
                 </Typography>
-                <TableContainer>
+                <TableContainer sx={{ overflowX: "auto" }}>
                   <Table>
                     <TableHead>
                       <TableRow sx={{ backgroundColor: "#FAFAFA" }}>

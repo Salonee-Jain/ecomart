@@ -66,8 +66,8 @@ export default function HomePage() {
         <Box
           sx={{
             mb: 6,
-            py: 8,
-            px: 4,
+            py: { xs: 4, sm: 6, md: 8 },
+            px: { xs: 2, sm: 3, md: 4 },
             borderRadius: 3,
             background: "#FAFAFA",
             display: "flex",
@@ -84,7 +84,8 @@ export default function HomePage() {
               color: "#191919",
               letterSpacing: "-1px",
               mb: 2,
-              textAlign: "center", 
+              textAlign: "center",
+              fontSize: { xs: "2rem", sm: "2.5rem", md: "3.75rem" },
             }}
           >
             Everything you need, delivered
@@ -97,6 +98,9 @@ export default function HomePage() {
               fontWeight: 400,
               maxWidth: "650px",
               mx: "auto",
+              textAlign: "center",
+              fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" },
+              px: { xs: 2, sm: 0 },
             }}
           >
             Browse our selection of premium products and get them delivered right to your door
@@ -107,7 +111,9 @@ export default function HomePage() {
             variant="contained"
             size="large"
             sx={{
-              mx: "200px",
+              mx: "auto",
+              maxWidth: { xs: "100%", sm: "300px" },
+              width: { xs: "calc(100% - 32px)", sm: "auto" },
               bgcolor: "#EB1700",
               color: "white",
               borderRadius: 3,
@@ -181,7 +187,7 @@ export default function HomePage() {
           <Grid container spacing={3}>
             {products.map((p: Product, index: number) => (
               <Grid
-                size={{xs: 12, sm: 12, md: 4, lg: 4}}
+                size={{ xs: 12, sm: 12, md: 4, lg: 4 }}
                 key={p._id}
               >
                 <ProductCard product={p} />
